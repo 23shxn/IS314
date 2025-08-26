@@ -1,0 +1,20 @@
+# React frontend
+FrontEnd/node_modules/
+FrontEnd/build/
+FrontEnd/.env
+
+# Spring Boot backend
+BackEnd/target/
+BackEnd/.classpath
+BackEnd/.project
+BackEnd/.settings/
+
+# IDE files
+.idea/
+*.iml
+
+# OS files
+.DS_Store
+Thumbs.db
+
+

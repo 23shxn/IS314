@@ -1,0 +1,93 @@
+.maintenance-container {
+  max-width: 1200px;
+  margin: 20px auto;
+  padding: 20px;
+}
+
+.management-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.management-header h2 {
+  color: #0f766e;
+}
+
+.maintenance-form-card {
+  margin-bottom: 20px;
+}
+
+.maintenance-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+}
+
+.maintenance-form textarea {
+  min-height: 100px;
+}
+
+.form-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+.maintenance-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.maintenance-table th, .maintenance-table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.maintenance-table th {
+  background-color: #e6fffa;
+}
+
+.status-badge.available {
+  background-color: #28a745;
+  color: white;
+}
+
+.status-badge.rented {
+  background-color: #ffc107;
+  color: #333;
+}
+
+.status-badge.maintenance {
+  background-color: #dc3545;
+  color: white;
+}
+
+.table-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.action-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.action-btn.edit {
+  color: #0f766e;
+}
+
+.action-btn.delete {
+  color: #dc3545;
+}
+
+.action-icon {
+  width: 18px;
+  height: 18px;
+}

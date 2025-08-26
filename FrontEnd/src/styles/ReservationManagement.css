@@ -1,0 +1,85 @@
+.reservations-container {
+  max-width: 1200px;
+  margin: 20px auto;
+  padding: 20px;
+}
+
+.reservations-container h2 {
+  color: #6b21a8;
+  margin-bottom: 20px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px;
+  background: white;
+  border-radius: 8px;
+}
+
+.empty-icon {
+  width: 60px;
+  height: 60px;
+  margin-bottom: 20px;
+  color: #6b21a8;
+}
+
+.reservations-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.reservation-card {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.reservation-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.reservation-date {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.status-badge.confirmed {
+  background-color: #28a745;
+  color: white;
+}
+
+.status-badge.pending {
+  background-color: #ffc107;
+  color: #333;
+}
+
+.status-badge.cancelled {
+  background-color: #dc3545;
+  color: white;
+}
+
+.reservation-details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.reservation-section h4 {
+  margin-bottom: 10px;
+  color: #6b21a8;
+}
+
+.detail-list p {
+  margin-bottom: 5px;
+}
+
+.reservation-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}

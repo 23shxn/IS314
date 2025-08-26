@@ -1,0 +1,54 @@
+.user-management {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .card {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .card h2 {
+    margin-top: 0;
+    color: #333;
+  }
+  
+  .error-text {
+    color: red;
+    margin-bottom: 10px;
+  }
+  
+  .table-container {
+    overflow-x: auto;
+  }
+  
+  .users-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+  
+  .users-table th,
+  .users-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .users-table th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+  }
+  
+  .users-table td {
+    vertical-align: middle;
+  }
+  
+  .license-image {
+    max-width: 100px;
+    height: auto;
+    border-radius: 4px;
+  }

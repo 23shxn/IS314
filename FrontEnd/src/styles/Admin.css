@@ -1,0 +1,213 @@
+/* Admin-specific styling */
+
+.admin-form {
+    border: 2px solid #2c3e50;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  }
+  
+  .admin-form .form-header {
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    color: white;
+    padding: 20px;
+    margin: -20px -20px 20px -20px;
+    border-radius: 8px 8px 0 0;
+    text-align: center;
+  }
+  
+  .admin-icon {
+    color: #3498db !important;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+  }
+  
+  .admin-form h3 {
+    color: #2c3e50;
+    font-weight: 600;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  
+  .admin-form .subtitle {
+    font-size: 14px;
+    opacity: 0.9;
+    margin-top: 5px;
+  }
+  
+  .admin-submit-btn {
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    width: 100%;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  
+  .admin-submit-btn:hover {
+    background: linear-gradient(135deg, #1a252f 0%, #2c3e50 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(44, 62, 80, 0.3);
+  }
+  
+  .admin-submit-btn:disabled {
+    background: #95a5a6;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+  
+  .password-input {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  
+  .password-input input {
+    padding-right: 40px;
+    flex: 1;
+  }
+  
+  .password-toggle {
+    position: absolute;
+    right: 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #666;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 20px;
+    width: 20px;
+  }
+  
+  .password-toggle:hover {
+    color: #2c3e50;
+  }
+  
+  .info-message {
+    background: #e8f5e8;
+    border: 1px solid #2ecc71;
+    color: #27ae60;
+    padding: 12px;
+    border-radius: 4px;
+    margin-bottom: 15px;
+    text-align: center;
+  }
+  
+  .back-to-customer {
+    margin-top: 20px;
+    text-align: center;
+    padding-top: 15px;
+    border-top: 1px solid #ddd;
+  }
+  
+  .admin-login-btn {
+    transition: all 0.3s ease;
+  }
+  
+  .admin-login-btn:hover {
+    background-color: #1a252f !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(44, 62, 80, 0.3);
+  }
+  
+  .admin-login-btn:disabled {
+    background-color: #95a5a6 !important;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+  
+  /* Admin content styling */
+  .admin-content {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 8px;
+    border: 2px solid #2c3e50;
+  }
+  
+  .admin-content h2 {
+    color: #2c3e50;
+    border-bottom: 3px solid #3498db;
+    padding-bottom: 10px;
+  }
+  
+  .admin-content .card {
+    border-left: 4px solid #3498db;
+    background: white;
+    box-shadow: 0 2px 10px rgba(44, 62, 80, 0.1);
+  }
+  
+  .admin-content .request-card {
+    background: white;
+    border: 1px solid #e3e6f0;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+  }
+  
+  .admin-content .request-card:hover {
+    box-shadow: 0 4px 12px rgba(44, 62, 80, 0.15);
+    transform: translateY(-2px);
+  }
+  
+  .admin-content .request-info {
+    padding: 20px;
+  }
+  
+  .admin-content .request-actions {
+    padding: 0 20px 20px 20px;
+    display: flex;
+    gap: 10px;
+  }
+  
+  .admin-content .btn-success {
+    background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+  }
+  
+  .admin-content .btn-success:hover {
+    background: linear-gradient(135deg, #1e8449 0%, #27ae60 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(39, 174, 96, 0.3);
+  }
+  
+  .admin-content .btn-danger {
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+  }
+  
+  .admin-content .btn-danger:hover {
+    background: linear-gradient(135deg, #c0392b 0%, #a93226 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(231, 76, 60, 0.3);
+  }
+  
+  .license-image img {
+    transition: all 0.3s ease;
+  }
+  
+  .license-image img:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  }
