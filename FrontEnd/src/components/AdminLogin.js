@@ -27,7 +27,9 @@ const AdminLogin = ({ setCurrentUser }) => {
 
   const checkFirstAdmin = async () => {
     try {
-      const response = await fetch("http://localhost:8080/api/admin/is-first-admin");
+      const response = await fetch("http://localhost:8080/api/admin/is-first-admin", {
+        credentials: 'include'
+      });
       if (response.ok) {
         const data = await response.json();
         setIsFirstAdmin(data.isFirstAdmin);
@@ -41,9 +43,6 @@ const AdminLogin = ({ setCurrentUser }) => {
   };
 
   const validateForm = () => {
-    console.log('Validating form, isRegister:', isRegister);
-    console.log('Credentials:', credentials);
-    
     if (isRegister) {
       if (!credentials.firstName.trim()) {
         setError('First name is required');
@@ -80,29 +79,21 @@ const AdminLogin = ({ setCurrentUser }) => {
       return false;
     }
 
-    console.log('Form validation passed');
     return true;
   };
 
   const handleAuth = async (e) => {
     e.preventDefault();
-    console.log('=== handleAuth called ===');
-    console.log('isRegister:', isRegister);
-    console.log('credentials:', credentials);
-    
     setError('');
     setSuccess('');
 
     if (!validateForm()) {
-      console.log('Form validation failed');
       return;
     }
 
     setLoading(true);
-    console.log('Starting authentication process...');
 
     if (isRegister) {
-      console.log('Processing admin registration...');
       // Admin Registration
       try {
         const registrationData = {
@@ -113,17 +104,14 @@ const AdminLogin = ({ setCurrentUser }) => {
           password: credentials.password
         };
         
-        console.log('Sending registration data:', registrationData);
-        
         const response = await fetch('http://localhost:8080/api/admin/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
           body: JSON.stringify(registrationData),
         });
 
-        console.log('Registration response status:', response.status);
         const data = await response.json();
-        console.log('Registration response data:', data);
 
         if (!response.ok) {
           setError(data.error || 'Registration failed. Please try again.');
@@ -153,7 +141,6 @@ const AdminLogin = ({ setCurrentUser }) => {
         setError('Failed to connect to the server.');
       }
     } else {
-      console.log('Processing admin login...');
       // Admin Login
       try {
         const loginData = {
@@ -161,26 +148,21 @@ const AdminLogin = ({ setCurrentUser }) => {
           password: credentials.password
         };
         
-        console.log('Sending login data:', loginData);
-        
         const response = await fetch('http://localhost:8080/api/admin/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
           body: JSON.stringify(loginData),
         });
 
-        console.log('Login response status:', response.status);
-        
         if (!response.ok) {
           const data = await response.json();
-          console.log('Login error response:', data);
           setError(data.error || 'Login failed');
           setLoading(false);
           return;
         }
 
         const admin = await response.json();
-        console.log('Login successful, admin data:', admin);
         
         // Ensure the admin object has the role property
         const adminWithRole = {
@@ -189,10 +171,7 @@ const AdminLogin = ({ setCurrentUser }) => {
           name: `${admin.firstName || ''} ${admin.lastName || ''}`.trim() || admin.username || admin.email
         };
         
-        console.log('Setting current user:', adminWithRole);
         setCurrentUser(adminWithRole);
-        
-        console.log('Navigating to admin dashboard...');
         navigate('/admin/dashboard');
         
       } catch (err) {
@@ -201,7 +180,6 @@ const AdminLogin = ({ setCurrentUser }) => {
       }
     }
     
-    console.log('Setting loading to false');
     setLoading(false);
   };
 
@@ -220,9 +198,6 @@ const AdminLogin = ({ setCurrentUser }) => {
       });
     }
   };
-
-  console.log('Rendering AdminLogin component');
-  console.log('Current state - isRegister:', isRegister, 'loading:', loading, 'error:', error);
 
   return (
     <div className="login-container">

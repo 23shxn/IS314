@@ -95,6 +95,7 @@ public class SecurityConfig {
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
+        configuration.setMaxAge(3600L);
         
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
@@ -106,19 +107,27 @@ public class SecurityConfig {
         http
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+            .sessionManagement(session -> session
+                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                .maximumSessions(1)
+                .maxSessionsPreventsLogin(false))
             .authorizeHttpRequests(auth -> auth
+                // Public endpoints
                 .requestMatchers("/api/auth/register", "/api/auth/login").permitAll()
                 .requestMatchers("/api/admin/register", "/api/admin/login", "/api/admin/is-first-admin").permitAll()
                 .requestMatchers("/h2-console/**").permitAll()
                 .requestMatchers("/api/vehicles/available", "/api/vehicles/search", 
-                               "/api/vehicles/locations", "/api/vehicles/types").permitAll()
+                               "/api/vehicles/locations", "/api/vehicles/types", "/api/vehicles/{id}").permitAll()
+                
+                // Admin only endpoints
                 .requestMatchers("/api/vehicles/all", "/api/vehicles/add", "/api/vehicles/*/status",
-                               "/api/vehicles/stats", "/api/vehicles/*").permitAll()
+                               "/api/vehicles/stats").hasRole("ADMIN")
+                .requestMatchers("/api/vehicles/{id}").hasRole("ADMIN") // For PUT/DELETE operations
                 .requestMatchers("/api/auth/requests/pending", "/api/auth/approve/**", "/api/auth/reject/**").hasRole("ADMIN")
                 .requestMatchers("/api/auth/users/customers").hasRole("ADMIN")
                 .requestMatchers("/api/admin/all", "/api/admin/*/deactivate", "/api/admin/*/activate").hasRole("ADMIN")
-                .requestMatchers("/api/admin/*").hasRole("ADMIN")
+                .requestMatchers("/api/admin/{id}").hasRole("ADMIN")
+                
                 .anyRequest().authenticated()
             )
             .exceptionHandling(ex -> ex

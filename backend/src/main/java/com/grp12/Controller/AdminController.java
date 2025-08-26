@@ -5,8 +5,14 @@ import com.grp12.Services.AdminService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
@@ -15,8 +21,12 @@ import java.util.HashMap;
 @RequestMapping("/api/admin")
 @CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
 public class AdminController {
+    
     @Autowired
     private AdminService adminService;
+    
+    @Autowired
+    private AuthenticationManager authenticationManager;
 
     @PostMapping("/register")
     public ResponseEntity<?> registerAdmin(@RequestBody Admin admin) {
@@ -42,11 +52,24 @@ public class AdminController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> loginAdmin(@RequestBody Map<String, String> loginRequest) {
+    public ResponseEntity<?> loginAdmin(@RequestBody Map<String, String> loginRequest, 
+                                       HttpServletRequest request) {
         try {
             String emailOrUsername = loginRequest.get("emailOrUsername");
             String password = loginRequest.get("password");
             
+            // Authenticate using Spring Security
+            UsernamePasswordAuthenticationToken authToken = 
+                new UsernamePasswordAuthenticationToken(emailOrUsername, password);
+            
+            Authentication authentication = authenticationManager.authenticate(authToken);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            
+            // Store authentication in session
+            request.getSession().setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, 
+                SecurityContextHolder.getContext());
+            
+            // Get admin details for response
             Admin authenticatedAdmin = adminService.loginAdmin(emailOrUsername, password);
             if (authenticatedAdmin != null) {
                 // Remove password from response for security
@@ -57,9 +80,26 @@ public class AdminController {
             Map<String, String> errorResponse = new HashMap<>();
             errorResponse.put("error", "Invalid credentials or account inactive");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+            
         } catch (Exception e) {
             Map<String, String> errorResponse = new HashMap<>();
             errorResponse.put("error", "Login failed: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logoutAdmin(HttpServletRequest request) {
+        try {
+            SecurityContextHolder.clearContext();
+            request.getSession().invalidate();
+            
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Logged out successfully");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Logout failed: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
@@ -167,5 +207,29 @@ public class AdminController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
+    
+    @GetMapping("/current")
+    public ResponseEntity<?> getCurrentAdmin() {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication != null && authentication.isAuthenticated() && 
+                !authentication.getName().equals("anonymousUser")) {
+                
+                String email = authentication.getName();
+                Admin admin = adminService.getAdminByEmail(email);
+                if (admin != null) {
+                    admin.setPassword(null);
+                    return ResponseEntity.ok(admin);
+                }
+            }
+            
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Not authenticated");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+        } catch (Exception e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Failed to get current admin: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
 }
-

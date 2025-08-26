@@ -1,29 +1,72 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { LogOut } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { LogOut, Layout, Users, Car, ClipboardList, ToolCase } from 'lucide-react';
 import '../styles/AdminDashboard.css';
 
 const AdminDashboard = ({ currentUser, cars, reservations, users }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [currentView, setCurrentView] = useState('dashboard');
 
   const handleLogout = () => {
     navigate('/');
   };
 
+  const handleNavigation = (path) => {
+    setCurrentView(path);
+    navigate(`/admin/${path}`);
+  };
+
   return (
     <div className="admin-dashboard">
-      <div className="sidebar">
-        <h2>Admin Dashboard</h2>
-        <button onClick={() => setCurrentView('dashboard')} className="sidebar-btn">Dashboard</button>
-        <button onClick={() => navigate('/admin/vehicles')} className="sidebar-btn">Vehicle Management</button>
-        <button onClick={() => navigate('/admin/pending-requests')} className="sidebar-btn">Pending Requests</button>
-        <button onClick={() => navigate('/admin/users')} className="sidebar-btn">User Management</button>
-        <button onClick={() => navigate('/admin/maintenance')} className="sidebar-btn">Maintenance</button>
-        <button onClick={handleLogout} className="sidebar-btn logout">
-          <LogOut className="btn-icon" /> Logout
-        </button>
-      </div>
+      <nav className="sidebar">
+        <div className="sidebar-header">
+          <h2>Admin Dashboard</h2>
+        </div>
+        <div className="sidebar-menu">
+          <button 
+            onClick={() => handleNavigation('dashboard')} 
+            className={`sidebar-btn ${location.pathname === '/admin/dashboard' ? 'active' : ''}`}
+          >
+            <Layout className="btn-icon" />
+            <span>Dashboard</span>
+          </button>
+          <button 
+            onClick={() => handleNavigation('vehicles')} 
+            className={`sidebar-btn ${location.pathname === '/admin/vehicles' ? 'active' : ''}`}
+          >
+            <Car className="btn-icon" />
+            <span>Vehicle Management</span>
+          </button>
+          <button 
+            onClick={() => handleNavigation('pending-requests')} 
+            className={`sidebar-btn ${location.pathname === '/admin/pending-requests' ? 'active' : ''}`}
+          >
+            <ClipboardList className="btn-icon" />
+            <span>Pending Requests</span>
+          </button>
+          <button 
+            onClick={() => handleNavigation('users')} 
+            className={`sidebar-btn ${location.pathname === '/admin/users' ? 'active' : ''}`}
+          >
+            <Users className="btn-icon" />
+            <span>User Management</span>
+          </button>
+          <button 
+            onClick={() => handleNavigation('maintenance')} 
+            className={`sidebar-btn ${location.pathname === '/admin/maintenance' ? 'active' : ''}`}
+          >
+            <ToolCase className="btn-icon" />
+            <span>Maintenance</span>
+          </button>
+        </div>
+        <div className="sidebar-footer">
+          <button onClick={handleLogout} className="sidebar-btn logout">
+            <LogOut className="btn-icon" />
+            <span>Logout</span>
+          </button>
+        </div>
+      </nav>
       <div className="main-content">
         {currentView === 'dashboard' && (
           <div>

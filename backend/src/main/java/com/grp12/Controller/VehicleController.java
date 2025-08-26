@@ -1,6 +1,5 @@
 package com.grp12.Controller;
 
-
 import com.grp12.Model.Vehicle;
 import com.grp12.Services.VehicleService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +18,7 @@ import java.util.HashMap;
 
 @RestController
 @RequestMapping("/api/vehicles")
-@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
+@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true", allowedHeaders = "*")
 public class VehicleController {
     
     @Autowired
@@ -81,22 +80,7 @@ public class VehicleController {
         }
     }
     
-    // Admin endpoints
-    
-    // Get all vehicles (admin only)
-    @GetMapping("/all")
-    public ResponseEntity<?> getAllVehicles() {
-        try {
-            List<Vehicle> vehicles = vehicleService.getAllVehicles();
-            return ResponseEntity.ok(vehicles);
-        } catch (Exception e) {
-            Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", "Failed to fetch vehicles: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
-        }
-    }
-    
-    // Get vehicle by ID
+    // Get vehicle by ID - Public for viewing details
     @GetMapping("/{id}")
     public ResponseEntity<?> getVehicleById(@PathVariable Long id) {
         try {
@@ -114,8 +98,25 @@ public class VehicleController {
         }
     }
     
+    // ADMIN ONLY ENDPOINTS BELOW
+    
+    // Get all vehicles (admin only)
+    @GetMapping("/all")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> getAllVehicles() {
+        try {
+            List<Vehicle> vehicles = vehicleService.getAllVehicles();
+            return ResponseEntity.ok(vehicles);
+        } catch (Exception e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Failed to fetch vehicles: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+    
     // Add new vehicle (admin only) - with file upload
     @PostMapping("/add")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> addVehicle(
             @RequestParam("make") String make,
             @RequestParam("model") String model,
@@ -178,6 +179,7 @@ public class VehicleController {
     
     // Update vehicle (admin only)
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> updateVehicle(@PathVariable Long id, @RequestBody Vehicle vehicle) {
         try {
             vehicle.setId(id);
@@ -196,6 +198,7 @@ public class VehicleController {
     
     // Update vehicle status (admin only)
     @PatchMapping("/{id}/status")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> updateVehicleStatus(@PathVariable Long id, @RequestBody Map<String, String> statusUpdate) {
         try {
             String newStatus = statusUpdate.get("status");
@@ -220,6 +223,7 @@ public class VehicleController {
     
     // Delete vehicle (admin only)
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> deleteVehicle(@PathVariable Long id) {
         try {
             vehicleService.deleteVehicle(id);
@@ -239,6 +243,7 @@ public class VehicleController {
     
     // Get vehicle statistics (admin only)
     @GetMapping("/stats")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> getVehicleStatistics() {
         try {
             VehicleService.VehicleStatistics stats = vehicleService.getVehicleStatistics();
@@ -250,4 +255,3 @@ public class VehicleController {
         }
     }
 }
-

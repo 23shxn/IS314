@@ -67,6 +67,17 @@ public class AdminService {
         }
     }
 
+    public Admin getAdminByEmail(String email) {
+        try {
+            return adminRepository.findByEmail(email)
+                    .filter(admin -> "ACTIVE".equals(admin.getStatus()))
+                    .orElse(null);
+        } catch (Exception e) {
+            System.err.println("Error in getAdminByEmail: " + e.getMessage());
+            return null;
+        }
+    }
+
     public List<Admin> getAllAdmins() {
         try {
             return adminRepository.findActiveAdminsOrderByCreatedAt();
@@ -167,4 +178,3 @@ public class AdminService {
         return adminRepository.countActiveAdmins() == 0;
     }
 }
-

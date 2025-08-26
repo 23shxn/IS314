@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Check, X, Plus } from 'lucide-react';
+import { Check, X, Plus, Trash2, Eye } from 'lucide-react';
 import '../styles/VehicleManagement.css';
 
 const VehicleManagement = () => {
@@ -7,6 +7,7 @@ const VehicleManagement = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
+  const [viewingVehicle, setViewingVehicle] = useState(null);
   const [newVehicle, setNewVehicle] = useState({
     licensePlate: '',
     make: '',
@@ -46,6 +47,10 @@ const VehicleManagement = () => {
         console.log('Vehicles fetched:', data);
         setVehicles(Array.isArray(data) ? data : []);
         setError('');
+      } else if (response.status === 401) {
+        setError('Unauthorized: Please log in as admin');
+      } else if (response.status === 403) {
+        setError('Forbidden: Admin access required');
       } else {
         const errorData = await response.json();
         setError(errorData.error || 'Failed to fetch vehicles');
@@ -58,60 +63,71 @@ const VehicleManagement = () => {
     }
   };
 
-  const handleApproveVehicle = async (id) => {
+  const handleDeleteVehicle = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this vehicle? This action cannot be undone.')) {
+      return;
+    }
+    
     setError('');
     setLoading(true);
-    console.log('Approving vehicle ID:', id);
+    console.log('Deleting vehicle ID:', id);
 
     try {
-      const response = await fetch(`http://localhost:8080/api/vehicles/${id}/status`, {
-        method: 'PATCH',
+      const response = await fetch(`http://localhost:8080/api/vehicles/${id}`, {
+        method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: 'APPROVED' }),
         credentials: 'include'
       });
-      console.log('Approve vehicle response:', response.status);
+      console.log('Delete vehicle response:', response.status);
       if (response.ok) {
+        // Remove the vehicle from the local state
         setVehicles(vehicles.filter(v => v.id !== id));
         setError('');
+        console.log('Vehicle deleted successfully');
+      } else if (response.status === 401) {
+        setError('Unauthorized: Please log in as admin');
+      } else if (response.status === 403) {
+        setError('Forbidden: Admin access required');
       } else {
         const errorData = await response.json();
-        setError(errorData.error || 'Failed to approve vehicle');
+        setError(errorData.error || 'Failed to delete vehicle');
       }
     } catch (err) {
       setError('Failed to connect to the server');
-      console.error('Approve vehicle error:', err);
+      console.error('Delete vehicle error:', err);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleRejectVehicle = async (id) => {
-    if (!window.confirm('Are you sure you want to reject this vehicle?')) {
-      return;
-    }
+  const handleStatusUpdate = async (id, newStatus) => {
     setError('');
     setLoading(true);
-    console.log('Rejecting vehicle ID:', id);
+    console.log('Updating vehicle status:', id, newStatus);
 
     try {
       const response = await fetch(`http://localhost:8080/api/vehicles/${id}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: 'REJECTED' }),
+        body: JSON.stringify({ status: newStatus }),
         credentials: 'include'
       });
-      console.log('Reject vehicle response:', response.status);
+      console.log('Update status response:', response.status);
       if (response.ok) {
-        setVehicles(vehicles.filter(v => v.id !== id));
+        const updatedVehicle = await response.json();
+        setVehicles(vehicles.map(v => v.id === id ? updatedVehicle : v));
         setError('');
+      } else if (response.status === 401) {
+        setError('Unauthorized: Please log in as admin');
+      } else if (response.status === 403) {
+        setError('Forbidden: Admin access required');
       } else {
         const errorData = await response.json();
-        setError(errorData.error || 'Failed to reject vehicle');
+        setError(errorData.error || 'Failed to update vehicle status');
       }
     } catch (err) {
       setError('Failed to connect to the server');
-      console.error('Reject vehicle error:', err);
+      console.error('Update status error:', err);
     } finally {
       setLoading(false);
     }
@@ -185,6 +201,10 @@ const VehicleManagement = () => {
         setShowAddForm(false);
         fetchVehicles();
         setError('');
+      } else if (response.status === 401) {
+        setFormError('Unauthorized: Please log in as admin');
+      } else if (response.status === 403) {
+        setFormError('Forbidden: Admin access required');
       } else {
         const errorData = await response.json();
         setFormError(errorData.error || 'Failed to add vehicle');
@@ -195,6 +215,55 @@ const VehicleManagement = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const VehicleDetailModal = ({ vehicle, onClose }) => {
+    if (!vehicle) return null;
+    
+    return (
+      <div className="modal-overlay" onClick={onClose}>
+        <div className="modal-content" onClick={e => e.stopPropagation()}>
+          <div className="modal-header">
+            <h3>{vehicle.make} {vehicle.model} ({vehicle.year})</h3>
+            <button onClick={onClose} className="close-btn">&times;</button>
+          </div>
+          <div className="modal-body">
+            {vehicle.vehicleImage && (
+              <img
+                src={`data:image/jpeg;base64,${vehicle.vehicleImage}`}
+                alt={`${vehicle.make} ${vehicle.model}`}
+                className="modal-vehicle-image"
+              />
+            )}
+            <div className="vehicle-details-grid">
+              <div><strong>License Plate:</strong> {vehicle.licensePlate}</div>
+              <div><strong>Type:</strong> {vehicle.vehicleType}</div>
+              <div><strong>Color:</strong> {vehicle.color}</div>
+              <div><strong>VIN:</strong> {vehicle.vin || 'N/A'}</div>
+              <div><strong>Fuel Type:</strong> {vehicle.fuelType}</div>
+              <div><strong>Transmission:</strong> {vehicle.transmission}</div>
+              <div><strong>Seating:</strong> {vehicle.seatingCapacity} seats</div>
+              <div><strong>Mileage:</strong> {vehicle.mileage || 'N/A'} km</div>
+              <div><strong>Price:</strong> ${vehicle.pricePerDay}/day</div>
+              <div><strong>Location:</strong> {vehicle.location}</div>
+              <div><strong>Status:</strong> <span className={`status-badge ${vehicle.status.toLowerCase()}`}>{vehicle.status}</span></div>
+            </div>
+            {vehicle.description && (
+              <div className="description-section">
+                <strong>Description:</strong>
+                <p>{vehicle.description}</p>
+              </div>
+            )}
+            {vehicle.features && (
+              <div className="features-section">
+                <strong>Features:</strong>
+                <p>{vehicle.features}</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
   };
 
   console.log('Rendering VehicleManagement, vehicles:', vehicles, 'showAddForm:', showAddForm);
@@ -383,6 +452,7 @@ const VehicleManagement = () => {
                   <option value="">Select location</option>
                   <option value="Suva">Suva</option>
                   <option value="Nadi">Nadi</option>
+                  <option value="Lautoka">Lautoka</option>
                 </select>
               </div>
               <div className="form-group full-width">
@@ -417,15 +487,22 @@ const VehicleManagement = () => {
               </div>
             </div>
             <button type="submit" className="action-btn submit" disabled={loading}>
-              Submit
+              {loading ? 'Adding...' : 'Add Vehicle'}
             </button>
           </form>
         </div>
       )}
 
-      {error && <p className="error-text">{error}</p>}
-      {loading && <p>Loading...</p>}
-      {!loading && vehicles.length === 0 && <p>No pending vehicles.</p>}
+      {error && <div className="error-message">{error}</div>}
+      
+      {loading && <div className="loading-message">Loading...</div>}
+      
+      {!loading && vehicles.length === 0 && !error && (
+        <div className="no-data-message">
+          <p>No vehicles found.</p>
+        </div>
+      )}
+      
       {vehicles.length > 0 && (
         <div className="table-container">
           <table className="vehicles-table">
@@ -436,8 +513,9 @@ const VehicleManagement = () => {
                 <th>Model</th>
                 <th>Year</th>
                 <th>Type</th>
-                <th>Mileage</th>
-                <th>Image</th>
+                <th>Status</th>
+                <th>Price/Day</th>
+                <th>Location</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -449,32 +527,41 @@ const VehicleManagement = () => {
                   <td data-label="Model">{vehicle.model}</td>
                   <td data-label="Year">{vehicle.year}</td>
                   <td data-label="Type">{vehicle.vehicleType}</td>
-                  <td data-label="Mileage">{vehicle.mileage}</td>
-                  <td data-label="Image">
-                    {vehicle.vehicleImage ? (
-                      <img
-                        src={`data:image/jpeg;base64,${vehicle.vehicleImage}`}
-                        alt={`${vehicle.make} ${vehicle.model}`}
-                        className="vehicle-image"
-                      />
-                    ) : (
-                      <span>No Image</span>
-                    )}
+                  <td data-label="Status">
+                    <span className={`status-badge ${vehicle.status.toLowerCase()}`}>
+                      {vehicle.status}
+                    </span>
                   </td>
+                  <td data-label="Price/Day">${vehicle.pricePerDay}</td>
+                  <td data-label="Location">{vehicle.location}</td>
                   <td data-label="Actions" className="table-actions">
                     <button
-                      onClick={() => handleApproveVehicle(vehicle.id)}
-                      className="action-btn approve"
-                      disabled={loading}
+                      onClick={() => setViewingVehicle(vehicle)}
+                      className="action-btn view"
+                      title="View Details"
                     >
-                      <Check className="action-icon" />
+                      <Eye className="action-icon" />
                     </button>
-                    <button
-                      onClick={() => handleRejectVehicle(vehicle.id)}
-                      className="action-btn reject"
+                    
+                    <select
+                      value={vehicle.status}
+                      onChange={(e) => handleStatusUpdate(vehicle.id, e.target.value)}
+                      className="status-select"
                       disabled={loading}
                     >
-                      <X className="action-icon" />
+                      <option value="Available">Available</option>
+                      <option value="Rented">Rented</option>
+                      <option value="Maintenance">Maintenance</option>
+                      <option value="Out_of_Service">Out of Service</option>
+                    </select>
+                    
+                    <button
+                      onClick={() => handleDeleteVehicle(vehicle.id)}
+                      className="action-btn delete"
+                      disabled={loading}
+                      title="Delete Vehicle"
+                    >
+                      <Trash2 className="action-icon" />
                     </button>
                   </td>
                 </tr>
@@ -482,6 +569,13 @@ const VehicleManagement = () => {
             </tbody>
           </table>
         </div>
+      )}
+
+      {viewingVehicle && (
+        <VehicleDetailModal 
+          vehicle={viewingVehicle} 
+          onClose={() => setViewingVehicle(null)} 
+        />
       )}
     </div>
   );

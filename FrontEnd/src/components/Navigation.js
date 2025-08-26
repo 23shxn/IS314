@@ -39,6 +39,12 @@ const Navigation = ({ currentUser, setCurrentUser }) => {
                 to="/admin/dashboard"
                 className={`nav-link ${isActive('/admin/dashboard') ? 'active' : ''}`}
               >
+                Dashboard
+              </Link>
+              <Link
+                to="/admin/pending-requests"
+                className={`nav-link ${isActive('/admin/pending-requests') ? 'active' : ''}`}
+              >
                 Pending Requests
               </Link>
               <Link
