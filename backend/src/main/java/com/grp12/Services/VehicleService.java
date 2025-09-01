@@ -1,6 +1,5 @@
 package com.grp12.Services;
 
-
 import com.grp12.Model.Vehicle;
 import com.grp12.Repository.VehicleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 @Service
 @Transactional
@@ -17,6 +17,36 @@ public class VehicleService {
     
     @Autowired
     private VehicleRepository vehicleRepository;
+    
+    // License plate pattern: AB 123 (2 letters, space, 3 numbers)
+    private static final Pattern LICENSE_PLATE_PATTERN = Pattern.compile("^[A-Za-z]{2}\\s\\d{3}$");
+    
+    // Validate license plate format
+    private void validateLicensePlate(String licensePlate) {
+        if (licensePlate == null || licensePlate.trim().isEmpty()) {
+            throw new IllegalArgumentException("License plate is required");
+        }
+        
+        String trimmedPlate = licensePlate.trim();
+        if (!LICENSE_PLATE_PATTERN.matcher(trimmedPlate).matches()) {
+            throw new IllegalArgumentException("License plate must be in format: AB 123 (2 letters, space, 3 numbers)");
+        }
+    }
+    
+    // Validate seating capacity
+    private void validateSeatingCapacity(Integer seatingCapacity) {
+        if (seatingCapacity == null) {
+            throw new IllegalArgumentException("Seating capacity is required");
+        }
+        
+        if (seatingCapacity < 2) {
+            throw new IllegalArgumentException("Seating capacity must be at least 2");
+        }
+        
+        if (seatingCapacity > 50) { // Reasonable upper limit
+            throw new IllegalArgumentException("Seating capacity cannot exceed 50");
+        }
+    }
     
     // Create or update vehicle
     public Vehicle saveVehicle(Vehicle vehicle) {
@@ -37,13 +67,32 @@ public class VehicleService {
             if (vehicle.getLocation() == null || vehicle.getLocation().trim().isEmpty()) {
                 throw new IllegalArgumentException("Location is required");
             }
-           if (vehicle.getPricePerDay() == null || vehicle.getPricePerDay().compareTo(BigDecimal.ZERO) <= 0) {
-             throw new IllegalArgumentException("Valid price per day greater than 0 is required");
-}
+            if (vehicle.getPricePerDay() == null || vehicle.getPricePerDay().compareTo(BigDecimal.ZERO) <= 0) {
+                throw new IllegalArgumentException("Valid price per day greater than 0 is required");
+            }
+            
+            // Validate license plate format
+            validateLicensePlate(vehicle.getLicensePlate());
+            
+            // Validate seating capacity
+            validateSeatingCapacity(vehicle.getSeatingCapacity());
+            
+            // Validate that all 3 images are provided for new vehicles
+            if (vehicle.getId() == null) { // New vehicle
+                if (vehicle.getVehicleImage1() == null || vehicle.getVehicleImage1().trim().isEmpty()) {
+                    throw new IllegalArgumentException("Vehicle Image 1 is required");
+                }
+                if (vehicle.getVehicleImage2() == null || vehicle.getVehicleImage2().trim().isEmpty()) {
+                    throw new IllegalArgumentException("Vehicle Image 2 is required");
+                }
+                if (vehicle.getVehicleImage3() == null || vehicle.getVehicleImage3().trim().isEmpty()) {
+                    throw new IllegalArgumentException("Vehicle Image 3 is required");
+                }
+            }
             
             // Check for duplicate license plate (if provided)
             if (vehicle.getLicensePlate() != null && !vehicle.getLicensePlate().trim().isEmpty()) {
-                Optional<Vehicle> existingByPlate = vehicleRepository.findByLicensePlate(vehicle.getLicensePlate());
+                Optional<Vehicle> existingByPlate = vehicleRepository.findByLicensePlate(vehicle.getLicensePlate().trim());
                 if (existingByPlate.isPresent() && !existingByPlate.get().getId().equals(vehicle.getId())) {
                     throw new IllegalArgumentException("Vehicle with this license plate already exists");
                 }
@@ -51,11 +100,53 @@ public class VehicleService {
             
             // Check for duplicate VIN (if provided)
             if (vehicle.getVin() != null && !vehicle.getVin().trim().isEmpty()) {
-                Optional<Vehicle> existingByVin = vehicleRepository.findByVin(vehicle.getVin());
+                Optional<Vehicle> existingByVin = vehicleRepository.findByVin(vehicle.getVin().trim());
                 if (existingByVin.isPresent() && !existingByVin.get().getId().equals(vehicle.getId())) {
                     throw new IllegalArgumentException("Vehicle with this VIN already exists");
                 }
             }
+            
+            // Validate fuel type
+            if (vehicle.getFuelType() != null && !vehicle.getFuelType().trim().isEmpty()) {
+                String fuelType = vehicle.getFuelType().trim();
+                if (!fuelType.equals("Petrol") && !fuelType.equals("Diesel") && 
+                    !fuelType.equals("Electric") && !fuelType.equals("Hybrid")) {
+                    throw new IllegalArgumentException("Fuel type must be one of: Petrol, Diesel, Electric, Hybrid");
+                }
+            }
+            
+            // Validate transmission
+            if (vehicle.getTransmission() != null && !vehicle.getTransmission().trim().isEmpty()) {
+                String transmission = vehicle.getTransmission().trim();
+                if (!transmission.equals("Automatic") && !transmission.equals("Manual")) {
+                    throw new IllegalArgumentException("Transmission must be either Automatic or Manual");
+                }
+            }
+            
+            // Validate vehicle type
+            if (vehicle.getVehicleType() != null && !vehicle.getVehicleType().trim().isEmpty()) {
+                String vehicleType = vehicle.getVehicleType().trim();
+                if (!vehicleType.equals("Sedan") && !vehicleType.equals("SUV") && 
+                    !vehicleType.equals("Truck") && !vehicleType.equals("Van")) {
+                    throw new IllegalArgumentException("Vehicle type must be one of: Sedan, SUV, Truck, Van");
+                }
+            }
+            
+            // Validate location
+            if (vehicle.getLocation() != null && !vehicle.getLocation().trim().isEmpty()) {
+                String location = vehicle.getLocation().trim();
+                if (!location.equals("Suva") && !location.equals("Nadi") && !location.equals("Lautoka")) {
+                    throw new IllegalArgumentException("Location must be one of: Suva, Nadi, Lautoka");
+                }
+            }
+            
+            // Validate mileage if provided
+            if (vehicle.getMileage() != null && vehicle.getMileage() < 0) {
+                throw new IllegalArgumentException("Mileage cannot be negative");
+            }
+            
+            // Normalize license plate format (ensure consistent format)
+            vehicle.setLicensePlate(vehicle.getLicensePlate().trim().toUpperCase());
             
             Vehicle savedVehicle = vehicleRepository.save(vehicle);
             System.out.println("Vehicle saved with ID: " + savedVehicle.getId());
@@ -125,7 +216,18 @@ public class VehicleService {
             Vehicle vehicle = vehicleRepository.findById(vehicleId)
                 .orElseThrow(() -> new RuntimeException("Vehicle not found"));
             
-            vehicle.setStatus(status);
+            // Validate status
+            if (status == null || status.trim().isEmpty()) {
+                throw new IllegalArgumentException("Status is required");
+            }
+            
+            String normalizedStatus = status.trim();
+            if (!normalizedStatus.equals("Available") && !normalizedStatus.equals("Rented") && 
+                !normalizedStatus.equals("Maintenance") && !normalizedStatus.equals("Out_of_Service")) {
+                throw new IllegalArgumentException("Status must be one of: Available, Rented, Maintenance, Out_of_Service");
+            }
+            
+            vehicle.setStatus(normalizedStatus);
             return vehicleRepository.save(vehicle);
         } catch (Exception e) {
             System.err.println("Error updating vehicle status: " + e.getMessage());

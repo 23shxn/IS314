@@ -30,41 +30,17 @@ import VehicleMaintenance from './components/VehicleMaintenance';
 import PendingRequests from './components/PendingRequests';
 import UserManagement from './components/UserManagement';
 import LandingPage from './components/LandingPage';
+import AboutUs from './components/AboutUs';
+import FAQs from './components/FAQs';
+import Contact from './components/Contact';
 
 const App = () => {
   const [currentUser, setCurrentUser] = useState(null);
-  const [cars, setCars] = useState([
-    {
-      id: 1,
-      make: 'Toyota',
-      model: 'Camry',
-      type: 'Sedan',
-      year: 2023,
-      location: 'Suva',
-      rentalDate: '2025-08-05',
-      pricePerDay: 50,
-      status: 'Available',
-      image: '/images/camry.jpeg.avif'
-    },
-    {
-      id: 2,
-      make: 'Honda',
-      model: 'Civic',
-      type: 'Compact',
-      year: 2022,
-      location: 'Lautoka',
-      rentalDate: '2025-08-06',
-      pricePerDay: 45,
-      status: 'Rented',
-      image: 'images/civic.jpeg.png'
-    }
-  ]);
+  const [cars, setCars] = useState([]);
   const [reservations, setReservations] = useState([]);
   const [maintenanceRecords, setMaintenanceRecords] = useState([]);
-  const [users, setUsers] = useState([
-    { id: 1, name: 'John Doe', email: 'john@example.com' },
-    { id: 2, name: 'Jane Smith', email: 'jane@admin.com', role: 'admin' }
-  ]);
+  const [users, setUsers] = useState([]);
+  const [pendingRequests, setPendingRequests] = useState([]);
   const [searchParams, setSearchParams] = useState({
     location: '',
     type: '',
@@ -74,49 +50,75 @@ const App = () => {
 
   useEffect(() => {
     console.log('App - currentUser:', currentUser);
+    fetchInitialData();
   }, [currentUser]);
 
+  const fetchInitialData = async () => {
+    if (currentUser?.role === 'admin') {
+      try {
+        const [vehiclesRes, usersRes, pendingRes] = await Promise.all([
+          fetch('http://localhost:8080/api/vehicles/all', {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include'
+          }),
+          fetch('http://localhost:8080/api/auth/users/customers', {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include'
+          }),
+          fetch('http://localhost:8080/api/auth/requests/pending', {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include'
+          })
+        ]);
+
+        const vehiclesData = await vehiclesRes.json();
+        const usersData = await usersRes.json();
+        const pendingData = await pendingRes.json();
+
+        if (vehiclesRes.ok) setCars(Array.isArray(vehiclesData) ? vehiclesData : []);
+        if (usersRes.ok) setUsers(Array.isArray(usersData) ? usersData : []);
+        if (pendingRes.ok) setPendingRequests(Array.isArray(pendingData) ? pendingData : []);
+      } catch (error) {
+        console.error('Failed to fetch initial data:', error);
+      }
+    }
+  };
+
   // Component to protect admin routes
-  const AdminRoute = ({ children }) => {
-    // If no user is logged in, redirect to admin login
+  const AdminRoute = ({ children, setCurrentUser }) => {
     if (!currentUser) {
       return <Navigate to="/admin/login" replace />;
     }
-    
-    // If user is logged in but not admin, redirect to admin login
     if (currentUser.role !== 'admin') {
       return <Navigate to="/admin/login" replace />;
     }
-    
-    // User is admin, render the protected content
-    return children;
+    return React.cloneElement(children, { currentUser, setCurrentUser, cars, users, pendingRequests });
   };
 
   // Component to protect customer routes
   const CustomerRoute = ({ children }) => {
-    // If no user is logged in, redirect to customer login
     if (!currentUser) {
       return <Navigate to="/login" replace />;
     }
-    
-    // If user is logged in but not customer, redirect to customer login
     if (currentUser.role !== 'customer') {
       return <Navigate to="/login" replace />;
     }
-    
-    // User is customer, render the protected content
     return children;
   };
 
   // Component to redirect logged-in users away from login pages
   const PublicRoute = ({ children }) => {
-    if (currentUser) {
-      if (currentUser.role === 'admin') {
-        return <Navigate to="/admin/dashboard" replace />;
-      }
-      if (currentUser.role === 'customer') {
-        return <Navigate to="/dashboard" replace />;
-      }
+    if (!currentUser) {
+      return children;
+    }
+    if (currentUser.role === 'admin') {
+      return <Navigate to="/admin/dashboard" replace />;
+    }
+    if (currentUser.role === 'customer') {
+      return <Navigate to="/dashboard" replace />;
     }
     return children;
   };
@@ -126,12 +128,15 @@ const App = () => {
       <div className="app">
         <Navigation 
           currentUser={currentUser} 
-          setCurrentUser={setCurrentUser} 
+          setCurrentUser={setCurrentUser}
         />
         
         <Routes>
-          {/* Public Routes */}
+          {/* Public Routes - Available to everyone */}
           <Route path="/" element={<LandingPage currentUser={currentUser} />} />
+          <Route path="/about" element={<AboutUs />} />
+          <Route path="/faqs" element={<FAQs />} />
+          <Route path="/contact" element={<Contact />} />
           
           {/* Login Routes - redirect if already logged in */}
           <Route 
@@ -151,19 +156,7 @@ const App = () => {
             } 
           />
 
-          {/* Customer Routes */}
-          <Route 
-            path="/dashboard" 
-            element={
-              <CustomerRoute>
-                <CustomerDashboard 
-                  currentUser={currentUser} 
-                  reservations={reservations} 
-                  cars={cars} 
-                />
-              </CustomerRoute>
-            } 
-          />
+          {/* Vehicle Search - Available to both logged in and non-logged in users */}
           <Route 
             path="/search" 
             element={
@@ -175,6 +168,20 @@ const App = () => {
                 setReservations={setReservations} 
                 currentUser={currentUser}
               />
+            } 
+          />
+
+          {/* Customer Protected Routes */}
+          <Route 
+            path="/dashboard" 
+            element={
+              <CustomerRoute>
+                <CustomerDashboard 
+                  currentUser={currentUser} 
+                  reservations={reservations} 
+                  cars={cars} 
+                />
+              </CustomerRoute>
             } 
           />
           <Route 
@@ -198,16 +205,17 @@ const App = () => {
             } 
           />
 
-          {/* Admin Routes */}
+          {/* Admin Protected Routes */}
           <Route 
             path="/admin/dashboard" 
             element={
-              <AdminRoute>
+              <AdminRoute setCurrentUser={setCurrentUser}>
                 <AdminDashboard 
                   currentUser={currentUser} 
                   cars={cars} 
                   reservations={reservations} 
                   users={users} 
+                  pendingRequests={pendingRequests}
                 />
               </AdminRoute>
             } 
@@ -215,7 +223,7 @@ const App = () => {
           <Route 
             path="/admin/vehicles" 
             element={
-              <AdminRoute>
+              <AdminRoute setCurrentUser={setCurrentUser}>
                 <VehicleManagement />
               </AdminRoute>
             } 
@@ -223,7 +231,7 @@ const App = () => {
           <Route 
             path="/admin/maintenance" 
             element={
-              <AdminRoute>
+              <AdminRoute setCurrentUser={setCurrentUser}>
                 <VehicleMaintenance
                   cars={cars}
                   maintenanceRecords={maintenanceRecords}
@@ -235,7 +243,7 @@ const App = () => {
           <Route 
             path="/admin/pending-requests" 
             element={
-              <AdminRoute>
+              <AdminRoute setCurrentUser={setCurrentUser}>
                 <PendingRequests />
               </AdminRoute>
             } 
@@ -243,7 +251,7 @@ const App = () => {
           <Route 
             path="/admin/users" 
             element={
-              <AdminRoute>
+              <AdminRoute setCurrentUser={setCurrentUser}>
                 <UserManagement />
               </AdminRoute>
             } 

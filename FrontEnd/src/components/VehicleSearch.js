@@ -1,7 +1,143 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Plus, MapPin, Car, Users, Fuel, Settings } from 'lucide-react';
+import { Search, Plus, MapPin, Car, Users, Fuel, Settings, ChevronLeft, ChevronRight, Eye } from 'lucide-react';
 import '../styles/VehicleSearch.css';
+
+const VehicleImageCarousel = ({ images, vehicleInfo }) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  
+  const validImages = images.filter(img => img);
+  
+  if (validImages.length === 0) {
+    return (
+      <div className="placeholder-image">
+        <Car size={40} />
+      </div>
+    );
+  }
+
+  const nextImage = () => {
+    setCurrentIndex((prev) => (prev + 1) % validImages.length);
+  };
+
+  const prevImage = () => {
+    setCurrentIndex((prev) => (prev - 1 + validImages.length) % validImages.length);
+  };
+
+  return (
+    <div className="vehicle-image-carousel">
+      <div className="image-container">
+        <img 
+          src={`data:image/jpeg;base64,${validImages[currentIndex]}`} 
+          alt={`${vehicleInfo.make} ${vehicleInfo.model} - Image ${currentIndex + 1}`}
+          className="carousel-image"
+        />
+        {validImages.length > 1 && (
+          <>
+            <button className="carousel-nav prev" onClick={prevImage}>
+              <ChevronLeft size={20} />
+            </button>
+            <button className="carousel-nav next" onClick={nextImage}>
+              <ChevronRight size={20} />
+            </button>
+          </>
+        )}
+      </div>
+      {validImages.length > 1 && (
+        <div className="carousel-indicators">
+          {validImages.map((_, index) => (
+            <button
+              key={index}
+              className={`indicator ${index === currentIndex ? 'active' : ''}`}
+              onClick={() => setCurrentIndex(index)}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+const VehicleDetailModal = ({ vehicle, onClose }) => {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  if (!vehicle) return null;
+  
+  const vehicleImages = [
+    vehicle.vehicleImage1,
+    vehicle.vehicleImage2,
+    vehicle.vehicleImage3
+  ].filter(img => img);
+
+  const nextImage = () => {
+    setCurrentImageIndex((prev) => (prev + 1) % vehicleImages.length);
+  };
+
+  const prevImage = () => {
+    setCurrentImageIndex((prev) => (prev - 1 + vehicleImages.length) % vehicleImages.length);
+  };
+  
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>Vehicle Details</h3>
+          <button onClick={onClose} className="close-btn">&times;</button>
+        </div>
+        <div className="modal-body">
+          {vehicleImages.length > 0 && (
+            <div className="vehicle-image-gallery">
+              <div className="image-container">
+                <img
+                  src={`data:image/jpeg;base64,${vehicleImages[currentImageIndex]}`}
+                  alt={`${vehicle.make} ${vehicle.model} - Image ${currentImageIndex + 1}`}
+                  className="main-vehicle-image"
+                />
+                {vehicleImages.length > 1 && (
+                  <>
+                    <button className="image-nav prev" onClick={prevImage}>
+                      <ChevronLeft size={24} />
+                    </button>
+                    <button className="image-nav next" onClick={nextImage}>
+                      <ChevronRight size={24} />
+                    </button>
+                  </>
+                )}
+              </div>
+              <div className="image-indicators">
+                {vehicleImages.map((_, index) => (
+                  <button
+                    key={index}
+                    className={`indicator ${index === currentImageIndex ? 'active' : ''}`}
+                    onClick={() => setCurrentImageIndex(index)}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+          <div className="vehicle-details-grid">
+            <p><strong>License Plate:</strong> {vehicle.licensePlate}</p>
+            <p><strong>Make:</strong> {vehicle.make}</p>
+            <p><strong>Model:</strong> {vehicle.model}</p>
+            <p><strong>Year:</strong> {vehicle.year}</p>
+            <p><strong>Type:</strong> {vehicle.vehicleType}</p>
+            <p><strong>Color:</strong> {vehicle.color}</p>
+            <p><strong>VIN:</strong> {vehicle.vin || 'N/A'}</p>
+            <p><strong>Fuel Type:</strong> {vehicle.fuelType}</p>
+            <p><strong>Transmission:</strong> {vehicle.transmission}</p>
+            <p><strong>Seating Capacity:</strong> {vehicle.seatingCapacity}</p>
+            <p><strong>Mileage:</strong> {vehicle.mileage || 'N/A'}</p>
+            <p><strong>Price/Day:</strong> ${vehicle.pricePerDay}</p>
+            <p><strong>Location:</strong> {vehicle.location}</p>
+            <p><strong>Description:</strong> {vehicle.description || 'N/A'}</p>
+            <p><strong>Features:</strong> {vehicle.features || 'N/A'}</p>
+            <p><strong>Status:</strong> {vehicle.status}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const VehicleSearch = ({ reservations, setReservations, setCurrentView, currentUser }) => {
   const [vehicles, setVehicles] = useState([]);
@@ -10,6 +146,7 @@ const VehicleSearch = ({ reservations, setReservations, setCurrentView, currentU
   const [vehicleTypes, setVehicleTypes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [viewingVehicle, setViewingVehicle] = useState(null);
   const navigate = useNavigate();
   
   const [searchParams, setSearchParams] = useState({
@@ -341,17 +478,19 @@ const VehicleSearch = ({ reservations, setReservations, setCurrentView, currentU
         ) : (
           filteredVehicles.map((vehicle) => (
             <div key={vehicle.id} className="vehicle-card">
-              <div className="vehicle-image">
-                {vehicle.vehicleImage ? (
-                  <img 
-                    src={`data:image/jpeg;base64,${vehicle.vehicleImage}`} 
-                    alt={`${vehicle.make} ${vehicle.model}`}
-                  />
-                ) : (
-                  <div className="placeholder-image">
-                    <Car size={40} />
-                  </div>
-                )}
+              <div 
+                className="vehicle-image"
+                onClick={() => setViewingVehicle(vehicle)}
+                style={{ cursor: 'pointer' }}
+                title="View Details"
+              >
+                <VehicleImageCarousel 
+                  images={[vehicle.vehicleImage1, vehicle.vehicleImage2, vehicle.vehicleImage3]}
+                  vehicleInfo={{ make: vehicle.make, model: vehicle.model }}
+                />
+                <button className="action-btn view" style={{ position: 'absolute', top: '10px', right: '10px' }}>
+                  <Eye size={16} />
+                </button>
               </div>
               
               <div className="vehicle-info">
@@ -405,6 +544,13 @@ const VehicleSearch = ({ reservations, setReservations, setCurrentView, currentU
           ))
         )}
       </div>
+
+      {viewingVehicle && (
+        <VehicleDetailModal 
+          vehicle={viewingVehicle} 
+          onClose={() => setViewingVehicle(null)} 
+        />
+      )}
     </div>
   );
 };

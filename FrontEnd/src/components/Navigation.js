@@ -7,9 +7,15 @@ const Navigation = ({ currentUser, setCurrentUser }) => {
   const location = useLocation();
   const navigate = useNavigate();
 
+  // Don't render navigation for admin users or admin pages (from original)
+  if (currentUser?.role === 'admin' || location.pathname.startsWith('/admin')) {
+    return null;
+  }
+
   const handleLogout = () => {
-    setCurrentUser(null);
-    navigate('/');
+    console.log('Logging out, setting currentUser to null');
+    setCurrentUser(null); // This should update App.js state
+    navigate('/login'); // Navigate to login (from original)
   };
 
   const isActive = (path) => {
@@ -27,40 +33,7 @@ const Navigation = ({ currentUser, setCurrentUser }) => {
         </div>
 
         <div className="nav-menu">
-          {currentUser?.role === 'admin' ? (
-            <>
-              <Link
-                to="/"
-                className={`nav-link ${isActive('/') ? 'active' : ''}`}
-              >
-                Home
-              </Link>
-              <Link
-                to="/admin/dashboard"
-                className={`nav-link ${isActive('/admin/dashboard') ? 'active' : ''}`}
-              >
-                Dashboard
-              </Link>
-              <Link
-                to="/admin/pending-requests"
-                className={`nav-link ${isActive('/admin/pending-requests') ? 'active' : ''}`}
-              >
-                Pending Requests
-              </Link>
-              <Link
-                to="/admin/vehicles"
-                className={`nav-link ${isActive('/admin/vehicles') ? 'active' : ''}`}
-              >
-                Vehicle Management
-              </Link>
-              <Link
-                to="/admin/maintenance"
-                className={`nav-link ${isActive('/admin/maintenance') ? 'active' : ''}`}
-              >
-                Maintenance
-              </Link>
-            </>
-          ) : currentUser?.role === 'customer' ? (
+          {currentUser?.role === 'customer' ? (
             <>
               <Link
                 to="/"
@@ -94,13 +67,31 @@ const Navigation = ({ currentUser, setCurrentUser }) => {
               </Link>
             </>
           ) : (
-            // Show basic navigation for non-logged in users
+            // Show basic navigation for non-logged in users (enhanced from second version)
             <>
               <Link
                 to="/"
                 className={`nav-link ${isActive('/') ? 'active' : ''}`}
               >
                 Home
+              </Link>
+              <Link
+                to="/about"
+                className={`nav-link ${isActive('/about') ? 'active' : ''}`}
+              >
+                About Us
+              </Link>
+              <Link
+                to="/faqs"
+                className={`nav-link ${isActive('/faqs') ? 'active' : ''}`}
+              >
+                FAQS
+              </Link>
+              <Link
+                to="/contact"
+                className={`nav-link ${isActive('/contact') ? 'active' : ''}`}
+              >
+                Contact
               </Link>
               <Link
                 to="/login"

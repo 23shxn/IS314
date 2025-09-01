@@ -1,15 +1,18 @@
+
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { LogOut, Layout, Users, Car, ClipboardList, ToolCase } from 'lucide-react';
 import '../styles/AdminDashboard.css';
 
-const AdminDashboard = ({ currentUser, cars, reservations, users }) => {
+const AdminDashboard = ({ currentUser, cars, reservations, users, pendingRequests, setCurrentUser }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [currentView, setCurrentView] = useState('dashboard');
 
   const handleLogout = () => {
-    navigate('/');
+    console.log('Logging out from Admin Dashboard');
+    setCurrentUser(null); // Clear the user state
+    navigate('/login'); // Redirect to admin login page
   };
 
   const handleNavigation = (path) => {
@@ -21,7 +24,7 @@ const AdminDashboard = ({ currentUser, cars, reservations, users }) => {
     <div className="admin-dashboard">
       <nav className="sidebar">
         <div className="sidebar-header">
-          <h2>Admin Dashboard</h2>
+          <h2>Ronaldo's Rentals Admin Dashboard</h2>
         </div>
         <div className="sidebar-menu">
           <button 
@@ -75,15 +78,19 @@ const AdminDashboard = ({ currentUser, cars, reservations, users }) => {
             <div className="dashboard-stats">
               <div className="stat-card">
                 <h3>Total Vehicles</h3>
-                <p>{cars?.length || 0}</p>
+                <p>{cars.length}</p>
               </div>
               <div className="stat-card">
                 <h3>Total Reservations</h3>
-                <p>{reservations?.length || 0}</p>
+                <p>{reservations.length}</p>
               </div>
               <div className="stat-card">
                 <h3>Total Users</h3>
-                <p>{users?.length || 0}</p>
+                <p>{users.length}</p>
+              </div>
+              <div className="stat-card">
+                <h3>Pending Requests</h3>
+                <p>{pendingRequests.length}</p>
               </div>
             </div>
           </div>

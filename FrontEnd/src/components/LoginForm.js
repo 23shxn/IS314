@@ -11,6 +11,7 @@ const LoginForm = ({ setCurrentUser }) => {
     phoneNumber: '',
     email: '',
     password: '',
+    confirmPassword: '',
     driversLicenseNumber: '',
     driversLicenseImage: null
   });
@@ -19,6 +20,27 @@ const LoginForm = ({ setCurrentUser }) => {
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // Validation functions
+  const validateEmail = (email) => {
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+    return emailRegex.test(email);
+  };
+
+  const validatePhoneNumber = (phoneNumber) => {
+    const phoneRegex = /^\d{7}$/;
+    return phoneRegex.test(phoneNumber);
+  };
+
+  const validateName = (name) => {
+    const nameRegex = /^[a-zA-Z\s]+$/;
+    return nameRegex.test(name);
+  };
+
+  const validatePassword = (password) => {
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    return passwordRegex.test(password);
+  };
+
   const handleAuth = async (e) => {
     e.preventDefault();
     setError('');
@@ -26,7 +48,43 @@ const LoginForm = ({ setCurrentUser }) => {
     setLoading(true);
 
     if (isRegister) {
-      // Validation
+      // Frontend validation
+      if (!validateName(credentials.firstName)) {
+        setError('First name must contain only letters and spaces');
+        setLoading(false);
+        return;
+      }
+
+      if (!validateName(credentials.lastName)) {
+        setError('Last name must contain only letters and spaces');
+        setLoading(false);
+        return;
+      }
+
+      if (!validatePhoneNumber(credentials.phoneNumber)) {
+        setError('Phone number must be exactly 7 digits');
+        setLoading(false);
+        return;
+      }
+
+      if (!validateEmail(credentials.email)) {
+        setError('Email must end with @gmail.com');
+        setLoading(false);
+        return;
+      }
+
+      if (!validatePassword(credentials.password)) {
+        setError('Password must be at least 8 characters long, including uppercase, lowercase, number, and special character');
+        setLoading(false);
+        return;
+      }
+
+      if (credentials.password !== credentials.confirmPassword) {
+        setError('Passwords do not match');
+        setLoading(false);
+        return;
+      }
+
       if (!credentials.driversLicenseImage) {
         setError('Please upload a driver\'s license image');
         setLoading(false);
@@ -39,6 +97,7 @@ const LoginForm = ({ setCurrentUser }) => {
       formData.append('phoneNumber', credentials.phoneNumber);
       formData.append('email', credentials.email);
       formData.append('password', credentials.password);
+      formData.append('confirmPassword', credentials.confirmPassword); // Added confirmPassword
       formData.append('driversLicenseNumber', credentials.driversLicenseNumber);
       formData.append('driversLicenseImage', credentials.driversLicenseImage);
 
@@ -63,6 +122,7 @@ const LoginForm = ({ setCurrentUser }) => {
           phoneNumber: '',
           email: '',
           password: '',
+          confirmPassword: '',
           driversLicenseNumber: '',
           driversLicenseImage: null
         });
@@ -75,6 +135,13 @@ const LoginForm = ({ setCurrentUser }) => {
         console.error('Registration error:', err);
       }
     } else {
+      // Login validation
+      if (!validateEmail(credentials.email)) {
+        setError('Email must end with @gmail.com');
+        setLoading(false);
+        return;
+      }
+
       try {
         const response = await fetch('http://localhost:8080/api/auth/login', {
           method: 'POST',
@@ -94,17 +161,14 @@ const LoginForm = ({ setCurrentUser }) => {
 
         const user = await response.json();
         
-        // Add proper user information for the navigation and dashboard
         const userWithDetails = {
           ...user,
-          role: 'customer', // Set role for navigation
+          role: 'customer',
           name: `${user.firstName} ${user.lastName}`
         };
         
         console.log('User logged in:', userWithDetails);
         setCurrentUser(userWithDetails);
-        
-        // Regular users go to dashboard
         navigate('/dashboard');
       } catch (err) {
         setError('Failed to connect to the server.');
@@ -119,19 +183,18 @@ const LoginForm = ({ setCurrentUser }) => {
     if (file) {
       if (!file.type.startsWith('image/')) {
         setError('Please upload a valid image file');
-        e.target.value = ''; // Reset file input
+        e.target.value = '';
         return;
       }
       
-      // Check file size (limit to 5MB)
       if (file.size > 5 * 1024 * 1024) {
         setError('Image file size must be less than 5MB');
-        e.target.value = ''; // Reset file input
+        e.target.value = '';
         return;
       }
       
       setCredentials({ ...credentials, driversLicenseImage: file });
-      setError(''); // Clear any previous errors
+      setError('');
     }
   };
 
@@ -145,10 +208,10 @@ const LoginForm = ({ setCurrentUser }) => {
       phoneNumber: '',
       email: '',
       password: '',
+      confirmPassword: '',
       driversLicenseNumber: '',
       driversLicenseImage: null
     });
-    // Reset file input
     const fileInput = document.getElementById('driversLicenseImage');
     if (fileInput) fileInput.value = '';
   };
@@ -158,7 +221,7 @@ const LoginForm = ({ setCurrentUser }) => {
       <div className="login-form">
         <div className="form-header">
           <Car size={48} className="logo-icon" />
-          <h2>Ronaldo's Ravishing Rentals</h2>
+          <h2>Ronaldo's Rentals</h2>
         </div>
         <h3>{isRegister ? 'Customer Registration' : 'Customer Login'}</h3>
         {error && <p className="error-message">{error}</p>}
@@ -248,6 +311,19 @@ const LoginForm = ({ setCurrentUser }) => {
               disabled={loading}
             />
           </div>
+          {isRegister && (
+            <div className="form-group">
+              <label htmlFor="confirmPassword"><User size={20} /> Confirm Password</label>
+              <input
+                type="password"
+                id="confirmPassword"
+                value={credentials.confirmPassword}
+                onChange={(e) => setCredentials({ ...credentials, confirmPassword: e.target.value })}
+                required
+                disabled={loading}
+              />
+            </div>
+          )}
           <button type="submit" disabled={loading}>
             {loading ? (isRegister ? 'Registering...' : 'Logging in...') : (isRegister ? 'Register' : 'Login')}
           </button>

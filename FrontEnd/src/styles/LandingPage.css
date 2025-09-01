@@ -5,67 +5,195 @@
 }
 
 .hero {
-    background: linear-gradient(135deg, #6b21a8, #9d4edd);
-    color: white;
-    padding: 60px 20px;
-    border-radius: 8px;
-    text-align: center;
-    margin-bottom: 20px;
+  position: relative;
+  width: 100%;
+  height: clamp(380px, 60vh, 720px);
+  overflow: hidden;
+  isolation: isolate;
+  color: #fff;
+  display: grid;
+  place-items: center;
 }
 
-.hero-content h1 {
-    font-size: 2.5rem;
-    margin-bottom: 10px;
+/* === Slides wrapper === */
+.hero__slides {
+  position: absolute;
+  inset: 0;
 }
 
-.hero-content p {
-    font-size: 1.2rem;
-    margin-bottom: 20px;
+/* Each slide stacks; we fade by toggling opacity */
+.hero__slide {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;                 /* hidden by default */
+  transition: opacity 800ms ease; /* sync with TRANSITION_MS */
+  user-select: none;
+  pointer-events: none;
+  filter: saturate(1.05) contrast(1.02);
+}
+.hero__slide.is-active {
+  opacity: 1;
 }
 
-.hero-buttons {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    max-width: 300px;
-    margin: 0 auto;
+/* Optional dark overlay for text readability */
+.hero__overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(0,0,0,0.35) 0%,
+    rgba(0,0,0,0.45) 50%,
+    rgba(0,0,0,0.35) 100%
+  );
+  pointer-events: none;
 }
 
-.hero-buttons .btn-primary,
-.hero-buttons .btn-secondary {
-    padding: 12px 20px;
-    font-size: 1.1rem;
-    font-weight: 500;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
+/* === Content === */
+.hero__content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  padding: 0 1rem;
+  max-width: 900px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-.hero-buttons .btn-primary {
-    background-color: #6b21a8;
-    color: white;
+.hero__title {
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  line-height: 1.1;
+  margin: 0 0 0.4rem;
+  text-shadow: 0 2px 16px rgba(0,0,0,0.4);
 }
 
-.hero-buttons .btn-primary:hover {
-    background: linear-gradient(90deg, #5b1b8e, #7b2cc8);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+.hero__subtitle {
+  font-size: clamp(1rem, 1.6vw, 1.25rem);
+  opacity: 0.95;
+  margin: 0 0 1.25rem;
 }
 
-.hero-buttons .btn-secondary {
-    background-color: #6c757d;
-    color: white;
+.hero__cta {
+  background: rgba(255,255,255,0.14);
+  border: 1px solid rgba(255,255,255,0.4);
+  backdrop-filter: blur(6px);
+  color: #fff;
+  padding: 0.75rem 1.15rem;
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: transform .2s ease, background .2s ease, border-color .2s ease;
+  margin: 0 auto;
+  display: block;
 }
 
-.hero-buttons .btn-secondary:hover {
-    background-color: #5a6268;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+.hero__cta:hover { 
+  transform: translateY(-2px); 
+  background: rgba(255,255,255,0.22); 
+  border-color: rgba(255,255,255,0.6); 
+}
+
+/* === Controls === */
+.hero__nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 3;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.6);
+  background: rgba(0,0,0,0.25);
+  color: #fff;
+  font-size: 24px;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: background .2s ease, transform .2s ease;
+}
+.hero__nav:hover { background: rgba(0,0,0,0.4); transform: translateY(-50%) scale(1.05); }
+.hero__nav--prev { left: clamp(8px, 2vw, 24px); }
+.hero__nav--next { right: clamp(8px, 2vw, 24px); }
+
+/* === Dots === */
+.hero__dots {
+  position: absolute;
+  z-index: 3;
+  bottom: clamp(8px, 3vh, 24px);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+}
+.hero__dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.45);
+  border: 0;
+  cursor: pointer;
+  transition: transform .2s ease, background .2s ease;
+}
+.hero__dot.is-active { background: #fff; transform: scale(1.2); }
+
+.how-it-works {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.how-it-works h2 {
+  font-size: 1.8rem;
+  color: #6b21a8;
+  margin-bottom: 10px;
+}
+
+.how-subtitle {
+  color: #666;
+  margin-bottom: 30px;
+}
+
+.how-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 30px;
+  justify-items: center;
+}
+
+.how-card {
+  max-width: 300px;
+}
+
+.how-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: #6b21a8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 15px;
+  color: white;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s ease;
+}
+
+.how-card:hover .how-icon {
+  transform: scale(1.1);
+}
+
+.how-card h3 {
+  font-size: 1.2rem;
+  margin-bottom: 8px;
+  color: #2a1742;
+}
+
+.how-card p {
+  color: #555;
+  font-size: 0.95rem;
 }
 
 .features {
@@ -81,19 +209,12 @@
 .feature-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 20px;
+    gap: 100px;
 }
 
 .feature-card {
     text-align: center;
     padding: 20px;
-}
-
-.feature-icon {
-    width: 40px;
-    height: 40px;
-    color: #6b21a8;
-    margin-bottom: 10px;
 }
 
 .feature-card h3 {
@@ -106,35 +227,231 @@
 }
 
 .cta {
-    padding: 20px 0;
-    text-align: center;
+  padding: 10px 0;
+  text-align: center;
 }
 
 .cta-card {
-    padding: 30px;
+  padding: 15px 20px;
 }
 
 .cta-card h2 {
-    color: #6b21a8;
-    margin-bottom: 10px;
+  color: #6b21a8;
+  margin-bottom: 8px;
+  font-size: 3rem;
 }
 
 .cta-card p {
-    color: #666;
-    margin-bottom: 20px;
+  color: #666;
+  margin-bottom: 12px;
+  font-size: 0.95rem;
 }
 
-.cta-card .btn-primary {
-    padding: 12px 25px;
-    font-size: 1.1rem;
-    font-weight: 500;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
+.cta-flex {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 30px;
 }
 
-.cta-card .btn-primary:hover {
-    background: linear-gradient(90deg, #5b1b8e, #7b2cc8);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+.cta-text {
+  flex: 1;
+  text-align: center; /* Center all content including button */
+}
+
+.cta-image {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.cta-image img {
+  max-width: 250px;
+  height: auto;
+  border-radius: 12px;
+}
+
+/* Button styling */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(90deg, #6b21a8, #8b5cf6);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-size: 1.1rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin: 0 auto;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(90deg, #5b1b8e, #7b2cc8);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+.btn-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.feature-with-photo {
+  padding: 0;
+  overflow: hidden;
+}
+
+.card-media {
+  position: relative;
+  height: 300px;
+  width: 100%;
+  overflow: hidden;
+}
+
+.card-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  display: block;
+  transform: scale(1.02);
+  transition: transform 0.35s ease;
+}
+
+.media-gradient {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.media-badge {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(4px);
+  border-radius: 999px;
+  padding: 6px 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+}
+
+/* shrink the icon when it sits inside the badge */
+.feature-with-photo .feature-icon {
+  color: #6b21a8;
+  width: 20px;
+  height: 20px;
+}
+
+.feature-with-photo .card-body {
+  padding: 14px 16px 18px 16px;
+}
+
+.feature-with-photo h3 {
+  color: #2a1742;
+  margin: 4px 0 6px;
+  font-size: 1.05rem;
+}
+
+.feature-with-photo p {
+  color: #5b5b5b;
+  font-size: 0.95rem;
+}
+
+/* Hover zoom */
+.feature-with-photo:hover .card-media img {
+  transform: scale(1.06);
+}
+
+/* ===== Testimonials ===== */
+.testimonials {
+  padding: 20px 0;
+}
+
+.testimonials h2 {
+  color: #6b21a8;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.testimonial-card {
+  padding: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.testimonial-media {
+  height: 180px;
+  width: 100%;
+  overflow: hidden;
+}
+
+.testimonial-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.testimonial-card .card-body {
+  padding: 16px;
+  text-align: center;
+}
+
+.stars {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 8px;
+  color: #6b21a8;
+  justify-content: center;
+}
+
+.quote {
+  color: #333;
+  font-style: italic;
+  margin-bottom: 6px;
+}
+
+.name {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+/* Base card polish used across the page */
+.card {
+  background: #fff;
+  border-radius: 10px;
+  border: 1px solid #eee;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+}
+
+/* Responsive design improvements */
+@media (max-width: 768px) {
+  .cta-flex {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .cta-image {
+    margin-top: 20px;
+  }
+  
+  .feature-grid {
+    gap: 30px;
+  }
+  
+  .hero__title {
+    font-size: 2rem;
+  }
+  
+  .cta-card h2 {
+    font-size: 2rem;
+  }
 }

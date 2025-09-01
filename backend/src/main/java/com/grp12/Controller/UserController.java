@@ -39,6 +39,7 @@ public class UserController {
             @RequestParam("phoneNumber") String phoneNumber,
             @RequestParam("email") String email,
             @RequestParam("password") String password,
+            @RequestParam("confirmPassword") String confirmPassword,
             @RequestParam("driversLicenseNumber") String driversLicenseNumber,
             @RequestParam("driversLicenseImage") MultipartFile driversLicenseImage) {
         
@@ -47,6 +48,13 @@ public class UserController {
             if (driversLicenseImage.isEmpty()) {
                 Map<String, String> errorResponse = new HashMap<>();
                 errorResponse.put("error", "Driver's license image is required");
+                return ResponseEntity.badRequest().body(errorResponse);
+            }
+
+            // Validate confirm password
+            if (!password.equals(confirmPassword)) {
+                Map<String, String> errorResponse = new HashMap<>();
+                errorResponse.put("error", "Passwords do not match");
                 return ResponseEntity.badRequest().body(errorResponse);
             }
 
@@ -195,7 +203,7 @@ public class UserController {
                 String email = authentication.getName();
                 User user = userService.getUserByEmail(email);
                 if (user != null) {
-                    user.setPassword(null); // Remove password from response
+                    user.setPassword(null);
                     return ResponseEntity.ok(user);
                 }
             }

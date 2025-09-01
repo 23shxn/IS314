@@ -13,17 +13,47 @@ const AdminLogin = ({ setCurrentUser }) => {
     password: '',
     confirmPassword: ''
   });
-  const [isRegister, setIsRegister] = useState(false);
   const [isFirstAdmin, setIsFirstAdmin] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true); // Start with loading true
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [secretMode, setSecretMode] = useState(false);
+  const [keySequence, setKeySequence] = useState([]);
 
   useEffect(() => {
     checkFirstAdmin();
-  }, []);
+    
+    // Secret key combination listener (Ctrl+Shift+A)
+    const handleKeyDown = (event) => {
+      if (!isFirstAdmin && !secretMode) {
+        const newSequence = [...keySequence, event.key.toLowerCase()];
+        setKeySequence(newSequence);
+        
+        // Check for secret combination: "admin123"
+        const secretCode = ['c', 'r', 'e', 'a', 't', 'e', '1', '2'];
+        const lastEightKeys = newSequence.slice(-8);
+        
+        if (lastEightKeys.join('') === secretCode.join('')) {
+          setSecretMode(true);
+          setSuccess('Secret admin registration unlocked! You can now add a new admin.');
+          setKeySequence([]);
+        }
+        
+        // Reset sequence if it gets too long
+        if (newSequence.length > 10) {
+          setKeySequence([]);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [keySequence, isFirstAdmin, secretMode]);
 
   const checkFirstAdmin = async () => {
     try {
@@ -33,17 +63,17 @@ const AdminLogin = ({ setCurrentUser }) => {
       if (response.ok) {
         const data = await response.json();
         setIsFirstAdmin(data.isFirstAdmin);
-        if (data.isFirstAdmin) {
-          setIsRegister(true); // Force registration mode for first admin
-        }
       }
     } catch (err) {
       console.error('Error checking first admin status:', err);
+      setError('Failed to connect to server. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
   const validateForm = () => {
-    if (isRegister) {
+    if (isFirstAdmin || secretMode) {
       if (!credentials.firstName.trim()) {
         setError('First name is required');
         return false;
@@ -93,8 +123,8 @@ const AdminLogin = ({ setCurrentUser }) => {
 
     setLoading(true);
 
-    if (isRegister) {
-      // Admin Registration
+    if (isFirstAdmin || secretMode) {
+      // Admin Registration (for first admin or secret mode)
       try {
         const registrationData = {
           firstName: credentials.firstName,
@@ -104,7 +134,12 @@ const AdminLogin = ({ setCurrentUser }) => {
           password: credentials.password
         };
         
-        const response = await fetch('http://localhost:8080/api/admin/register', {
+        // Use different endpoint for secret mode registration
+        const endpoint = secretMode 
+          ? 'http://localhost:8080/api/admin/add-admin'
+          : 'http://localhost:8080/api/admin/register';
+        
+        const response = await fetch(endpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
@@ -119,7 +154,10 @@ const AdminLogin = ({ setCurrentUser }) => {
           return;
         }
 
-        setSuccess('Admin account created successfully! You can now login.');
+        setSuccess(secretMode 
+          ? 'New admin added successfully! Registration mode disabled.' 
+          : 'Admin account created successfully! Please login to continue.');
+        
         setCredentials({
           firstName: '',
           lastName: '',
@@ -129,11 +167,13 @@ const AdminLogin = ({ setCurrentUser }) => {
           confirmPassword: ''
         });
         
-        // Switch to login mode after successful registration
+        // Reset modes after successful registration
         setTimeout(() => {
-          setIsRegister(false);
           setSuccess('');
-          checkFirstAdmin(); // Recheck first admin status
+          setSecretMode(false);
+          if (!secretMode) {
+            checkFirstAdmin(); // Only check for first admin if it was first admin registration
+          }
         }, 2000);
         
       } catch (err) {
@@ -183,21 +223,23 @@ const AdminLogin = ({ setCurrentUser }) => {
     setLoading(false);
   };
 
-  const handleToggleForm = () => {
-    if (!isFirstAdmin) { // Only allow toggle if not first admin
-      setIsRegister(!isRegister);
-      setError('');
-      setSuccess('');
-      setCredentials({
-        firstName: '',
-        lastName: '',
-        username: '',
-        email: '',
-        password: '',
-        confirmPassword: ''
-      });
-    }
-  };
+  // Show loading spinner while checking admin status
+  if (loading && !error) {
+    return (
+      <div className="login-container">
+        <div className="login-form admin-form">
+          <div className="form-header">
+            <Shield size={48} className="logo-icon admin-icon" />
+            <h2>Admin Portal</h2>
+            <p className="subtitle">Ronaldo's Rentals</p>
+          </div>
+          <div className="loading-message">
+            <p>Loading...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="login-container">
@@ -205,11 +247,11 @@ const AdminLogin = ({ setCurrentUser }) => {
         <div className="form-header">
           <Shield size={48} className="logo-icon admin-icon" />
           <h2>Admin Portal</h2>
-          <p className="subtitle">Ronaldo's Ravishing Rentals</p>
+          <p className="subtitle">Ronaldo's Rentals</p>
         </div>
         
         <h3>
-          {isFirstAdmin ? 'Create First Admin Account' : (isRegister ? 'Register Admin' : 'Admin Login')}
+          {isFirstAdmin ? 'Create First Admin Account' : (secretMode ? 'Add New Admin' : 'Admin Login')}
         </h3>
         
         {isFirstAdmin && (
@@ -218,11 +260,45 @@ const AdminLogin = ({ setCurrentUser }) => {
           </div>
         )}
         
+        {secretMode && (
+          <div className="info-message">
+            <p>🔓 Secret mode activated! You can now add a new admin account.</p>
+            <button 
+              type="button" 
+              className="link-button" 
+              onClick={() => {
+                setSecretMode(false);
+                setSuccess('');
+                setCredentials({
+                  firstName: '',
+                  lastName: '',
+                  username: '',
+                  email: '',
+                  password: '',
+                  confirmPassword: ''
+                });
+              }}
+              style={{ fontSize: '12px', marginTop: '5px' }}
+            >
+              Cancel & Return to Login
+            </button>
+          </div>
+        )}
+        
+        {!isFirstAdmin && !secretMode && (
+          <div className="info-message">
+            <p>Please login with your admin credentials.</p>
+            <p style={{ fontSize: '11px', color: '#666', marginTop: '5px' }}>
+              
+            </p>
+          </div>
+        )}
+        
         {error && <p className="error-message">{error}</p>}
         {success && <p className="success-message">{success}</p>}
         
         <form onSubmit={handleAuth}>
-          {isRegister && (
+          {(isFirstAdmin || secretMode) && (
             <>
               <div className="form-group">
                 <label htmlFor="firstName"><User size={20} /> First Name</label>
@@ -266,15 +342,15 @@ const AdminLogin = ({ setCurrentUser }) => {
           )}
           
           <div className="form-group">
-            <label htmlFor="email"><Mail size={20} /> Email {!isRegister && '/ Username'}</label>
+            <label htmlFor="email"><Mail size={20} /> Email {!isFirstAdmin && !secretMode && '/ Username'}</label>
             <input
-              type={isRegister ? "email" : "text"}
+              type={(isFirstAdmin || secretMode) ? "email" : "text"}
               id="email"
               value={credentials.email}
               onChange={(e) => setCredentials({ ...credentials, email: e.target.value })}
               required
               disabled={loading}
-              placeholder={isRegister ? "Enter your email" : "Enter email or username"}
+              placeholder={(isFirstAdmin || secretMode) ? "Enter your email" : "Enter email or username"}
             />
           </div>
           
@@ -288,7 +364,7 @@ const AdminLogin = ({ setCurrentUser }) => {
                 onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
                 required
                 disabled={loading}
-                placeholder={isRegister ? "Create password (min 6 characters)" : "Enter your password"}
+                placeholder={(isFirstAdmin || secretMode) ? "Create password (min 6 characters)" : "Enter your password"}
               />
               <button
                 type="button"
@@ -301,7 +377,7 @@ const AdminLogin = ({ setCurrentUser }) => {
             </div>
           </div>
           
-          {isRegister && (
+          {(isFirstAdmin || secretMode) && (
             <div className="form-group">
               <label htmlFor="confirmPassword"><Lock size={20} /> Confirm Password</label>
               <div className="password-input">
@@ -327,25 +403,9 @@ const AdminLogin = ({ setCurrentUser }) => {
           )}
           
           <button type="submit" disabled={loading} className="admin-submit-btn">
-            {loading ? (isRegister ? 'Creating Account...' : 'Logging in...') : (isRegister ? 'Create Admin Account' : 'Login')}
+            {loading ? ((isFirstAdmin || secretMode) ? 'Creating Account...' : 'Logging in...') : ((isFirstAdmin || secretMode) ? 'Create Admin Account' : 'Login')}
           </button>
         </form>
-        
-        {!isFirstAdmin && (
-          <div className="auth-toggle">
-            <p>
-              {isRegister ? 'Already have an admin account?' : 'Need to create an admin account?'}
-              <button 
-                type="button"
-                className="link-button" 
-                onClick={handleToggleForm}
-                disabled={loading}
-              >
-                {isRegister ? 'Login here' : 'Register here'}
-              </button>
-            </p>
-          </div>
-        )}
       </div>
     </div>
   );

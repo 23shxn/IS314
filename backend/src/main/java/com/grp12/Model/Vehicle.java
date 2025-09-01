@@ -62,8 +62,15 @@ public class Vehicle {
     @Column(name = "image_url", length = 500)
     private String imageUrl;
     
-    @Column(name = "vehicle_image", columnDefinition = "TEXT")
-    private String vehicleImage; // Base64 encoded image
+    // Three vehicle images (Base64 encoded)
+    @Column(name = "vehicle_image_1", columnDefinition = "TEXT")
+    private String vehicleImage1;
+    
+    @Column(name = "vehicle_image_2", columnDefinition = "TEXT")
+    private String vehicleImage2;
+    
+    @Column(name = "vehicle_image_3", columnDefinition = "TEXT")
+    private String vehicleImage3;
     
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
@@ -151,8 +158,15 @@ public class Vehicle {
     public String getImageUrl() { return imageUrl; }
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
     
-    public String getVehicleImage() { return vehicleImage; }
-    public void setVehicleImage(String vehicleImage) { this.vehicleImage = vehicleImage; }
+    // Multiple image getters and setters
+    public String getVehicleImage1() { return vehicleImage1; }
+    public void setVehicleImage1(String vehicleImage1) { this.vehicleImage1 = vehicleImage1; }
+    
+    public String getVehicleImage2() { return vehicleImage2; }
+    public void setVehicleImage2(String vehicleImage2) { this.vehicleImage2 = vehicleImage2; }
+    
+    public String getVehicleImage3() { return vehicleImage3; }
+    public void setVehicleImage3(String vehicleImage3) { this.vehicleImage3 = vehicleImage3; }
     
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }

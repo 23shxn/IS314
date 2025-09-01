@@ -1,8 +1,12 @@
+
 import React, { useState, useEffect } from 'react';
-import { Check, X } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { LogOut, Layout, Users, Car, ClipboardList, ToolCase, Check, X } from 'lucide-react';
 import '../styles/PendingRequests.css';
 
-const PendingRequests = () => {
+const PendingRequests = ({ setCurrentUser }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -10,6 +14,26 @@ const PendingRequests = () => {
   useEffect(() => {
     fetchPendingRequests();
   }, []);
+
+  const handleLogout = async () => {
+    try {
+      await fetch('http://localhost:8080/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include'
+      });
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+    
+    localStorage.clear();
+    sessionStorage.clear();
+    setCurrentUser(null); // Clear the user state
+    navigate('/login'); // Redirect to admin login
+  };
+
+  const handleNavigation = (path) => {
+    navigate(`/admin/${path}`);
+  };
 
   const fetchPendingRequests = async () => {
     setLoading(true);
@@ -96,78 +120,131 @@ const PendingRequests = () => {
   };
 
   return (
-    <div className="pending-requests">
-      <div className="card">
-        <h2>Pending Registration Requests</h2>
-        {error && <p className="error-text">{error}</p>}
-        {loading && <p>Loading...</p>}
-        {!loading && requests.length === 0 && <p>No pending requests.</p>}
-        {requests.length > 0 && (
-          <div className="table-container">
-            <table className="requests-table">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>Phone Number</th>
-                  <th>Driver's License</th>
-                  <th>License Image</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {requests.map((request) => (
-                  <tr key={request.id}>
-                    <td>{request.firstName} {request.lastName}</td>
-                    <td>{request.email}</td>
-                    <td>{request.phoneNumber}</td>
-                    <td>{request.driversLicenseNumber}</td>
-                    <td>
-                      {isValidBase64(request.driversLicenseImage) ? (
-                        <a
-                          href={`data:image/jpeg;base64,${request.driversLicenseImage}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <img
-                            src={`data:image/jpeg;base64,${request.driversLicenseImage}`}
-                            alt={`${request.firstName}'s license`}
-                            className="license-image"
-                            onError={(e) => {
-                              e.target.style.display = 'none';
-                              e.target.parentElement.nextSibling.style.display = 'inline';
-                            }}
-                          />
-                        </a>
-                      ) : (
-                        <span style={{ display: 'inline' }}>No Image</span>
-                      )}
-                      <span style={{ display: 'none' }}>Invalid Image</span>
-                    </td>
-                    <td>{request.status}</td>
-                    <td className="table-actions">
-                      <button
-                        onClick={() => handleApproveRequest(request.id)}
-                        className="action-btn approve"
-                        disabled={loading}
-                      >
-                        <Check className="action-icon" />
-                      </button>
-                      <button
-                        onClick={() => handleRejectRequest(request.id)}
-                        className="action-btn reject"
-                        disabled={loading}
-                      >
-                        <X className="action-icon" />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+    <div className="admin-dashboard">
+      <nav className="sidebar">
+        <div className="sidebar-header">
+          <h2>Ronaldo's Rentals Admin Dashboard</h2>
+        </div>
+        <div className="sidebar-menu">
+          <button 
+            onClick={() => handleNavigation('dashboard')} 
+            className={`sidebar-btn ${location.pathname === '/admin/dashboard' ? 'active' : ''}`}
+          >
+            <Layout className="btn-icon" />
+            <span>Dashboard</span>
+          </button>
+          <button 
+            onClick={() => handleNavigation('vehicles')} 
+            className={`sidebar-btn ${location.pathname === '/admin/vehicles' ? 'active' : ''}`}
+          >
+            <Car className="btn-icon" />
+            <span>Vehicle Management</span>
+          </button>
+          <button 
+            onClick={() => handleNavigation('pending-requests')} 
+            className={`sidebar-btn ${location.pathname === '/admin/pending-requests' ? 'active' : ''}`}
+          >
+            <ClipboardList className="btn-icon" />
+            <span>Pending Requests</span>
+          </button>
+          <button 
+            onClick={() => handleNavigation('users')} 
+            className={`sidebar-btn ${location.pathname === '/admin/users' ? 'active' : ''}`}
+          >
+            <Users className="btn-icon" />
+            <span>User Management</span>
+          </button>
+          <button 
+            onClick={() => handleNavigation('maintenance')} 
+            className={`sidebar-btn ${location.pathname === '/admin/maintenance' ? 'active' : ''}`}
+          >
+            <ToolCase className="btn-icon" />
+            <span>Maintenance</span>
+          </button>
+        </div>
+        <div className="sidebar-footer">
+          <button onClick={handleLogout} className="sidebar-btn logout">
+            <LogOut className="btn-icon" />
+            <span>Logout</span>
+          </button>
+        </div>
+      </nav>
+      
+      <div className="main-content">
+        <div className="pending-requests">
+          <div className="card">
+            <h2>Pending Registration Requests</h2>
+            {error && <p className="error-text">{error}</p>}
+            {loading && <p>Loading...</p>}
+            {!loading && requests.length === 0 && <p>No pending requests.</p>}
+            {requests.length > 0 && (
+              <div className="table-container">
+                <table className="requests-table">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Email</th>
+                      <th>Phone Number</th>
+                      <th>Driver's License</th>
+                      <th>License Image</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {requests.map((request) => (
+                      <tr key={request.id}>
+                        <td>{request.firstName} {request.lastName}</td>
+                        <td>{request.email}</td>
+                        <td>{request.phoneNumber}</td>
+                        <td>{request.driversLicenseNumber}</td>
+                        <td>
+                          {isValidBase64(request.driversLicenseImage) ? (
+                            <a
+                              href={`data:image/jpeg;base64,${request.driversLicenseImage}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <img
+                                src={`data:image/jpeg;base64,${request.driversLicenseImage}`}
+                                alt={`${request.firstName}'s license`}
+                                className="license-image"
+                                onError={(e) => {
+                                  e.target.style.display = 'none';
+                                  e.target.parentElement.nextSibling.style.display = 'inline';
+                                }}
+                              />
+                            </a>
+                          ) : (
+                            <span style={{ display: 'inline' }}>No Image</span>
+                          )}
+                          <span style={{ display: 'none' }}>Invalid Image</span>
+                        </td>
+                        <td>{request.status}</td>
+                        <td className="table-actions">
+                          <button
+                            onClick={() => handleApproveRequest(request.id)}
+                            className="action-btn approve"
+                            disabled={loading}
+                          >
+                            <Check className="action-icon" />
+                          </button>
+                          <button
+                            onClick={() => handleRejectRequest(request.id)}
+                            className="action-btn reject"
+                            disabled={loading}
+                          >
+                            <X className="action-icon" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

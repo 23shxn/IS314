@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Base64;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.regex.Pattern;
 
 @RestController
 @RequestMapping("/api/vehicles")
@@ -23,6 +24,9 @@ public class VehicleController {
     
     @Autowired
     private VehicleService vehicleService;
+    
+    // License plate pattern: AB 123 (2 letters, space, 3 numbers)
+    private static final Pattern LICENSE_PLATE_PATTERN = Pattern.compile("^[A-Za-z]{2}\\s\\d{3}$");
     
     // Public endpoint - Get all available vehicles for search
     @GetMapping("/available")
@@ -114,7 +118,63 @@ public class VehicleController {
         }
     }
     
-    // Add new vehicle (admin only) - with file upload
+    // Helper method to validate input parameters
+    private void validateVehicleParameters(String licensePlate, Integer seatingCapacity, String vehicleType, 
+                                         String fuelType, String transmission, String location) {
+        // Validate license plate format
+        if (licensePlate != null && !licensePlate.trim().isEmpty()) {
+            String trimmedPlate = licensePlate.trim();
+            if (!LICENSE_PLATE_PATTERN.matcher(trimmedPlate).matches()) {
+                throw new IllegalArgumentException("License plate must be in format: AB 123 (2 letters, space, 3 numbers)");
+            }
+        }
+        
+        // Validate seating capacity
+        if (seatingCapacity != null) {
+            if (seatingCapacity < 2) {
+                throw new IllegalArgumentException("Seating capacity must be at least 2");
+            }
+            if (seatingCapacity > 50) {
+                throw new IllegalArgumentException("Seating capacity cannot exceed 50");
+            }
+        }
+        
+        // Validate vehicle type
+        if (vehicleType != null && !vehicleType.trim().isEmpty()) {
+            String type = vehicleType.trim();
+            if (!type.equals("Sedan") && !type.equals("SUV") && 
+                !type.equals("Truck") && !type.equals("Van")) {
+                throw new IllegalArgumentException("Vehicle type must be one of: Sedan, SUV, Truck, Van");
+            }
+        }
+        
+        // Validate fuel type
+        if (fuelType != null && !fuelType.trim().isEmpty()) {
+            String fuel = fuelType.trim();
+            if (!fuel.equals("Petrol") && !fuel.equals("Diesel") && 
+                !fuel.equals("Electric") && !fuel.equals("Hybrid")) {
+                throw new IllegalArgumentException("Fuel type must be one of: Petrol, Diesel, Electric, Hybrid");
+            }
+        }
+        
+        // Validate transmission
+        if (transmission != null && !transmission.trim().isEmpty()) {
+            String trans = transmission.trim();
+            if (!trans.equals("Automatic") && !trans.equals("Manual")) {
+                throw new IllegalArgumentException("Transmission must be either Automatic or Manual");
+            }
+        }
+        
+        // Validate location
+        if (location != null && !location.trim().isEmpty()) {
+            String loc = location.trim();
+            if (!loc.equals("Suva") && !loc.equals("Nadi") && !loc.equals("Lautoka")) {
+                throw new IllegalArgumentException("Location must be one of: Suva, Nadi, Lautoka");
+            }
+        }
+    }
+    
+    // Add new vehicle (admin only) - with 3 required file uploads
     @PostMapping("/add")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> addVehicle(
@@ -133,31 +193,101 @@ public class VehicleController {
             @RequestParam("location") String location,
             @RequestParam(value = "description", required = false) String description,
             @RequestParam(value = "features", required = false) String features,
-            @RequestParam(value = "vehicleImage", required = false) MultipartFile vehicleImage) {
+            @RequestParam("vehicleImage1") MultipartFile vehicleImage1,
+            @RequestParam("vehicleImage2") MultipartFile vehicleImage2,
+            @RequestParam("vehicleImage3") MultipartFile vehicleImage3) {
         
         try {
+            // Validate input parameters first
+            validateVehicleParameters(licensePlate, seatingCapacity, vehicleType, fuelType, transmission, location);
+            
+            // Validate that all 3 images are provided
+            if (vehicleImage1 == null || vehicleImage1.isEmpty()) {
+                Map<String, String> errorResponse = new HashMap<>();
+                errorResponse.put("error", "Vehicle Image 1 is required");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+            }
+            if (vehicleImage2 == null || vehicleImage2.isEmpty()) {
+                Map<String, String> errorResponse = new HashMap<>();
+                errorResponse.put("error", "Vehicle Image 2 is required");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+            }
+            if (vehicleImage3 == null || vehicleImage3.isEmpty()) {
+                Map<String, String> errorResponse = new HashMap<>();
+                errorResponse.put("error", "Vehicle Image 3 is required");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+            }
+            
+            // Validate image types and sizes
+            if (!isValidImageType(vehicleImage1) || !isValidImageType(vehicleImage2) || !isValidImageType(vehicleImage3)) {
+                Map<String, String> errorResponse = new HashMap<>();
+                errorResponse.put("error", "All images must be valid image files (JPEG, PNG, GIF, WebP)");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+            }
+            
+            // Check image sizes (10MB limit each)
+            long maxSize = 10 * 1024 * 1024; // 10MB
+            if (vehicleImage1.getSize() > maxSize || vehicleImage2.getSize() > maxSize || vehicleImage3.getSize() > maxSize) {
+                Map<String, String> errorResponse = new HashMap<>();
+                errorResponse.put("error", "Each image must be smaller than 10MB");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+            }
+            
+            // Validate required string fields
+            if (make == null || make.trim().isEmpty()) {
+                throw new IllegalArgumentException("Make is required");
+            }
+            if (model == null || model.trim().isEmpty()) {
+                throw new IllegalArgumentException("Model is required");
+            }
+            if (color == null || color.trim().isEmpty()) {
+                throw new IllegalArgumentException("Color is required");
+            }
+            if (licensePlate == null || licensePlate.trim().isEmpty()) {
+                throw new IllegalArgumentException("License plate is required");
+            }
+            
+            // Validate numeric fields
+            if (year == null || year < 1900 || year > 2030) {
+                throw new IllegalArgumentException("Valid year between 1900 and 2030 is required");
+            }
+            if (pricePerDay == null || pricePerDay.compareTo(BigDecimal.ZERO) <= 0) {
+                throw new IllegalArgumentException("Price per day must be greater than 0");
+            }
+            if (mileage != null && mileage < 0) {
+                throw new IllegalArgumentException("Mileage cannot be negative");
+            }
+            
             Vehicle vehicle = new Vehicle();
-            vehicle.setMake(make);
-            vehicle.setModel(model);
-            vehicle.setVehicleType(vehicleType);
+            vehicle.setMake(make.trim());
+            vehicle.setModel(model.trim());
+            vehicle.setVehicleType(vehicleType.trim());
             vehicle.setYear(year);
-            vehicle.setColor(color);
-            vehicle.setLicensePlate(licensePlate);
-            vehicle.setVin(vin);
-            vehicle.setFuelType(fuelType);
-            vehicle.setTransmission(transmission);
+            vehicle.setColor(color.trim());
+            vehicle.setLicensePlate(licensePlate.trim().toUpperCase()); // Normalize to uppercase
+            if (vin != null && !vin.trim().isEmpty()) {
+                vehicle.setVin(vin.trim());
+            }
+            vehicle.setFuelType(fuelType.trim());
+            vehicle.setTransmission(transmission.trim());
             vehicle.setSeatingCapacity(seatingCapacity);
-            vehicle.setMileage(mileage);
+            if (mileage != null) {
+                vehicle.setMileage(mileage);
+            }
             vehicle.setPricePerDay(pricePerDay);
-            vehicle.setLocation(location);
-            vehicle.setDescription(description);
-            vehicle.setFeatures(features);
+            vehicle.setLocation(location.trim());
+            if (description != null && !description.trim().isEmpty()) {
+                vehicle.setDescription(description.trim());
+            }
+            if (features != null && !features.trim().isEmpty()) {
+                vehicle.setFeatures(features.trim());
+            }
             vehicle.setStatus("Available");
             
-            // Handle image upload
-            if (vehicleImage != null && !vehicleImage.isEmpty()) {
-                vehicle.setVehicleImage(Base64.getEncoder().encodeToString(vehicleImage.getBytes()));
-            }
+            // Handle image uploads
+            vehicle.setVehicleImage1(Base64.getEncoder().encodeToString(vehicleImage1.getBytes()));
+            vehicle.setVehicleImage2(Base64.getEncoder().encodeToString(vehicleImage2.getBytes()));
+            vehicle.setVehicleImage3(Base64.getEncoder().encodeToString(vehicleImage3.getBytes()));
             
             Vehicle savedVehicle = vehicleService.saveVehicle(vehicle);
             return ResponseEntity.ok(savedVehicle);
@@ -168,7 +298,7 @@ public class VehicleController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         } catch (IOException e) {
             Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", "Failed to process image file");
+            errorResponse.put("error", "Failed to process image files: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         } catch (Exception e) {
             Map<String, String> errorResponse = new HashMap<>();
@@ -177,11 +307,29 @@ public class VehicleController {
         }
     }
     
+    private boolean isValidImageType(MultipartFile file) {
+        String contentType = file.getContentType();
+        return contentType != null && (
+            contentType.equals("image/jpeg") ||
+            contentType.equals("image/jpg") ||
+            contentType.equals("image/png") ||
+            contentType.equals("image/gif") ||
+            contentType.equals("image/webp")
+        );
+    }
+    
     // Update vehicle (admin only)
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> updateVehicle(@PathVariable Long id, @RequestBody Vehicle vehicle) {
         try {
+            // Validate the vehicle data before updating
+            if (vehicle.getLicensePlate() != null) {
+                validateVehicleParameters(vehicle.getLicensePlate(), vehicle.getSeatingCapacity(), 
+                    vehicle.getVehicleType(), vehicle.getFuelType(), vehicle.getTransmission(), 
+                    vehicle.getLocation());
+            }
+            
             vehicle.setId(id);
             Vehicle updatedVehicle = vehicleService.saveVehicle(vehicle);
             return ResponseEntity.ok(updatedVehicle);
@@ -208,35 +356,24 @@ public class VehicleController {
                 return ResponseEntity.badRequest().body(errorResponse);
             }
             
-            Vehicle updatedVehicle = vehicleService.updateVehicleStatus(id, newStatus);
+            // Validate status value
+            String status = newStatus.trim();
+            if (!status.equals("Available") && !status.equals("Rented") && 
+                !status.equals("Maintenance") && !status.equals("Out_of_Service")) {
+                Map<String, String> errorResponse = new HashMap<>();
+                errorResponse.put("error", "Status must be one of: Available, Rented, Maintenance, Out_of_Service");
+                return ResponseEntity.badRequest().body(errorResponse);
+            }
+            
+            Vehicle updatedVehicle = vehicleService.updateVehicleStatus(id, status);
             return ResponseEntity.ok(updatedVehicle);
-        } catch (RuntimeException e) {
+        } catch (IllegalArgumentException e) {
             Map<String, String> errorResponse = new HashMap<>();
             errorResponse.put("error", e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         } catch (Exception e) {
             Map<String, String> errorResponse = new HashMap<>();
             errorResponse.put("error", "Failed to update vehicle status: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
-        }
-    }
-    
-    // Delete vehicle (admin only)
-    @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> deleteVehicle(@PathVariable Long id) {
-        try {
-            vehicleService.deleteVehicle(id);
-            Map<String, String> response = new HashMap<>();
-            response.put("message", "Vehicle deleted successfully");
-            return ResponseEntity.ok(response);
-        } catch (RuntimeException e) {
-            Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
-        } catch (Exception e) {
-            Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", "Failed to delete vehicle: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
@@ -251,6 +388,26 @@ public class VehicleController {
         } catch (Exception e) {
             Map<String, String> errorResponse = new HashMap<>();
             errorResponse.put("error", "Failed to fetch vehicle statistics: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+    
+    // Delete vehicle (admin only)
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> deleteVehicle(@PathVariable Long id) {
+        try {
+            vehicleService.deleteVehicle(id);
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Vehicle deleted successfully");
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        } catch (Exception e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Failed to delete vehicle: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }

@@ -1,7 +1,12 @@
+
 import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { LogOut, Layout, Users, Car, ClipboardList, ToolCase } from 'lucide-react';
 import '../styles/UserManagement.css';
 
-const UserManagement = () => {
+const UserManagement = ({ setCurrentUser }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -9,6 +14,26 @@ const UserManagement = () => {
   useEffect(() => {
     fetchUsers();
   }, []);
+
+  const handleLogout = async () => {
+    try {
+      await fetch('http://localhost:8080/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include'
+      });
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+    
+    localStorage.clear();
+    sessionStorage.clear();
+    setCurrentUser(null); // Clear the user state
+    navigate('/login'); // Redirect to admin login
+  };
+
+  const handleNavigation = (path) => {
+    navigate(`/admin/${path}`);
+  };
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -55,61 +80,114 @@ const UserManagement = () => {
   };
 
   return (
-    <div className="user-management">
-      <div className="card">
-        <h2>User Management</h2>
-        {error && <p className="error-text">{error}</p>}
-        {loading && <p>Loading...</p>}
-        {!loading && users.length === 0 && <p>No users found.</p>}
-        {users.length > 0 && (
-          <div className="table-container">
-            <table className="users-table">
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>Phone Number</th>
-                  <th>Driver's License</th>
-                  <th>License Image</th>
-                </tr>
-              </thead>
-              <tbody>
-                {users.map((user) => (
-                  <tr key={user.id}>
-                    <td>{user.id}</td>
-                    <td>{user.firstName} {user.lastName}</td>
-                    <td>{user.email}</td>
-                    <td>{user.phoneNumber}</td>
-                    <td>{user.driversLicenseNumber}</td>
-                    <td>
-                      {isValidBase64(user.driversLicenseImage) ? (
-                        <a
-                          href={`data:image/jpeg;base64,${user.driversLicenseImage}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <img
-                            src={`data:image/jpeg;base64,${user.driversLicenseImage}`}
-                            alt={`${user.firstName}'s license`}
-                            className="license-image"
-                            onError={(e) => {
-                              e.target.style.display = 'none';
-                              e.target.parentElement.nextSibling.style.display = 'inline';
-                            }}
-                          />
-                        </a>
-                      ) : (
-                        <span style={{ display: 'inline' }}>No Image</span>
-                      )}
-                      <span style={{ display: 'none' }}>Invalid Image</span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+    <div className="admin-dashboard">
+      <nav className="sidebar">
+        <div className="sidebar-header">
+          <h2>Ronaldo's Rentals Admin Dashboard</h2>
+        </div>
+        <div className="sidebar-menu">
+          <button 
+            onClick={() => handleNavigation('dashboard')} 
+            className={`sidebar-btn ${location.pathname === '/admin/dashboard' ? 'active' : ''}`}
+          >
+            <Layout className="btn-icon" />
+            <span>Dashboard</span>
+          </button>
+          <button 
+            onClick={() => handleNavigation('vehicles')} 
+            className={`sidebar-btn ${location.pathname === '/admin/vehicles' ? 'active' : ''}`}
+          >
+            <Car className="btn-icon" />
+            <span>Vehicle Management</span>
+          </button>
+          <button 
+            onClick={() => handleNavigation('pending-requests')} 
+            className={`sidebar-btn ${location.pathname === '/admin/pending-requests' ? 'active' : ''}`}
+          >
+            <ClipboardList className="btn-icon" />
+            <span>Pending Requests</span>
+          </button>
+          <button 
+            onClick={() => handleNavigation('users')} 
+            className={`sidebar-btn ${location.pathname === '/admin/users' ? 'active' : ''}`}
+          >
+            <Users className="btn-icon" />
+            <span>User Management</span>
+          </button>
+          <button 
+            onClick={() => handleNavigation('maintenance')} 
+            className={`sidebar-btn ${location.pathname === '/admin/maintenance' ? 'active' : ''}`}
+          >
+            <ToolCase className="btn-icon" />
+            <span>Maintenance</span>
+          </button>
+        </div>
+        <div className="sidebar-footer">
+          <button onClick={handleLogout} className="sidebar-btn logout">
+            <LogOut className="btn-icon" />
+            <span>Logout</span>
+          </button>
+        </div>
+      </nav>
+      
+      <div className="main-content">
+        <div className="user-management">
+          <div className="card">
+            <h2>User Management</h2>
+            {error && <p className="error-text">{error}</p>}
+            {loading && <p>Loading...</p>}
+            {!loading && users.length === 0 && <p>No users found.</p>}
+            {users.length > 0 && (
+              <div className="table-container">
+                <table className="users-table">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Name</th>
+                      <th>Email</th>
+                      <th>Phone Number</th>
+                      <th>Driver's License</th>
+                      <th>License Image</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {users.map((user) => (
+                      <tr key={user.id}>
+                        <td>{user.id}</td>
+                        <td>{user.firstName} {user.lastName}</td>
+                        <td>{user.email}</td>
+                        <td>{user.phoneNumber}</td>
+                        <td>{user.driversLicenseNumber}</td>
+                        <td>
+                          {isValidBase64(user.driversLicenseImage) ? (
+                            <a
+                              href={`data:image/jpeg;base64,${user.driversLicenseImage}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <img
+                                src={`data:image/jpeg;base64,${user.driversLicenseImage}`}
+                                alt={`${user.firstName}'s license`}
+                                className="license-image"
+                                onError={(e) => {
+                                  e.target.style.display = 'none';
+                                  e.target.parentElement.nextSibling.style.display = 'inline';
+                                }}
+                              />
+                            </a>
+                          ) : (
+                            <span style={{ display: 'inline' }}>No Image</span>
+                          )}
+                          <span style={{ display: 'none' }}>Invalid Image</span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
