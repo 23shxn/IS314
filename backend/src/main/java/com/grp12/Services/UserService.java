@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.Optional;
 
 import java.util.List;
 import java.util.regex.Pattern;
@@ -95,32 +96,70 @@ public class UserService {
 
     public User loginUser(String email, String password) {
         try {
+            System.out.println("LoginUser called with email: " + email);
+            
             if (!EMAIL_PATTERN.matcher(email).matches()) {
+                System.out.println("Invalid email format");
                 throw new IllegalArgumentException("Email must end with @gmail.com");
             }
             
-            return userRepository.findByEmail(email)
-                .filter(user -> "APPROVED".equals(user.getStatus()))
-                .filter(user -> "ROLE_CUSTOMER".equals(user.getRole()))
-                .filter(user -> passwordEncoder.matches(password, user.getPassword()))
-                .orElse(null);
+            Optional<User> userOpt = userRepository.findByEmail(email);
+            if (userOpt.isEmpty()) {
+                System.out.println("User not found for email: " + email);
+                return null;
+            }
+            
+            User user = userOpt.get();
+            System.out.println("Found user: " + user.getEmail() + ", status: " + user.getStatus() + ", role: " + user.getRole());
+            
+            if (!"APPROVED".equals(user.getStatus())) {
+                System.out.println("User not approved, status: " + user.getStatus());
+                return null;
+            }
+            
+            // Remove the role check here since SecurityConfig handles role assignment
+            if (!passwordEncoder.matches(password, user.getPassword())) {
+                System.out.println("Password does not match for user: " + email);
+                return null;
+            }
+            
+            System.out.println("Login successful for user: " + email);
+            return user;
+            
         } catch (Exception e) {
             System.err.println("Error in loginUser: " + e.getMessage());
+            e.printStackTrace();
             return null;
         }
     }
 
     public User getUserByEmail(String email) {
         try {
-            return userRepository.findByEmail(email)
-                    .filter(user -> "ROLE_CUSTOMER".equals(user.getRole()))
-                    .filter(user -> "APPROVED".equals(user.getStatus()))
-                    .orElse(null);
+            System.out.println("GetUserByEmail called with: " + email);
+            
+            Optional<User> userOpt = userRepository.findByEmail(email);
+            if (userOpt.isEmpty()) {
+                System.out.println("User not found for email: " + email);
+                return null;
+            }
+            
+            User user = userOpt.get();
+            System.out.println("Found user: " + user.getEmail() + ", status: " + user.getStatus());
+            
+            if (!"APPROVED".equals(user.getStatus())) {
+                System.out.println("User not approved, status: " + user.getStatus());
+                return null;
+            }
+            
+            return user;
+            
         } catch (Exception e) {
             System.err.println("Error in getUserByEmail: " + e.getMessage());
+            e.printStackTrace();
             return null;
         }
     }
+    
 
     public User approveRegistration(Long requestId) {
         try {
@@ -197,10 +236,7 @@ public class UserService {
 
     public List<User> getAllCustomers() {
         try {
-            return userRepository.findByStatus("APPROVED")
-                    .stream()
-                    .filter(user -> "ROLE_CUSTOMER".equals(user.getRole()))
-                    .toList();
+            return userRepository.findByStatus("APPROVED");
         } catch (Exception e) {
             System.err.println("Error in getAllCustomers: " + e.getMessage());
             throw new RuntimeException("Failed to fetch customers: " + e.getMessage());
@@ -210,7 +246,6 @@ public class UserService {
     public User getUserById(Long id) {
         try {
             return userRepository.findById(id)
-                    .filter(user -> "ROLE_CUSTOMER".equals(user.getRole()))
                     .filter(user -> "APPROVED".equals(user.getStatus()))
                     .orElse(null);
         } catch (Exception e) {

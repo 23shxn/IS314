@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Calendar, Car, MapPin, Clock, CheckCircle, X, Eye } from 'lucide-react';
 
-const ReservationManagement = ({ reservations, setReservations, setCurrentView, currentUser }) => {
+const ReservationManagement = ({ reservations, setReservations, currentUser }) => {
   const [selectedReservation, setSelectedReservation] = useState(null);
   const navigate = useNavigate();
 
@@ -116,7 +116,10 @@ const ReservationManagement = ({ reservations, setReservations, setCurrentView, 
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
                       <Calendar size={14} />
                       <span>
-                        {new Date(reservation.rentalDate).toLocaleDateString()}
+                        {reservation.pickupDate 
+                          ? new Date(reservation.pickupDate).toLocaleDateString()
+                          : new Date(reservation.rentalDate).toLocaleDateString()
+                        }
                       </span>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
@@ -125,6 +128,13 @@ const ReservationManagement = ({ reservations, setReservations, setCurrentView, 
                         Reserved on {new Date(reservation.createdAt).toLocaleDateString()}
                       </span>
                     </div>
+                    {reservation.totalPrice && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                        <span style={{ fontWeight: '500' }}>
+                          ${reservation.totalPrice.toFixed(2)} FJD
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -193,7 +203,7 @@ const ReservationManagement = ({ reservations, setReservations, setCurrentView, 
             backgroundColor: 'white',
             borderRadius: '12px',
             padding: '2rem',
-            maxWidth: '500px',
+            maxWidth: '600px',
             width: '100%',
             maxHeight: '90vh',
             overflow: 'auto'
@@ -253,19 +263,102 @@ const ReservationManagement = ({ reservations, setReservations, setCurrentView, 
                   </span>
                 </div>
 
-                <div>
-                  <label style={{ fontWeight: '500', color: '#555', display: 'block', marginBottom: '0.25rem' }}>
-                    Rental Date
-                  </label>
-                  <span style={{ color: '#666' }}>
-                    {new Date(selectedReservation.rentalDate).toLocaleDateString('en-US', {
-                      weekday: 'long',
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric'
-                    })}
-                  </span>
-                </div>
+                {selectedReservation.pickupDate && (
+                  <div>
+                    <label style={{ fontWeight: '500', color: '#555', display: 'block', marginBottom: '0.25rem' }}>
+                      Pickup Date & Time
+                    </label>
+                    <span style={{ color: '#666' }}>
+                      {new Date(selectedReservation.pickupDate).toLocaleDateString('en-US', {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })} at {selectedReservation.pickupTime || '10:00'}
+                    </span>
+                  </div>
+                )}
+
+                {selectedReservation.dropoffDate && (
+                  <div>
+                    <label style={{ fontWeight: '500', color: '#555', display: 'block', marginBottom: '0.25rem' }}>
+                      Drop-off Date & Time
+                    </label>
+                    <span style={{ color: '#666' }}>
+                      {new Date(selectedReservation.dropoffDate).toLocaleDateString('en-US', {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })} at {selectedReservation.dropoffTime || '10:00'}
+                    </span>
+                  </div>
+                )}
+
+                {!selectedReservation.pickupDate && selectedReservation.rentalDate && (
+                  <div>
+                    <label style={{ fontWeight: '500', color: '#555', display: 'block', marginBottom: '0.25rem' }}>
+                      Rental Date
+                    </label>
+                    <span style={{ color: '#666' }}>
+                      {new Date(selectedReservation.rentalDate).toLocaleDateString('en-US', {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })}
+                    </span>
+                  </div>
+                )}
+
+                {selectedReservation.totalDays && (
+                  <div>
+                    <label style={{ fontWeight: '500', color: '#555', display: 'block', marginBottom: '0.25rem' }}>
+                      Duration
+                    </label>
+                    <span style={{ color: '#666' }}>
+                      {selectedReservation.totalDays} day{selectedReservation.totalDays !== 1 ? 's' : ''}
+                    </span>
+                  </div>
+                )}
+
+                {selectedReservation.totalPrice && (
+                  <div>
+                    <label style={{ fontWeight: '500', color: '#555', display: 'block', marginBottom: '0.25rem' }}>
+                      Total Price
+                    </label>
+                    <span style={{ color: '#666', fontSize: '1.1rem', fontWeight: '500' }}>
+                      ${selectedReservation.totalPrice.toFixed(2)} FJD
+                    </span>
+                    {selectedReservation.basePrice && (
+                      <div style={{ fontSize: '0.9rem', color: '#888', marginTop: '0.25rem' }}>
+                        Base: ${selectedReservation.basePrice.toFixed(2)} + Tax: ${(selectedReservation.tax || 0).toFixed(2)}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {(selectedReservation.firstName || selectedReservation.lastName) && (
+                  <div>
+                    <label style={{ fontWeight: '500', color: '#555', display: 'block', marginBottom: '0.25rem' }}>
+                      Driver
+                    </label>
+                    <span style={{ color: '#666' }}>
+                      {selectedReservation.title} {selectedReservation.firstName} {selectedReservation.lastName}
+                    </span>
+                  </div>
+                )}
+
+                {selectedReservation.additionalRequests && (
+                  <div>
+                    <label style={{ fontWeight: '500', color: '#555', display: 'block', marginBottom: '0.25rem' }}>
+                      Additional Requests
+                    </label>
+                    <span style={{ color: '#666' }}>
+                      {selectedReservation.additionalRequests}
+                    </span>
+                  </div>
+                )}
 
                 <div>
                   <label style={{ fontWeight: '500', color: '#555', display: 'block', marginBottom: '0.25rem' }}>

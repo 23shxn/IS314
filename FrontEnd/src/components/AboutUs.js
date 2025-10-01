@@ -40,7 +40,7 @@ const AboutUs = () => {
             <p>Roadside assistance</p>
           </div>
           <div className="stat">
-            <h3>+50</h3>
+            <h3>+15</h3>
             <p>Vehicles in our fleet</p>
           </div>
           <div className="stat">

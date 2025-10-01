@@ -1,0 +1,170 @@
+.complete-booking-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+.booking-header {
+  text-align: center;
+  margin-bottom: 30px;
+  color: #333;
+}
+
+.booking-header h1 {
+  font-size: 2.5em;
+  margin-bottom: 10px;
+}
+
+.booking-header p {
+  font-size: 1.1em;
+  color: #666;
+}
+
+.booking-date {
+  font-size: 0.9em;
+  color: #888;
+  margin-top: 5px;
+}
+
+.booking-summary {
+  display: flex;
+  gap: 20px;
+  background: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 30px;
+}
+
+.vehicle-image img {
+  width: 250px;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.placeholder-image {
+  width: 250px;
+  height: 180px;
+  background: #f5f5f5;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+}
+
+.summary-details {
+  flex-grow: 1;
+}
+
+.summary-details h2 {
+  font-size: 1.8em;
+  margin-bottom: 15px;
+  color: #2c3e50;
+}
+
+.detail-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  color: #34495e;
+}
+
+.detail-item.price {
+  font-weight: bold;
+}
+
+.total-price {
+  font-size: 1.5em;
+  color: #e74c3c;
+  margin-top: 15px;
+  padding-top: 10px;
+  border-top: 1px solid #eee;
+}
+
+
+/* Add to existing CompleteBooking.css */
+.amenities-select {
+  width: 100%;
+  padding: 8px;
+  margin-top: 5px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1em;
+  background-color: #fff;
+}
+
+.amenities-select:focus {
+  outline: none;
+  border-color: #2ecc71;
+  box-shadow: 0 0 5px rgba(46, 204, 113, 0.5);
+}
+
+.detail-item.amenities {
+  margin-bottom: 15px;
+}
+
+.detail-item.amenities p {
+  margin-top: 5px;
+  color: #2c3e50;
+  font-size: 0.9em;
+}
+
+.total-price p {
+  font-size: 0.9em;
+  color: #e74c3c;
+  margin-top: 5px;
+}
+
+/* SP CODE ENDS  */
+
+.features, .description {
+  margin-top: 10px;
+  color: #7f8c8d;
+}
+
+.booking-actions {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.btn-confirm, .btn-cancel {
+  padding: 12px 25px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background-color 0.3s;
+}
+
+.btn-confirm {
+  background-color: #2ecc71;
+  color: white;
+}
+
+.btn-confirm:hover {
+  background-color: #27ae60;
+}
+
+.btn-cancel {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.btn-cancel:hover {
+  background-color: #c0392b;
+}
+
+.loading {
+  text-align: center;
+  font-size: 1.2em;
+  color: #666;
+  margin-top: 20px;
+}

@@ -1,0 +1,449 @@
+/* Booking Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5); /* Semi-transparent black background */
+    z-index: 1000; /* High z-index to ensure it appears above other content */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: auto; /* Allow scrolling if content overflows */
+  }
+  
+  .booking-modal-content {
+    background: white;
+    border-radius: 12px;
+    max-width: 1200px;
+    width: 95%;
+    max-height: 95vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: modalSlideIn 0.3s ease-out;
+    position: relative; /* Ensure positioning context for child elements */
+  }
+  
+  @keyframes modalSlideIn {
+    from {
+      opacity: 0;
+      transform: translateY(-30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .booking-modal-body {
+    padding: 0;
+  }
+  
+  .booking-content-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+  }
+  
+  /* Vehicle Summary Section */
+  .vehicle-summary {
+    background: #f8f9fa;
+    padding: 2rem;
+    border-right: 1px solid #e9ecef;
+  }
+  
+  .vehicle-summary-header h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin: 0 0 0.5rem 0;
+  }
+  
+  .vehicle-badges {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .vehicle-type-badge {
+    background: #007bff;
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 500;
+  }
+  
+  .vehicle-category {
+    background: #6c757d;
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 500;
+  }
+  
+  .vehicle-image-section {
+    margin-bottom: 1.5rem;
+  }
+  
+  .booking-vehicle-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .booking-placeholder-image {
+    width: 100%;
+    height: 200px;
+    background-color: #f0f0f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #999;
+    border-radius: 8px;
+  }
+  
+  .vehicle-features {
+    margin-bottom: 1.5rem;
+  }
+  
+  .feature-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+  }
+  
+  .feature-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    background: white;
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+  
+  .feature-item svg {
+    color: #6c757d;
+  }
+  
+  .rate-includes {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .rate-includes h4 {
+    margin: 0 0 1rem 0;
+    color: #2c3e50;
+    font-size: 1.1rem;
+  }
+  
+  .rate-includes ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .rate-includes li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    color: #495057;
+    font-size: 0.9rem;
+  }
+  
+  .rate-includes li svg {
+    color: #28a745;
+    flex-shrink: 0;
+  }
+  
+  /* Booking Details Section */
+  .booking-details-section {
+    padding: 2rem;
+    background: white;
+  }
+  
+  .pickup-dropoff-info {
+    margin-bottom: 1.5rem;
+  }
+  
+  .location-info {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e9ecef;
+  }
+  
+  .location-info:last-child {
+    border-bottom: none;
+    margin-bottom: 1rem;
+  }
+  
+  .location-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .location-icon {
+    margin-top: 0.2rem;
+    flex-shrink: 0;
+  }
+  
+  .location-icon.pickup {
+    color: #28a745;
+  }
+  
+  .location-icon.dropoff {
+    color: #dc3545;
+  }
+  
+  .location-item div {
+    flex: 1;
+  }
+  
+  .location-item strong {
+    display: block;
+    color: #2c3e50;
+    margin-bottom: 0.25rem;
+  }
+  
+  .location-item p {
+    margin: 0;
+    color: #495057;
+    font-size: 0.95rem;
+  }
+  
+  .location-details {
+    color: #6c757d !important;
+    font-size: 0.85rem !important;
+    margin-top: 0.25rem !important;
+  }
+  
+  .date-time {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #495057;
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+  
+  .date-time svg {
+    color: #007bff;
+  }
+  
+  .modify-reservation-btn {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: #ff5757;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    margin-bottom: 1.5rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .modify-reservation-btn:hover {
+    background: #ff4444;
+  }
+  
+  .pricing-section {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+  }
+  
+  .pricing-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    font-size: 0.95rem;
+  }
+  
+  .pricing-row:last-child {
+    margin-bottom: 0;
+  }
+  
+  .pricing-row.total {
+    padding-top: 0.75rem;
+    border-top: 1px solid #dee2e6;
+    font-size: 1.1rem;
+  }
+  
+  /* Driver Details Form */
+  .driver-details-form {
+    padding: 2rem;
+    border-top: 1px solid #e9ecef;
+    grid-column: 1 / -1;
+  }
+  
+  .driver-details-form h3 {
+    margin: 0 0 1.5rem 0;
+    color: #2c3e50;
+    font-size: 1.4rem;
+  }
+  
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  
+  .form-group {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .form-group.full-width {
+    grid-column: 1 / -1;
+  }
+  
+  .form-group label {
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #495057;
+    font-size: 0.95rem;
+  }
+  
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    padding: 0.75rem;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+  }
+  
+  .form-group input.error,
+  .form-group select.error,
+  .form-group textarea.error {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+  }
+  
+  .error-message {
+    color: #dc3545;
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
+    display: block;
+  }
+  
+  .form-group textarea {
+    resize: vertical;
+    min-height: 80px;
+  }
+  
+  /* Terms Section */
+  .terms-section {
+    margin-bottom: 2rem;
+  }
+  
+  .checkbox-container {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+  
+  .checkbox-container input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+  }
+  
+  .checkbox-container input[type="checkbox"].error {
+    outline: 2px solid #dc3545;
+    outline-offset: 1px;
+  }
+  
+  .checkbox-container a {
+    color: #007bff;
+    text-decoration: none;
+  }
+  
+  .checkbox-container a:hover {
+    text-decoration: underline;
+  }
+  
+  /* Booking Actions */
+  .booking-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e9ecef;
+  }
+  
+  .booking-confirm-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem 2rem;
+    background: #28a745;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    min-width: 250px;
+    justify-content: center;
+  }
+  
+  .booking-confirm-btn:hover {
+    background: #218838;
+  }
+  
+  .btn-secondary {
+    padding: 1rem 1.5rem;
+    background: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .btn-secondary:hover {
+    background: #545b62;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 992px) {
+    .booking-content-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .vehicle-summary {
+      border-right: none;
+      border-bottom: 1px solid #e9ecef;
+    }
+  }

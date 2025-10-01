@@ -48,7 +48,7 @@ const LoginForm = ({ setCurrentUser }) => {
     setLoading(true);
 
     if (isRegister) {
-      // Frontend validation
+      // Frontend validation for registration
       if (!validateName(credentials.firstName)) {
         setError('First name must contain only letters and spaces');
         setLoading(false);
@@ -74,7 +74,7 @@ const LoginForm = ({ setCurrentUser }) => {
       }
 
       if (!validatePassword(credentials.password)) {
-        setError('Password must be at least 8 characters long, including uppercase, lowercase, number, and special character');
+        setError('Password must be at least 8 characters, including uppercase, lowercase, number, and special character');
         setLoading(false);
         return;
       }
@@ -97,7 +97,7 @@ const LoginForm = ({ setCurrentUser }) => {
       formData.append('phoneNumber', credentials.phoneNumber);
       formData.append('email', credentials.email);
       formData.append('password', credentials.password);
-      formData.append('confirmPassword', credentials.confirmPassword); // Added confirmPassword
+      formData.append('confirmPassword', credentials.confirmPassword);
       formData.append('driversLicenseNumber', credentials.driversLicenseNumber);
       formData.append('driversLicenseImage', credentials.driversLicenseImage);
 
@@ -105,6 +105,7 @@ const LoginForm = ({ setCurrentUser }) => {
         const response = await fetch('http://localhost:8080/api/auth/register', {
           method: 'POST',
           body: formData,
+          credentials: 'include' // Ensure session cookie is sent
         });
 
         const data = await response.json();
@@ -126,16 +127,14 @@ const LoginForm = ({ setCurrentUser }) => {
           driversLicenseNumber: '',
           driversLicenseImage: null
         });
-        // Reset file input
         const fileInput = document.getElementById('driversLicenseImage');
         if (fileInput) fileInput.value = '';
-        
       } catch (err) {
-        setError('Failed to connect to the server.');
+        setError('Failed to connect to the server. Please check your connection.');
         console.error('Registration error:', err);
       }
     } else {
-      // Login validation
+      // Login
       if (!validateEmail(credentials.email)) {
         setError('Email must end with @gmail.com');
         setLoading(false);
@@ -143,13 +142,16 @@ const LoginForm = ({ setCurrentUser }) => {
       }
 
       try {
+        const loginData = {
+          email: credentials.email,
+          password: credentials.password
+        };
+
         const response = await fetch('http://localhost:8080/api/auth/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email: credentials.email,
-            password: credentials.password
-          }),
+          credentials: 'include', // Ensure session cookie is sent
+          body: JSON.stringify(loginData)
         });
 
         if (!response.ok) {
@@ -160,18 +162,21 @@ const LoginForm = ({ setCurrentUser }) => {
         }
 
         const user = await response.json();
-        
         const userWithDetails = {
           ...user,
           role: 'customer',
-          name: `${user.firstName} ${user.lastName}`
+          name: `${user.firstName} ${user.lastName}`.trim() || user.email,
+          id: user.id // Ensure id is included
         };
-        
-        console.log('User logged in:', userWithDetails);
+
+        console.log('Login successful, user:', userWithDetails);
         setCurrentUser(userWithDetails);
-        navigate('/dashboard');
+
+        // Navigate to dashboard or returnTo route if provided
+        const returnTo = navigate.location?.state?.returnTo || '/dashboard';
+        navigate(returnTo, { state: navigate.location?.state });
       } catch (err) {
-        setError('Failed to connect to the server.');
+        setError('Failed to connect to the server. Please check your connection.');
         console.error('Login error:', err);
       }
     }
@@ -186,13 +191,13 @@ const LoginForm = ({ setCurrentUser }) => {
         e.target.value = '';
         return;
       }
-      
+
       if (file.size > 5 * 1024 * 1024) {
         setError('Image file size must be less than 5MB');
         e.target.value = '';
         return;
       }
-      
+
       setCredentials({ ...credentials, driversLicenseImage: file });
       setError('');
     }

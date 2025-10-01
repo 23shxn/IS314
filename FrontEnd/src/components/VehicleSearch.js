@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Plus, MapPin, Car, Users, Fuel, Settings, ChevronLeft, ChevronRight, Eye } from 'lucide-react';
+import { Plus, MapPin, Car, Users, Fuel, Settings, ChevronLeft, ChevronRight, Eye } from 'lucide-react';
 import '../styles/VehicleSearch.css';
 
 const VehicleImageCarousel = ({ images, vehicleInfo }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  
   const validImages = images.filter(img => img);
-  
+
   if (validImages.length === 0) {
     return (
       <div className="placeholder-image">
@@ -16,19 +15,14 @@ const VehicleImageCarousel = ({ images, vehicleInfo }) => {
     );
   }
 
-  const nextImage = () => {
-    setCurrentIndex((prev) => (prev + 1) % validImages.length);
-  };
-
-  const prevImage = () => {
-    setCurrentIndex((prev) => (prev - 1 + validImages.length) % validImages.length);
-  };
+  const nextImage = () => setCurrentIndex((prev) => (prev + 1) % validImages.length);
+  const prevImage = () => setCurrentIndex((prev) => (prev - 1 + validImages.length) % validImages.length);
 
   return (
     <div className="vehicle-image-carousel">
       <div className="image-container">
-        <img 
-          src={`data:image/jpeg;base64,${validImages[currentIndex]}`} 
+        <img
+          src={`data:image/jpeg;base64,${validImages[currentIndex]}`}
           alt={`${vehicleInfo.make} ${vehicleInfo.model} - Image ${currentIndex + 1}`}
           className="carousel-image"
         />
@@ -60,23 +54,13 @@ const VehicleImageCarousel = ({ images, vehicleInfo }) => {
 
 const VehicleDetailModal = ({ vehicle, onClose }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const vehicleImages = [vehicle.vehicleImage1, vehicle.vehicleImage2, vehicle.vehicleImage3].filter(img => img);
+
+  const nextImage = () => setCurrentImageIndex((prev) => (prev + 1) % vehicleImages.length);
+  const prevImage = () => setCurrentImageIndex((prev) => (prev - 1 + vehicleImages.length) % vehicleImages.length);
 
   if (!vehicle) return null;
-  
-  const vehicleImages = [
-    vehicle.vehicleImage1,
-    vehicle.vehicleImage2,
-    vehicle.vehicleImage3
-  ].filter(img => img);
 
-  const nextImage = () => {
-    setCurrentImageIndex((prev) => (prev + 1) % vehicleImages.length);
-  };
-
-  const prevImage = () => {
-    setCurrentImageIndex((prev) => (prev - 1 + vehicleImages.length) % vehicleImages.length);
-  };
-  
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={e => e.stopPropagation()}>
@@ -116,22 +100,18 @@ const VehicleDetailModal = ({ vehicle, onClose }) => {
             </div>
           )}
           <div className="vehicle-details-grid">
-            <p><strong>License Plate:</strong> {vehicle.licensePlate}</p>
             <p><strong>Make:</strong> {vehicle.make}</p>
             <p><strong>Model:</strong> {vehicle.model}</p>
             <p><strong>Year:</strong> {vehicle.year}</p>
             <p><strong>Type:</strong> {vehicle.vehicleType}</p>
-            <p><strong>Color:</strong> {vehicle.color}</p>
-            <p><strong>VIN:</strong> {vehicle.vin || 'N/A'}</p>
-            <p><strong>Fuel Type:</strong> {vehicle.fuelType}</p>
-            <p><strong>Transmission:</strong> {vehicle.transmission}</p>
-            <p><strong>Seating Capacity:</strong> {vehicle.seatingCapacity}</p>
-            <p><strong>Mileage:</strong> {vehicle.mileage || 'N/A'}</p>
-            <p><strong>Price/Day:</strong> ${vehicle.pricePerDay}</p>
             <p><strong>Location:</strong> {vehicle.location}</p>
+            <p><strong>Price/Day:</strong> ${vehicle.pricePerDay}</p>
+            <p><strong>Fuel Type:</strong> {vehicle.fuelType || 'N/A'}</p>
+            <p><strong>Transmission:</strong> {vehicle.transmission || 'N/A'}</p>
+            <p><strong>Seating:</strong> {vehicle.seatingCapacity || 'N/A'}</p>
+            <p><strong>Color:</strong> {vehicle.color || 'N/A'}</p>
             <p><strong>Description:</strong> {vehicle.description || 'N/A'}</p>
             <p><strong>Features:</strong> {vehicle.features || 'N/A'}</p>
-            <p><strong>Status:</strong> {vehicle.status}</p>
           </div>
         </div>
       </div>
@@ -139,7 +119,7 @@ const VehicleDetailModal = ({ vehicle, onClose }) => {
   );
 };
 
-const VehicleSearch = ({ reservations, setReservations, setCurrentView, currentUser }) => {
+const VehicleSearch = ({ reservations, setReservations, currentUser }) => {
   const [vehicles, setVehicles] = useState([]);
   const [filteredVehicles, setFilteredVehicles] = useState([]);
   const [locations, setLocations] = useState([]);
@@ -148,161 +128,139 @@ const VehicleSearch = ({ reservations, setReservations, setCurrentView, currentU
   const [error, setError] = useState('');
   const [viewingVehicle, setViewingVehicle] = useState(null);
   const navigate = useNavigate();
-  
+
   const [searchParams, setSearchParams] = useState({
     location: '',
     vehicleType: '',
     minPrice: '',
     maxPrice: '',
     startDate: '',
+    endDate: '',
     fuelType: '',
     transmission: '',
     seatingCapacity: ''
   });
 
   useEffect(() => {
-    fetchVehicles();
-    fetchLocations();
-    fetchVehicleTypes();
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+        const [vehiclesRes, locationsRes, typesRes] = await Promise.all([
+          fetch(`${apiUrl}/api/vehicles/available`),
+          fetch(`${apiUrl}/api/vehicles/locations`),
+          fetch(`${apiUrl}/api/vehicles/types`)
+        ]);
+
+        if (vehiclesRes.ok) {
+          const data = await vehiclesRes.json();
+          setVehicles(Array.isArray(data) ? data : []);
+        } else {
+          setError('Failed to fetch vehicles');
+        }
+
+        if (locationsRes.ok) {
+          const data = await locationsRes.json();
+          setLocations(Array.isArray(data) ? data : []);
+        }
+
+        if (typesRes.ok) {
+          const data = await typesRes.json();
+          setVehicleTypes(Array.isArray(data) ? data : []);
+        }
+      } catch (err) {
+        setError('Failed to connect to server');
+        console.error('Fetch error:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, []);
 
   useEffect(() => {
-    filterVehicles();
-  }, [vehicles, searchParams]);
-
-  const fetchVehicles = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch('http://localhost:8080/api/vehicles/available', {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' }
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setVehicles(Array.isArray(data) ? data : []);
-        setError('');
-      } else {
-        setError('Failed to fetch vehicles');
-      }
-    } catch (err) {
-      setError('Failed to connect to server');
-      console.error('Fetch vehicles error:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchLocations = async () => {
-    try {
-      const response = await fetch('http://localhost:8080/api/vehicles/locations');
-      if (response.ok) {
-        const data = await response.json();
-        setLocations(Array.isArray(data) ? data : []);
-      }
-    } catch (err) {
-      console.error('Fetch locations error:', err);
-    }
-  };
-
-  const fetchVehicleTypes = async () => {
-    try {
-      const response = await fetch('http://localhost:8080/api/vehicles/types');
-      if (response.ok) {
-        const data = await response.json();
-        setVehicleTypes(Array.isArray(data) ? data : []);
-      }
-    } catch (err) {
-      console.error('Fetch vehicle types error:', err);
-    }
-  };
-
-  const filterVehicles = () => {
     let results = [...vehicles];
 
     if (searchParams.location) {
-      results = results.filter(vehicle => 
-        vehicle.location.toLowerCase().includes(searchParams.location.toLowerCase())
-      );
+      results = results.filter(v => v.location.toLowerCase().includes(searchParams.location.toLowerCase()));
     }
-
     if (searchParams.vehicleType) {
-      results = results.filter(vehicle => 
-        vehicle.vehicleType.toLowerCase().includes(searchParams.vehicleType.toLowerCase())
-      );
+      results = results.filter(v => v.vehicleType.toLowerCase().includes(searchParams.vehicleType.toLowerCase()));
     }
-
     if (searchParams.minPrice) {
-      results = results.filter(vehicle => 
-        vehicle.pricePerDay >= parseFloat(searchParams.minPrice)
-      );
+      const minPrice = parseFloat(searchParams.minPrice);
+      if (!isNaN(minPrice) && minPrice >= 0) {
+        results = results.filter(v => v.pricePerDay >= minPrice);
+      }
     }
-
     if (searchParams.maxPrice) {
-      results = results.filter(vehicle => 
-        vehicle.pricePerDay <= parseFloat(searchParams.maxPrice)
-      );
+      const maxPrice = parseFloat(searchParams.maxPrice);
+      if (!isNaN(maxPrice) && maxPrice >= 0) {
+        results = results.filter(v => v.pricePerDay <= maxPrice);
+      }
     }
-
     if (searchParams.fuelType) {
-      results = results.filter(vehicle => 
-        vehicle.fuelType && vehicle.fuelType.toLowerCase().includes(searchParams.fuelType.toLowerCase())
-      );
+      results = results.filter(v => v.fuelType.toLowerCase() === searchParams.fuelType.toLowerCase());
     }
-
     if (searchParams.transmission) {
-      results = results.filter(vehicle => 
-        vehicle.transmission && vehicle.transmission.toLowerCase().includes(searchParams.transmission.toLowerCase())
-      );
+      results = results.filter(v => v.transmission.toLowerCase() === searchParams.transmission.toLowerCase());
     }
-
     if (searchParams.seatingCapacity) {
-      results = results.filter(vehicle => 
-        vehicle.seatingCapacity >= parseInt(searchParams.seatingCapacity)
-      );
-    }
-
-    if (searchParams.startDate) {
-      results = results.filter(vehicle => 
-        !reservations.some(res => 
-          res.vehicleId === vehicle.id && res.rentalDate === searchParams.startDate
-        )
-      );
+      const capacity = parseInt(searchParams.seatingCapacity);
+      if (!isNaN(capacity)) {
+        results = results.filter(v => v.seatingCapacity >= capacity);
+      }
     }
 
     setFilteredVehicles(results);
-  };
+  }, [vehicles, searchParams]);
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    filterVehicles();
+  const handleInputChange = (field, value) => {
+    setSearchParams(prev => ({ ...prev, [field]: value }));
+    setError('');
   };
 
   const handleReservation = (vehicle) => {
-    if (!currentUser) {
-      alert('Please login to make a reservation');
-      navigate('/login');
+    // Validate dates
+    if (!searchParams.startDate || !searchParams.endDate) {
+      setError('Please select both start and end dates to reserve a vehicle');
+      return;
+    }
+    
+    const startDate = new Date(searchParams.startDate);
+    const endDate = new Date(searchParams.endDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (startDate < today) {
+      setError('Start date cannot be in the past');
       return;
     }
 
-    if (!searchParams.startDate) {
-      alert('Please select a start date');
+    if (endDate <= startDate) {
+      setError('End date must be after start date');
       return;
     }
 
+    setError('');
+    
+    // Create reservation object with proper structure
     const reservation = {
-      id: Date.now(),
-      vehicleId: vehicle.id,
-      userId: currentUser.id,
       vehicle: vehicle,
       rentalDate: searchParams.startDate,
-      status: 'Confirmed',
-      createdAt: new Date().toISOString()
+      returnDate: searchParams.endDate,
+      userId: currentUser ? currentUser.id : null // Include userId if authenticated, null otherwise
     };
 
-    setReservations(prevReservations => [...prevReservations, reservation]);
-    alert(`Successfully reserved ${vehicle.make} ${vehicle.model} for ${searchParams.startDate}`);
-    navigate('/reservations');
+    console.log('Navigating to car-detail with reservation:', reservation);
+    
+    // Navigate to car detail page
+    navigate('/car-detail', { 
+      state: { 
+        reservation: reservation
+      } 
+    });
   };
 
   const clearFilters = () => {
@@ -311,222 +269,173 @@ const VehicleSearch = ({ reservations, setReservations, setCurrentView, currentU
       vehicleType: '',
       minPrice: '',
       maxPrice: '',
-      startDate: '',
       fuelType: '',
       transmission: '',
-      seatingCapacity: ''
+      seatingCapacity: '',
+      startDate: searchParams.startDate,
+      endDate: searchParams.endDate
     });
+    setError('');
   };
 
   if (loading) {
     return (
-      <div className="search-container">
-        <h2>Search Vehicles</h2>
-        <div className="card">
-          <p>Loading vehicles...</p>
-        </div>
+      <div className="loading">
+        <Car size={48} />
+        <p>Loading vehicles...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="error">
+        <p>{error}</p>
+        <button onClick={() => setError('')}>Clear Error</button>
       </div>
     );
   }
 
   return (
-    <div className="search-container">
-      <div className="search-header">
-        <h2>Find Your Perfect Ride</h2>
-        <p>Choose from our wide selection of vehicles</p>
-      </div>
+    <div className="vehicle-search-container">
+      <header className="search-header">
+        <h1>Find a Vehicle</h1>
+        <p>Select dates to book. Use additional filters to narrow down options.</p>
+        {!currentUser && (
+          <div className="auth-notice">
+            <p>Please <a href="/login">log in</a> to make reservations.</p>
+          </div>
+        )}
+      </header>
 
-      {error && (
-        <div className="error-message">
-          <p>{error}</p>
-          <button onClick={fetchVehicles}>Retry</button>
+      <div className="search-form">
+        <div className="form-row">
+          <div className="form-group">
+            <label><MapPin size={16} /> Location (Optional)</label>
+            <select value={searchParams.location} onChange={(e) => handleInputChange('location', e.target.value)}>
+              <option value="">All Locations</option>
+              {locations.map(loc => <option key={loc} value={loc}>{loc}</option>)}
+            </select>
+          </div>
+          <div className="form-group">
+            <label><Car size={16} /> Vehicle Type (Optional)</label>
+            <select value={searchParams.vehicleType} onChange={(e) => handleInputChange('vehicleType', e.target.value)}>
+              <option value="">All Types</option>
+              {vehicleTypes.map(type => <option key={type} value={type}>{type}</option>)}
+            </select>
+          </div>
+          <div className="form-group required">
+            <label>Start Date (Required)</label>
+            <input
+              type="date"
+              value={searchParams.startDate}
+              onChange={(e) => handleInputChange('startDate', e.target.value)}
+              min={new Date().toISOString().split('T')[0]}
+              required
+            />
+          </div>
+          <div className="form-group required">
+            <label>End Date (Required)</label>
+            <input
+              type="date"
+              value={searchParams.endDate}
+              onChange={(e) => handleInputChange('endDate', e.target.value)}
+              min={searchParams.startDate || new Date().toISOString().split('T')[0]}
+              required
+            />
+          </div>
         </div>
-      )}
-
-      <div className="card search-form-card">
-        <h3>Search Filters</h3>
-        <div className="search-form">
-          <div className="form-row">
-            <div className="form-group">
-              <label><MapPin size={16} /> Location</label>
-              <select
-                value={searchParams.location}
-                onChange={(e) => setSearchParams({...searchParams, location: e.target.value})}
-              >
-                <option value="">All Locations</option>
-                {locations.map(location => (
-                  <option key={location} value={location}>{location}</option>
-                ))}
-              </select>
-            </div>
-
-            <div className="form-group">
-              <label><Car size={16} /> Vehicle Type</label>
-              <select
-                value={searchParams.vehicleType}
-                onChange={(e) => setSearchParams({...searchParams, vehicleType: e.target.value})}
-              >
-                <option value="">All Types</option>
-                {vehicleTypes.map(type => (
-                  <option key={type} value={type}>{type}</option>
-                ))}
-              </select>
-            </div>
-
-            <div className="form-group">
-              <label>Start Date</label>
-              <input
-                type="date"
-                value={searchParams.startDate}
-                onChange={(e) => setSearchParams({...searchParams, startDate: e.target.value})}
-                min={new Date().toISOString().split('T')[0]}
-              />
-            </div>
+        <div className="form-row">
+          <div className="form-group">
+            <label>Min Price ($) (Optional)</label>
+            <input
+              type="number"
+              value={searchParams.minPrice}
+              onChange={(e) => handleInputChange('minPrice', e.target.value)}
+              placeholder="Min price"
+              min="0"
+            />
           </div>
-
-          <div className="form-row">
-            <div className="form-group">
-              <label>Min Price ($)</label>
-              <input
-                type="number"
-                value={searchParams.minPrice}
-                onChange={(e) => setSearchParams({...searchParams, minPrice: e.target.value})}
-                placeholder="Min price per day"
-                min="0"
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Max Price ($)</label>
-              <input
-                type="number"
-                value={searchParams.maxPrice}
-                onChange={(e) => setSearchParams({...searchParams, maxPrice: e.target.value})}
-                placeholder="Max price per day"
-                min="0"
-              />
-            </div>
-
-            <div className="form-group">
-              <label><Fuel size={16} /> Fuel Type</label>
-              <select
-                value={searchParams.fuelType}
-                onChange={(e) => setSearchParams({...searchParams, fuelType: e.target.value})}
-              >
-                <option value="">All Fuel Types</option>
-                <option value="Petrol">Petrol</option>
-                <option value="Diesel">Diesel</option>
-                <option value="Electric">Electric</option>
-                <option value="Hybrid">Hybrid</option>
-              </select>
-            </div>
+          <div className="form-group">
+            <label>Max Price ($) (Optional)</label>
+            <input
+              type="number"
+              value={searchParams.maxPrice}
+              onChange={(e) => handleInputChange('maxPrice', e.target.value)}
+              placeholder="Max price"
+              min="0"
+            />
           </div>
-
-          <div className="form-row">
-            <div className="form-group">
-              <label><Settings size={16} /> Transmission</label>
-              <select
-                value={searchParams.transmission}
-                onChange={(e) => setSearchParams({...searchParams, transmission: e.target.value})}
-              >
-                <option value="">All Transmissions</option>
-                <option value="Automatic">Automatic</option>
-                <option value="Manual">Manual</option>
-              </select>
-            </div>
-
-            <div className="form-group">
-              <label><Users size={16} /> Min Seats</label>
-              <select
-                value={searchParams.seatingCapacity}
-                onChange={(e) => setSearchParams({...searchParams, seatingCapacity: e.target.value})}
-              >
-                <option value="">Any</option>
-                <option value="2">2+ Seats</option>
-                <option value="4">4+ Seats</option>
-                <option value="5">5+ Seats</option>
-                <option value="7">7+ Seats</option>
-              </select>
-            </div>
-
-            <div className="form-group" style={{ display: 'flex', alignItems: 'flex-end', gap: '1rem' }}>
-              <button onClick={handleSearch} className="btn-primary search-btn">
-                <Search size={16} /> Search
-              </button>
-              <button onClick={clearFilters} className="btn-secondary">
-                Clear Filters
-              </button>
-            </div>
+          <div className="form-group">
+            <label><Fuel size={16} /> Fuel Type (Optional)</label>
+            <select value={searchParams.fuelType} onChange={(e) => handleInputChange('fuelType', e.target.value)}>
+              <option value="">All Fuel Types</option>
+              <option value="Petrol">Petrol</option>
+              <option value="Diesel">Diesel</option>
+              <option value="Electric">Electric</option>
+              <option value="Hybrid">Hybrid</option>
+            </select>
           </div>
+          <div className="form-group">
+            <label><Settings size={16} /> Transmission (Optional)</label>
+            <select value={searchParams.transmission} onChange={(e) => handleInputChange('transmission', e.target.value)}>
+              <option value="">All Transmissions</option>
+              <option value="Automatic">Automatic</option>
+              <option value="Manual">Manual</option>
+            </select>
+          </div>
+          <div className="form-group">
+            <label><Users size={16} /> Min Seats (Optional)</label>
+            <select value={searchParams.seatingCapacity} onChange={(e) => handleInputChange('seatingCapacity', e.target.value)}>
+              <option value="">Any</option>
+              <option value="2">2+ Seats</option>
+              <option value="4">4+ Seats</option>
+              <option value="5">5+ Seats</option>
+              <option value="7">7+ Seats</option>
+            </select>
+          </div>
+        </div>
+        <div className="form-actions">
+          <button onClick={clearFilters} className="btn btn-secondary btn-small">
+            Clear Filters
+          </button>
         </div>
       </div>
 
       <div className="results-summary">
-        <h3>Search Results ({filteredVehicles.length} vehicles found)</h3>
-        {searchParams.startDate && (
-          <p>Available for pickup on {new Date(searchParams.startDate).toLocaleDateString()}</p>
-        )}
+        <h3>{filteredVehicles.length} vehicles found</h3>
+        {searchParams.startDate && <p>Available for pickup on {new Date(searchParams.startDate).toLocaleDateString('en-FJ')}</p>}
       </div>
 
       <div className="search-results">
         {filteredVehicles.length === 0 ? (
           <div className="no-results">
-            <Car size={48} style={{ opacity: 0.3 }} />
+            <Car size={48} />
             <h3>No vehicles found</h3>
-            <p>Try adjusting your search filters to find available vehicles.</p>
+            <p>Adjust your filters or dates to find available vehicles.</p>
           </div>
         ) : (
           filteredVehicles.map((vehicle) => (
             <div key={vehicle.id} className="vehicle-card">
-              <div 
-                className="vehicle-image"
-                onClick={() => setViewingVehicle(vehicle)}
-                style={{ cursor: 'pointer' }}
-                title="View Details"
-              >
-                <VehicleImageCarousel 
+              <div className="vehicle-image" onClick={() => setViewingVehicle(vehicle)}>
+                <VehicleImageCarousel
                   images={[vehicle.vehicleImage1, vehicle.vehicleImage2, vehicle.vehicleImage3]}
                   vehicleInfo={{ make: vehicle.make, model: vehicle.model }}
                 />
-                <button className="action-btn view" style={{ position: 'absolute', top: '10px', right: '10px' }}>
-                  <Eye size={16} />
-                </button>
+                <button className="action-btn view"><Eye size={16} /></button>
               </div>
-              
               <div className="vehicle-info">
                 <div className="vehicle-header">
                   <h4>{vehicle.make} {vehicle.model} ({vehicle.year})</h4>
-                  <span className={`status-badge ${vehicle.status.toLowerCase()}`}>
-                    {vehicle.status}
-                  </span>
+                  <span className={`status-badge ${vehicle.status.toLowerCase()}`}>{vehicle.status}</span>
                 </div>
-                
                 <div className="vehicle-details">
-                  <div className="detail-row">
-                    <span><Car size={16} /> {vehicle.vehicleType}</span>
-                    <span><MapPin size={16} /> {vehicle.location}</span>
-                  </div>
-                  <div className="detail-row">
-                    <span><Users size={16} /> {vehicle.seatingCapacity} seats</span>
-                    <span><Fuel size={16} /> {vehicle.fuelType}</span>
-                  </div>
-                  <div className="detail-row">
-                    <span><Settings size={16} /> {vehicle.transmission}</span>
-                    {vehicle.mileage && <span>{vehicle.mileage} km</span>}
-                  </div>
-                  {vehicle.features && (
-                    <div className="features">
-                      <strong>Features:</strong> {vehicle.features}
-                    </div>
-                  )}
-                  {vehicle.description && (
-                    <div className="description">
-                      {vehicle.description}
-                    </div>
-                  )}
+                  <p><Car size={16} /> {vehicle.vehicleType} | <MapPin size={16} /> {vehicle.location}</p>
+                  <p><Users size={16} /> {vehicle.seatingCapacity} seats | <Fuel size={16} /> {vehicle.fuelType}</p>
+                  <p><Settings size={16} /> {vehicle.transmission} {vehicle.mileage ? `| ${vehicle.mileage} km` : ''}</p>
+                  {vehicle.features && <p><strong>Features:</strong> {vehicle.features}</p>}
                 </div>
               </div>
-              
               <div className="vehicle-booking">
                 <div className="price-info">
                   <span className="price">${vehicle.pricePerDay}</span>
@@ -534,10 +443,10 @@ const VehicleSearch = ({ reservations, setReservations, setCurrentView, currentU
                 </div>
                 <button
                   onClick={() => handleReservation(vehicle)}
-                  className="btn-primary reserve-btn"
-                  disabled={vehicle.status !== 'Available' || !searchParams.startDate}
+                  className="btn btn-primary"
+                  disabled={vehicle.status !== 'Available' || !searchParams.startDate || !searchParams.endDate}
                 >
-                  <Plus size={16} /> Reserve Now
+                  <Plus size={16} /> Reserve
                 </button>
               </div>
             </div>
@@ -545,12 +454,7 @@ const VehicleSearch = ({ reservations, setReservations, setCurrentView, currentU
         )}
       </div>
 
-      {viewingVehicle && (
-        <VehicleDetailModal 
-          vehicle={viewingVehicle} 
-          onClose={() => setViewingVehicle(null)} 
-        />
-      )}
+      {viewingVehicle && <VehicleDetailModal vehicle={viewingVehicle} onClose={() => setViewingVehicle(null)} />}
     </div>
   );
 };

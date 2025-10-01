@@ -36,36 +36,8 @@ const VehicleMaintenance = ({ setCurrentUser }) => {
 
   useEffect(() => {
     fetchVehicles();
-    // For now, we'll use mock data for maintenance records
-    // In a real app, you'd fetch this from your API
-    setMaintenanceRecords([
-      {
-        id: 1,
-        carId: 1,
-        type: 'Routine Service',
-        description: 'Oil change and general inspection',
-        cost: 150,
-        date: '2024-01-15',
-        nextDate: '2024-04-15',
-        mechanic: 'John\'s Auto Shop',
-        status: 'Completed',
-        notes: 'All systems checked, no issues found',
-        mileage: 45000
-      },
-      {
-        id: 2,
-        carId: 2,
-        type: 'Repair',
-        description: 'Brake pad replacement',
-        cost: 300,
-        date: '2024-02-20',
-        nextDate: '2024-08-20',
-        mechanic: 'Smith Auto Repair',
-        status: 'Completed',
-        notes: 'Front brake pads replaced',
-        mileage: 32000
-      }
-    ]);
+    // Initialize maintenanceRecords as empty
+    setMaintenanceRecords([]);
   }, []);
 
   const handleLogout = async () => {

@@ -33,6 +33,8 @@ import LandingPage from './components/LandingPage';
 import AboutUs from './components/AboutUs';
 import FAQs from './components/FAQs';
 import Contact from './components/Contact';
+import CompleteBooking from './components/CompleteBooking';
+import CarDetail from './components/CarDetail';
 
 const App = () => {
   const [currentUser, setCurrentUser] = useState(null);
@@ -185,6 +187,18 @@ const App = () => {
             } 
           />
           <Route 
+            path="/complete-booking" 
+            element={
+              <CustomerRoute>
+                <CompleteBooking 
+                  reservations={reservations} 
+                  setReservations={setReservations} 
+                  currentUser={currentUser}
+                />
+              </CustomerRoute>
+            } 
+          />
+          <Route 
             path="/reservations" 
             element={
               <CustomerRoute>
@@ -201,6 +215,19 @@ const App = () => {
             element={
               <CustomerRoute>
                 <div>Pickup functionality to be implemented</div>
+              </CustomerRoute>
+            } 
+          
+          />
+          <Route  
+            path="/car-detail" 
+            element={
+              <CustomerRoute>
+                <CarDetail
+                  reservations={reservations} 
+                  setReservations={setReservations} 
+                  currentUser={currentUser}
+                />
               </CustomerRoute>
             } 
           />

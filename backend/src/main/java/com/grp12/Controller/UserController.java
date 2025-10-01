@@ -102,7 +102,17 @@ public class UserController {
             // Get user details for response
             User authenticatedUser = userService.loginUser(user.getEmail(), user.getPassword());
             if (authenticatedUser != null) {
-                return ResponseEntity.ok(authenticatedUser);
+                // Create response with role information
+                Map<String, Object> response = new HashMap<>();
+                response.put("id", authenticatedUser.getId());
+                response.put("email", authenticatedUser.getEmail());
+                response.put("firstName", authenticatedUser.getFirstName());
+                response.put("lastName", authenticatedUser.getLastName());
+                response.put("phoneNumber", authenticatedUser.getPhoneNumber());
+                response.put("status", authenticatedUser.getStatus());
+                response.put("role", "customer"); // Explicitly set the role
+                
+                return ResponseEntity.ok(response);
             }
             
             Map<String, String> errorResponse = new HashMap<>();
@@ -111,6 +121,46 @@ public class UserController {
         } catch (Exception e) {
             Map<String, String> errorResponse = new HashMap<>();
             errorResponse.put("error", "Login failed: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
+    // Add this new endpoint for checking authentication status
+    @GetMapping("/me")
+    public ResponseEntity<?> getCurrentUserAuth() {
+        try {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            
+            if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
+                Map<String, String> errorResponse = new HashMap<>();
+                errorResponse.put("error", "Not authenticated");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+            }
+
+            String email = auth.getName();
+            User user = userService.getUserByEmail(email);
+            
+            if (user == null) {
+                Map<String, String> errorResponse = new HashMap<>();
+                errorResponse.put("error", "User not found");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+            }
+
+            // Create response with role information
+            Map<String, Object> response = new HashMap<>();
+            response.put("id", user.getId());
+            response.put("email", user.getEmail());
+            response.put("firstName", user.getFirstName());
+            response.put("lastName", user.getLastName());
+            response.put("phoneNumber", user.getPhoneNumber());
+            response.put("status", user.getStatus());
+            response.put("role", "customer"); // Explicitly set the role
+            response.put("authenticated", true);
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Failed to get user info: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
