@@ -118,6 +118,7 @@ public class SecurityConfig {
                 .requestMatchers("/h2-console/**").permitAll()
                 .requestMatchers("/api/vehicles/available", "/api/vehicles/search", 
                                "/api/vehicles/locations", "/api/vehicles/types", "/api/vehicles/{id}").permitAll()
+                .requestMatchers("/api/email/**").permitAll()  // Allow email verification endpoints
                 
                 // Admin only endpoints
                 .requestMatchers("/api/vehicles/all", "/api/vehicles/add", "/api/vehicles/*/status",
@@ -127,6 +128,9 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/users/customers").hasRole("ADMIN")
                 .requestMatchers("/api/admin/all", "/api/admin/*/deactivate", "/api/admin/*/activate").hasRole("ADMIN")
                 .requestMatchers("/api/admin/{id}").hasRole("ADMIN")
+                
+                // Customer endpoints
+                .requestMatchers("/api/customer/**").hasRole("CUSTOMER")
                 
                 .anyRequest().authenticated()
             )

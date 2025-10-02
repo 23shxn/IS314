@@ -39,6 +39,9 @@ public class User {
     @Column(name = "status", nullable = false, length = 20)
     private String status; // PENDING, APPROVED, REJECTED
 
+    @Column(name = "approved")
+    private boolean approved = false;
+
     // Default constructor
     public User() {}
 
@@ -84,6 +87,14 @@ public class User {
     
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+
+    public boolean isApproved() {
+        return approved;
+    }
+
+    public void setApproved(boolean approved) {
+        this.approved = approved;
+    }
 
     @Override
     public String toString() {

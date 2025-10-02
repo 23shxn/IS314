@@ -2,6 +2,7 @@ package com.grp12.Controller;
 
 import com.grp12.Model.Admin;
 import com.grp12.Services.AdminService;
+import com.grp12.Services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
@@ -27,6 +28,9 @@ public class AdminController {
     
     @Autowired
     private AuthenticationManager authenticationManager;
+    
+    @Autowired
+    private UserService userService;
 
     @PostMapping("/register")
     public ResponseEntity<?> registerAdmin(@RequestBody Admin admin) {

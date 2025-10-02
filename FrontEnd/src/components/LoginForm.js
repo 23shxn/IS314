@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Car, User, Shield } from 'lucide-react';
+import { Car, User, Shield, Mail } from 'lucide-react';
 import '../styles/LoginForm.css';
 
 const LoginForm = ({ setCurrentUser }) => {
@@ -19,6 +19,16 @@ const LoginForm = ({ setCurrentUser }) => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
+  
+  // Email verification state
+  const [showEmailVerification, setShowEmailVerification] = useState(false);
+  const [verificationCode, setVerificationCode] = useState('');
+  const [registrationEmail, setRegistrationEmail] = useState('');
+  const [emailVerified, setEmailVerified] = useState(false);
+  
+  // Move these to component level instead of inside modal
+  const [codes, setCodes] = useState(['', '', '', '', '', '']);
+  const inputRefs = useRef([]);
 
   // Validation functions
   const validateEmail = (email) => {
@@ -41,6 +51,118 @@ const LoginForm = ({ setCurrentUser }) => {
     return passwordRegex.test(password);
   };
 
+  // New function to send verification code
+  const handleSendVerification = async (email) => {
+    try {
+      const response = await fetch('http://localhost:8080/api/email/send-verification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+        credentials: 'include'
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || 'Failed to send verification email');
+        return false;
+      }
+
+      setSuccess('Verification email sent! Please check your inbox.');
+      return true;
+    } catch (err) {
+      setError('Failed to send verification email. Please try again.');
+      console.error('Email verification error:', err);
+      return false;
+    }
+  };
+
+  // New function to verify email code
+  const handleVerifyEmail = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+
+    try {
+      const response = await fetch('http://localhost:8080/api/email/verify-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          email: registrationEmail, 
+          code: verificationCode 
+        }),
+        credentials: 'include'
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || 'Invalid verification code');
+        setLoading(false);
+        return;
+      }
+
+      setSuccess('Email verified successfully!');
+      setEmailVerified(true);
+      setShowEmailVerification(false);
+      setVerificationCode('');
+      
+      // Continue with registration after email verification
+      await proceedWithRegistration();
+    } catch (err) {
+      setError('Failed to verify email. Please try again.');
+      console.error('Email verification error:', err);
+    }
+    setLoading(false);
+  };
+
+  // New function to proceed with registration after email verification
+  const proceedWithRegistration = async () => {
+    const formData = new FormData();
+    formData.append('firstName', credentials.firstName);
+    formData.append('lastName', credentials.lastName);
+    formData.append('phoneNumber', credentials.phoneNumber);
+    formData.append('email', credentials.email);
+    formData.append('password', credentials.password);
+    formData.append('confirmPassword', credentials.confirmPassword);
+    formData.append('driversLicenseNumber', credentials.driversLicenseNumber);
+    formData.append('driversLicenseImage', credentials.driversLicenseImage);
+
+    try {
+      const response = await fetch('http://localhost:8080/api/auth/register', {
+        method: 'POST',
+        body: formData,
+        credentials: 'include'
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || 'Registration failed. Please try again.');
+        return;
+      }
+
+      setSuccess('Registration completed successfully. Awaiting admin approval.');
+      setCredentials({
+        firstName: '',
+        lastName: '',
+        phoneNumber: '',
+        email: '',
+        password: '',
+        confirmPassword: '',
+        driversLicenseNumber: '',
+        driversLicenseImage: null
+      });
+      const fileInput = document.getElementById('driversLicenseImage');
+      if (fileInput) fileInput.value = '';
+      setEmailVerified(false);
+    } catch (err) {
+      setError('Failed to complete registration. Please try again.');
+      console.error('Registration error:', err);
+    }
+  };
+
+  // Modified handleAuth function
   const handleAuth = async (e) => {
     e.preventDefault();
     setError('');
@@ -91,47 +213,11 @@ const LoginForm = ({ setCurrentUser }) => {
         return;
       }
 
-      const formData = new FormData();
-      formData.append('firstName', credentials.firstName);
-      formData.append('lastName', credentials.lastName);
-      formData.append('phoneNumber', credentials.phoneNumber);
-      formData.append('email', credentials.email);
-      formData.append('password', credentials.password);
-      formData.append('confirmPassword', credentials.confirmPassword);
-      formData.append('driversLicenseNumber', credentials.driversLicenseNumber);
-      formData.append('driversLicenseImage', credentials.driversLicenseImage);
-
-      try {
-        const response = await fetch('http://localhost:8080/api/auth/register', {
-          method: 'POST',
-          body: formData,
-          credentials: 'include' // Ensure session cookie is sent
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          setError(data.error || 'Registration failed. Please try again.');
-          setLoading(false);
-          return;
-        }
-
-        setSuccess('Registration submitted successfully. Awaiting admin approval.');
-        setCredentials({
-          firstName: '',
-          lastName: '',
-          phoneNumber: '',
-          email: '',
-          password: '',
-          confirmPassword: '',
-          driversLicenseNumber: '',
-          driversLicenseImage: null
-        });
-        const fileInput = document.getElementById('driversLicenseImage');
-        if (fileInput) fileInput.value = '';
-      } catch (err) {
-        setError('Failed to connect to the server. Please check your connection.');
-        console.error('Registration error:', err);
+      // NEW: Send email verification before proceeding with registration
+      setRegistrationEmail(credentials.email);
+      const verificationSent = await handleSendVerification(credentials.email);
+      if (verificationSent) {
+        setShowEmailVerification(true);
       }
     } else {
       // Login
@@ -221,8 +307,126 @@ const LoginForm = ({ setCurrentUser }) => {
     if (fileInput) fileInput.value = '';
   };
 
+  // Memoized handlers to prevent re-renders
+  const handleCodeChange = useCallback((index, value) => {
+    if (value.length > 1) return; // Prevent multiple characters
+    
+    setCodes(prevCodes => {
+      const newCodes = [...prevCodes];
+      newCodes[index] = value;
+      
+      // Update the main verification code
+      setVerificationCode(newCodes.join(''));
+      
+      // Auto-focus next input
+      if (value && index < 5) {
+        setTimeout(() => {
+          inputRefs.current[index + 1]?.focus();
+        }, 0);
+      }
+      
+      return newCodes;
+    });
+  }, []);
+
+  const handleKeyDown = useCallback((index, e) => {
+    // Handle backspace
+    if (e.key === 'Backspace' && !codes[index] && index > 0) {
+      setTimeout(() => {
+        inputRefs.current[index - 1]?.focus();
+      }, 0);
+    }
+  }, [codes]);
+
+  // Memoized EmailVerificationModal component
+  const EmailVerificationModal = useCallback(() => {
+    return (
+      <div className="modal-overlay">
+        <div className="modal-content">
+          <h3><Mail size={24} /> Email Verification</h3>
+          <p>We've sent a verification code to:</p>
+          <p><strong>{registrationEmail}</strong></p>
+          <p>Please enter the 6-digit code below:</p>
+          
+          <form onSubmit={handleVerifyEmail}>
+            <div className="code-inputs">
+              {codes.map((code, index) => (
+                <input
+                  key={index}
+                  ref={(el) => {
+                    if (el) {
+                      inputRefs.current[index] = el;
+                    }
+                  }}
+                  type="text"
+                  inputMode="numeric"
+                  pattern="\d*"
+                  value={code}
+                  onChange={(e) => {
+                    e.preventDefault();
+                    const numericValue = e.target.value.replace(/\D/g, '');
+                    handleCodeChange(index, numericValue);
+                  }}
+                  onKeyDown={(e) => handleKeyDown(index, e)}
+                  onPaste={(e) => {
+                    e.preventDefault();
+                    const pastedData = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+                    if (pastedData) {
+                      const newCodes = pastedData.split('').concat(['', '', '', '', '', '']).slice(0, 6);
+                      setCodes(newCodes);
+                      setVerificationCode(newCodes.join(''));
+                    }
+                  }}
+                  maxLength="1"
+                  className="code-input"
+                  disabled={loading}
+                  autoFocus={index === 0}
+                  autoComplete="off"
+                />
+              ))}
+            </div>
+            
+            {error && <div className="error-message">{error}</div>}
+            {success && <div className="success-message">{success}</div>}
+            
+            <div className="modal-buttons">
+              <button type="submit" disabled={loading || verificationCode.length !== 6}>
+                {loading ? 'Verifying...' : 'Verify Email'}
+              </button>
+              <button 
+                type="button" 
+                onClick={() => handleSendVerification(registrationEmail)}
+                disabled={loading}
+                className="secondary-button"
+              >
+                Resend Code
+              </button>
+              <button 
+                type="button" 
+                onClick={() => {
+                  setShowEmailVerification(false);
+                  setVerificationCode('');
+                  setCodes(['', '', '', '', '', '']);
+                  setLoading(false);
+                  setError('');
+                  setSuccess('');
+                }}
+                disabled={loading}
+                className="cancel-button"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    );
+  }, [codes, registrationEmail, error, success, loading, verificationCode, handleCodeChange, handleKeyDown, handleVerifyEmail, handleSendVerification]);
+
   return (
     <div className="login-container">
+      {showEmailVerification && <EmailVerificationModal />}
+      
       <div className="login-form">
         <div className="form-header">
           <Car size={48} className="logo-icon" />

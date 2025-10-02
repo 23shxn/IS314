@@ -8,8 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import jakarta.mail.MessagingException; // Change this from javax.mail to jakarta.mail
 import java.util.Optional;
-
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -22,6 +22,8 @@ public class UserService {
     private RegistrationRequestRepository registrationRequestRepository;
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private EmailService emailService;
 
     private static final Pattern EMAIL_PATTERN = Pattern.compile("^[a-zA-Z0-9._%+-]+@gmail\\.com$");
     private static final Pattern PHONE_PATTERN = Pattern.compile("^\\d{7}$");
@@ -161,25 +163,17 @@ public class UserService {
     }
     
 
-    public User approveRegistration(Long requestId) {
+    public User approveUser(Long userId) {
         try {
-            RegistrationRequest request = registrationRequestRepository.findById(requestId)
-                    .orElseThrow(() -> new RuntimeException("Registration request not found"));
-                    
+            // Get user details from RegistrationRequest, not User table
+            RegistrationRequest request = registrationRequestRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Registration request not found"));
+            
             if (!"PENDING".equals(request.getStatus())) {
                 throw new RuntimeException("Request already processed");
             }
             
-            // Double-check that email and license don't exist in users table
-            if (userRepository.existsByEmail(request.getEmail())) {
-                throw new RuntimeException("Email already exists in users table");
-            }
-            
-            if (userRepository.existsByDriversLicenseNumber(request.getDriversLicenseNumber())) {
-                throw new RuntimeException("Driver's license number already exists in users table");
-            }
-            
-            // Create new user
+            // Create approved user
             User user = new User();
             user.setFirstName(request.getFirstName());
             user.setLastName(request.getLastName());
@@ -190,38 +184,70 @@ public class UserService {
             user.setDriversLicenseImage(request.getDriversLicenseImage());
             user.setRole("ROLE_CUSTOMER");
             user.setStatus("APPROVED");
+            user.setApproved(true);
+            
+            // Save user to User table
+            User savedUser = userRepository.save(user);
             
             // Update request status
             request.setStatus("APPROVED");
             registrationRequestRepository.save(request);
             
-            // Save user
-            User savedUser = userRepository.save(user);
-            System.out.println("User approved and created with ID: " + savedUser.getId());
-            return savedUser;
+            // Send approval email
+            try {
+                emailService.sendApprovalNotification(
+                    request.getEmail(), 
+                    request.getFirstName(), 
+                    request.getLastName(), 
+                    true
+                );
+                System.out.println("Approval email sent to: " + request.getEmail());
+            } catch (MessagingException e) {
+                // Log error but don't fail the approval process
+                System.err.println("Failed to send approval email: " + e.getMessage());
+            }
+            
+            return savedUser; // ADD THIS RETURN STATEMENT
             
         } catch (Exception e) {
-            System.err.println("Error in approveRegistration: " + e.getMessage());
-            throw new RuntimeException("Failed to approve registration: " + e.getMessage());
+            System.err.println("Error in approveUser: " + e.getMessage());
+            throw new RuntimeException("Failed to approve user: " + e.getMessage());
         }
     }
 
-    public void rejectRegistration(Long requestId) {
+    public void rejectUser(Long userId) {
         try {
-            RegistrationRequest request = registrationRequestRepository.findById(requestId)
-                    .orElseThrow(() -> new RuntimeException("Registration request not found"));
-                    
+            // Get registration request details
+            RegistrationRequest request = registrationRequestRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Registration request not found"));
+            
             if (!"PENDING".equals(request.getStatus())) {
                 throw new RuntimeException("Request already processed");
             }
             
+            // Send rejection email before marking as rejected
+            try {
+                emailService.sendApprovalNotification(
+                    request.getEmail(), 
+                    request.getFirstName(), 
+                    request.getLastName(), 
+                    false
+                );
+                System.out.println("Rejection email sent to: " + request.getEmail());
+            } catch (MessagingException e) {
+                // Log error
+                System.err.println("Failed to send rejection email: " + e.getMessage());
+            }
+            
+            // Update request status to rejected
             request.setStatus("REJECTED");
             registrationRequestRepository.save(request);
-            System.out.println("Registration request rejected: " + requestId);
+            
+            System.out.println("Registration request rejected: " + userId);
             
         } catch (Exception e) {
-            System.err.println("Error in rejectRegistration: " + e.getMessage());
-            throw new RuntimeException("Failed to reject registration: " + e.getMessage());
+            System.err.println("Error in rejectUser: " + e.getMessage());
+            throw new RuntimeException("Failed to reject user: " + e.getMessage());
         }
     }
 

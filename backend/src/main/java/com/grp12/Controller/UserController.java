@@ -3,6 +3,8 @@ package com.grp12.Controller;
 import com.grp12.Model.User;
 import com.grp12.Model.RegistrationRequest;
 import com.grp12.Services.UserService;
+import com.grp12.Services.EmailService;
+import com.grp12.Repository.RegistrationRequestRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
@@ -21,6 +23,7 @@ import java.util.List;
 import java.util.Base64;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -31,6 +34,12 @@ public class UserController {
     
     @Autowired
     private AuthenticationManager authenticationManager;
+    
+    @Autowired
+    private EmailService emailService;
+
+    @Autowired
+    private RegistrationRequestRepository registrationRequestRepository;
 
     @PostMapping("/register")
     public ResponseEntity<?> register(
@@ -198,8 +207,14 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> approveRegistration(@PathVariable Long requestId) {
         try {
-            User user = userService.approveRegistration(requestId);
-            return ResponseEntity.ok(user);
+            // Use approveUser instead of approveRegistration
+            User user = userService.approveUser(requestId);
+            
+            // Email notification is already handled in approveUser method
+            return ResponseEntity.ok(Map.of(
+                "message", "User approved successfully! Notification email sent.",
+                "user", user
+            ));
         } catch (RuntimeException e) {
             Map<String, String> errorResponse = new HashMap<>();
             errorResponse.put("error", e.getMessage());
@@ -215,9 +230,12 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> rejectRegistration(@PathVariable Long requestId) {
         try {
-            userService.rejectRegistration(requestId);
+            // Use rejectUser instead of rejectRegistration
+            userService.rejectUser(requestId);
+            
+            // Email notification is already handled in rejectUser method
             Map<String, String> response = new HashMap<>();
-            response.put("message", "Registration rejected successfully");
+            response.put("message", "Registration rejected successfully! Notification email sent.");
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             Map<String, String> errorResponse = new HashMap<>();

@@ -1,0 +1,232 @@
+package com.grp12.Services;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.stereotype.Service;
+
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.Random;
+
+@Service
+public class EmailService {
+
+    @Autowired
+    private JavaMailSender mailSender;
+
+    // In-memory storage for verification codes
+    private final Map<String, VerificationData> verificationCodes = new ConcurrentHashMap<>();
+
+    public void sendVerificationCode(String email) throws MessagingException {
+        // Generate 6-digit verification code
+        String code = String.format("%06d", new Random().nextInt(999999));
+        
+        // Store code with 10-minute expiration
+        verificationCodes.put(email, new VerificationData(code, System.currentTimeMillis() + 600000));
+        
+        // Create and send email
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true);
+        
+        helper.setTo(email);
+        helper.setSubject("Email Verification - Ronaldo's Rentals");
+        helper.setText(buildEmailHtml(code), true);
+        
+        mailSender.send(message);
+    }
+
+    public boolean verifyCode(String email, String code) {
+        VerificationData data = verificationCodes.get(email);
+        
+        if (data == null) {
+            return false;
+        }
+        
+        // Check if expired
+        if (System.currentTimeMillis() > data.expirationTime) {
+            verificationCodes.remove(email);
+            return false;
+        }
+        
+        // Check if code matches
+        if (data.code.equals(code)) {
+            verificationCodes.remove(email); // Remove after successful verification
+            return true;
+        }
+        
+        return false;
+    }
+
+    // NEW: Send approval notification
+    public void sendApprovalNotification(String email, String firstName, String lastName, boolean isApproved) throws MessagingException {
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true);
+        
+        helper.setTo(email);
+        
+        if (isApproved) {
+            helper.setSubject("Account Approved - Welcome to Ronaldo's Rentals!");
+            helper.setText(buildApprovalEmailHtml(firstName, lastName), true);
+        } else {
+            helper.setSubject("Account Application Update - Ronaldo's Rentals");
+            helper.setText(buildRejectionEmailHtml(firstName, lastName), true);
+        }
+        
+        mailSender.send(message);
+    }
+
+    private String buildApprovalEmailHtml(String firstName, String lastName) {
+        return "<!DOCTYPE html>" +
+                "<html>" +
+                "<head>" +
+                "<style>" +
+                "body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }" +
+                ".container { max-width: 600px; margin: 0 auto; padding: 20px; }" +
+                ".header { background-color: #27ae60; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }" +
+                ".content { padding: 30px; background-color: #f9f9f9; }" +
+                ".cta-button { display: inline-block; background-color: #2c3e50; color: white; padding: 15px 30px; " +
+                "text-decoration: none; border-radius: 5px; margin: 20px 0; font-weight: bold; }" +
+                ".cta-button:hover { background-color: #34495e; }" +
+                ".footer { text-align: center; margin-top: 20px; color: #666; font-size: 14px; }" +
+                ".success-box { background-color: #d4edda; border: 1px solid #c3e6cb; padding: 15px; border-radius: 4px; margin: 15px 0; }" +
+                "</style>" +
+                "</head>" +
+                "<body>" +
+                "<div class='container'>" +
+                "<div class='header'>" +
+                "<h1>🚗 Ronaldo's Rentals</h1>" +
+                "<h2>🎉 Account Approved!</h2>" +
+                "</div>" +
+                "<div class='content'>" +
+                "<h3>Congratulations, " + firstName + " " + lastName + "!</h3>" +
+                "<div class='success-box'>" +
+                "<p><strong>Great news!</strong> Your account has been approved by our admin team.</p>" +
+                "</div>" +
+                "<p>You can now access all features of Ronaldo's Rentals, including:</p>" +
+                "<ul>" +
+                "<li>Browse our extensive vehicle fleet</li>" +
+                "<li>Make reservations online</li>" +
+                "<li>Manage your bookings</li>" +
+                "<li>Track your rental history</li>" +
+                "</ul>" +
+                "<p>Ready to get started? Click the button below to access your dashboard:</p>" +
+                "<div style='text-align: center;'>" +
+                "<a href='http://localhost:3000/dashboard' class='cta-button'>Access Your Dashboard</a>" +
+                "</div>" +
+                "<p>You can also visit our website directly at: <a href='http://localhost:3000'>http://localhost:3000</a></p>" +
+                "<p>If you have any questions or need assistance, please don't hesitate to contact our support team.</p>" +
+                "<p>Welcome to the Ronaldo's Rentals family!</p>" +
+                "</div>" +
+                "<div class='footer'>" +
+                "<p>© 2025 Ronaldo's Rentals. All rights reserved.</p>" +
+                "<p>This email was sent to " + firstName + " " + lastName + "</p>" +
+                "</div>" +
+                "</div>" +
+                "</body>" +
+                "</html>";
+    }
+
+    private String buildRejectionEmailHtml(String firstName, String lastName) {
+        return "<!DOCTYPE html>" +
+                "<html>" +
+                "<head>" +
+                "<style>" +
+                "body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }" +
+                ".container { max-width: 600px; margin: 0 auto; padding: 20px; }" +
+                ".header { background-color: #e74c3c; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }" +
+                ".content { padding: 30px; background-color: #f9f9f9; }" +
+                ".cta-button { display: inline-block; background-color: #2c3e50; color: white; padding: 15px 30px; " +
+                "text-decoration: none; border-radius: 5px; margin: 20px 0; font-weight: bold; }" +
+                ".cta-button:hover { background-color: #34495e; }" +
+                ".footer { text-align: center; margin-top: 20px; color: #666; font-size: 14px; }" +
+                ".warning-box { background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 4px; margin: 15px 0; }" +
+                "</style>" +
+                "</head>" +
+                "<body>" +
+                "<div class='container'>" +
+                "<div class='header'>" +
+                "<h1>🚗 Ronaldo's Rentals</h1>" +
+                "<h2>Account Application Update</h2>" +
+                "</div>" +
+                "<div class='content'>" +
+                "<h3>Dear " + firstName + " " + lastName + ",</h3>" +
+                "<div class='warning-box'>" +
+                "<p><strong>Account Status:</strong> Unfortunately, your account application was not approved at this time.</p>" +
+                "</div>" +
+                "<p>We appreciate your interest in Ronaldo's Rentals. After reviewing your application, we were unable to approve your account based on our current requirements.</p>" +
+                "<p><strong>What you can do:</strong></p>" +
+                "<ul>" +
+                "<li>Review your submitted information for accuracy</li>" +
+                "<li>Ensure all required documents are clear and valid</li>" +
+                "<li>Contact our support team for specific feedback</li>" +
+                "<li>Reapply after addressing any issues</li>" +
+                "</ul>" +
+                "<p>You're welcome to submit a new application if you believe this decision was made in error or if your circumstances have changed.</p>" +
+                "<div style='text-align: center;'>" +
+                "<a href='http://localhost:3000/login' class='cta-button'>Visit Our Website</a>" +
+                "</div>" +
+                "<p>If you have questions about this decision, please contact our support team.</p>" +
+                "</div>" +
+                "<div class='footer'>" +
+                "<p>© 2025 Ronaldo's Rentals. All rights reserved.</p>" +
+                "<p>This email was sent to " + firstName + " " + lastName + "</p>" +
+                "</div>" +
+                "</div>" +
+                "</body>" +
+                "</html>";
+    }
+
+    private String buildEmailHtml(String code) {
+        return "<!DOCTYPE html>" +
+                "<html>" +
+                "<head>" +
+                "<style>" +
+                "body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }" +
+                ".container { max-width: 600px; margin: 0 auto; padding: 20px; }" +
+                ".header { background-color: #2c3e50; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }" +
+                ".content { padding: 20px; background-color: #f9f9f9; }" +
+                ".code { font-size: 32px; font-weight: bold; color: #2c3e50; text-align: center; " +
+                "padding: 20px; background-color: white; border: 2px dashed #2c3e50; margin: 20px 0; border-radius: 8px; }" +
+                ".footer { text-align: center; margin-top: 20px; color: #666; font-size: 14px; }" +
+                ".warning { background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 4px; margin: 15px 0; }" +
+                "</style>" +
+                "</head>" +
+                "<body>" +
+                "<div class='container'>" +
+                "<div class='header'>" +
+                "<h1>🚗 Ronaldo's Rentals</h1>" +
+                "</div>" +
+                "<div class='content'>" +
+                "<h2>Email Verification Required</h2>" +
+                "<p>Thank you for registering with Ronaldo's Rentals!</p>" +
+                "<p>To complete your registration, please use the following verification code:</p>" +
+                "<div class='code'>" + code + "</div>" +
+                "<div class='warning'>" +
+                "<strong>⚠️ Important:</strong> This verification code will expire in 10 minutes." +
+                "</div>" +
+                "<p>If you didn't request this verification, please ignore this email.</p>" +
+                "<p>After verification, your account will be reviewed by our admin team for approval.</p>" +
+                "</div>" +
+                "<div class='footer'>" +
+                "<p>© 2025 Ronaldo's Rentals. All rights reserved.</p>" +
+                "<p>This is an automated message, please do not reply to this email.</p>" +
+                "</div>" +
+                "</div>" +
+                "</body>" +
+                "</html>";
+    }
+
+    // Inner class to store verification data
+    private static class VerificationData {
+        final String code;
+        final long expirationTime;
+
+        VerificationData(String code, long expirationTime) {
+            this.code = code;
+            this.expirationTime = expirationTime;
+        }
+    }
+}

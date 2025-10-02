@@ -217,7 +217,6 @@ const App = () => {
                 <div>Pickup functionality to be implemented</div>
               </CustomerRoute>
             } 
-          
           />
           <Route  
             path="/car-detail" 

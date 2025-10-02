@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { LogOut, Layout, Users, Car, ClipboardList, ToolCase, Check, X } from 'lucide-react';
@@ -10,6 +9,7 @@ const PendingRequests = ({ setCurrentUser }) => {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
   useEffect(() => {
     fetchPendingRequests();
@@ -25,10 +25,8 @@ const PendingRequests = ({ setCurrentUser }) => {
       console.error('Logout error:', error);
     }
     
-    localStorage.clear();
-    sessionStorage.clear();
-    setCurrentUser(null); // Clear the user state
-    navigate('/login'); // Redirect to admin login
+    setCurrentUser(null);
+    navigate('/login');
   };
 
   const handleNavigation = (path) => {
@@ -60,52 +58,71 @@ const PendingRequests = ({ setCurrentUser }) => {
     }
   };
 
-  const handleApproveRequest = async (id) => {
-    setError('');
-    setLoading(true);
+  const handleApprove = async (requestId) => {
     try {
-      const response = await fetch(`http://localhost:8080/api/auth/approve/${id}`, {
+      setLoading(true);
+      const response = await fetch(`http://localhost:8080/api/auth/approve/${requestId}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
         credentials: 'include'
       });
+
+      console.log('Approve response status:', response.status);
+
       if (response.ok) {
-        setRequests(requests.filter(r => r.id !== id));
+        const result = await response.json();
+        console.log('Approve result:', result);
+        setSuccessMessage(result.message || 'User approved successfully! Notification email sent.');
         setError('');
+        fetchPendingRequests();
       } else {
         const errorData = await response.json();
-        setError(errorData.error || 'Failed to approve request');
+        console.error('Approve error:', errorData);
+        setError(errorData.error || 'Failed to approve user');
+        setSuccessMessage('');
       }
     } catch (err) {
-      setError('Failed to connect to the server');
-      console.error('Approve request error:', err);
+      console.error('Approve error:', err);
+      setError('Failed to approve user: ' + err.message);
+      setSuccessMessage('');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleRejectRequest = async (id) => {
-    if (!window.confirm('Are you sure you want to reject this registration request?')) {
-      return;
-    }
-    setError('');
-    setLoading(true);
+  const handleReject = async (requestId) => {
     try {
-      const response = await fetch(`http://localhost:8080/api/auth/reject/${id}`, {
+      setLoading(true);
+      const response = await fetch(`http://localhost:8080/api/auth/reject/${requestId}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
         credentials: 'include'
       });
+
+      console.log('Reject response status:', response.status);
+
       if (response.ok) {
-        setRequests(requests.filter(r => r.id !== id));
+        const result = await response.json();
+        console.log('Reject result:', result);
+        setSuccessMessage(result.message || 'User rejected successfully! Notification email sent.');
         setError('');
+        fetchPendingRequests();
       } else {
         const errorData = await response.json();
-        setError(errorData.error || 'Failed to reject request');
+        console.error('Reject error:', errorData);
+        setError(errorData.error || 'Failed to reject user');
+        setSuccessMessage('');
       }
     } catch (err) {
-      setError('Failed to connect to the server');
-      console.error('Reject request error:', err);
+      console.error('Reject error:', err);
+      setError('Failed to reject user: ' + err.message);
+      setSuccessMessage('');
     } finally {
       setLoading(false);
     }
@@ -175,6 +192,7 @@ const PendingRequests = ({ setCurrentUser }) => {
           <div className="card">
             <h2>Pending Registration Requests</h2>
             {error && <p className="error-text">{error}</p>}
+            {successMessage && <p className="success-text">{successMessage}</p>}
             {loading && <p>Loading...</p>}
             {!loading && requests.length === 0 && <p>No pending requests.</p>}
             {requests.length > 0 && (
@@ -223,16 +241,18 @@ const PendingRequests = ({ setCurrentUser }) => {
                         <td>{request.status}</td>
                         <td className="table-actions">
                           <button
-                            onClick={() => handleApproveRequest(request.id)}
+                            onClick={() => handleApprove(request.id)}
                             className="action-btn approve"
                             disabled={loading}
+                            title="Approve"
                           >
                             <Check className="action-icon" />
                           </button>
                           <button
-                            onClick={() => handleRejectRequest(request.id)}
+                            onClick={() => handleReject(request.id)}
                             className="action-btn reject"
                             disabled={loading}
+                            title="Reject"
                           >
                             <X className="action-icon" />
                           </button>
