@@ -103,52 +103,44 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            .authorizeHttpRequests(authz -> authz
+                // Public endpoints - no authentication required
+                .requestMatchers("/api/auth/login").permitAll()
+                .requestMatchers("/api/auth/register").permitAll()
+                .requestMatchers("/api/auth/logout").permitAll()
+                .requestMatchers("/api/email/send-verification").permitAll()
+                .requestMatchers("/api/email/verify-code").permitAll()
+                .requestMatchers("/api/auth/request-password-reset").permitAll()
+                .requestMatchers("/api/auth/verify-reset-code").permitAll()
+                .requestMatchers("/api/auth/reset-password").permitAll()
+                .requestMatchers("/api/auth/send-verification").permitAll()
+                .requestMatchers("/api/auth/verify-email").permitAll()
+                .requestMatchers("/api/vehicles/available").permitAll()
+                .requestMatchers("/api/vehicles/locations").permitAll()
+                .requestMatchers("/api/vehicles/types").permitAll()
+                
+                // Admin endpoints - require admin role
+                .requestMatchers("/api/auth/admin/login").permitAll()
+                .requestMatchers("/api/auth/admin/**").hasRole("ADMIN")
+                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                .requestMatchers("/api/auth/users/**").hasRole("ADMIN")
+                .requestMatchers("/api/auth/pending-requests").hasRole("ADMIN")
+                .requestMatchers("/api/auth/approve-user/**").hasRole("ADMIN")
+                .requestMatchers("/api/auth/reject-user/**").hasRole("ADMIN")
+                
+                // All other endpoints require authentication
+                .anyRequest().authenticated()
+            )
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                 .maximumSessions(1)
-                .maxSessionsPreventsLogin(false))
-            .authorizeHttpRequests(auth -> auth
-                // Public endpoints
-                .requestMatchers("/api/auth/register", "/api/auth/login").permitAll()
-                .requestMatchers("/api/admin/register", "/api/admin/login", "/api/admin/is-first-admin").permitAll()
-                .requestMatchers("/h2-console/**").permitAll()
-                .requestMatchers("/api/vehicles/available", "/api/vehicles/search", 
-                               "/api/vehicles/locations", "/api/vehicles/types", "/api/vehicles/{id}").permitAll()
-                .requestMatchers("/api/email/**").permitAll()  // Allow email verification endpoints
-                
-                // Admin only endpoints
-                .requestMatchers("/api/vehicles/all", "/api/vehicles/add", "/api/vehicles/*/status",
-                               "/api/vehicles/stats").hasRole("ADMIN")
-                .requestMatchers("/api/vehicles/{id}").hasRole("ADMIN") // For PUT/DELETE operations
-                .requestMatchers("/api/auth/requests/pending", "/api/auth/approve/**", "/api/auth/reject/**").hasRole("ADMIN")
-                .requestMatchers("/api/auth/users/customers").hasRole("ADMIN")
-                .requestMatchers("/api/admin/all", "/api/admin/*/deactivate", "/api/admin/*/activate").hasRole("ADMIN")
-                .requestMatchers("/api/admin/{id}").hasRole("ADMIN")
-                
-                // Customer endpoints
-                .requestMatchers("/api/customer/**").hasRole("CUSTOMER")
-                
-                .anyRequest().authenticated()
-            )
-            .exceptionHandling(ex -> ex
-                .authenticationEntryPoint((request, response, authException) -> {
-                    response.setContentType("application/json");
-                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                    response.getWriter().write("{\"error\": \"Unauthorized: Please log in as admin\"}");
-                })
-                .accessDeniedHandler((request, response, accessDeniedException) -> {
-                    response.setContentType("application/json");
-                    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                    response.getWriter().write("{\"error\": \"Forbidden: Admin access required\"}");
-                })
-            )
-            .formLogin(form -> form.disable())
-            .httpBasic(httpBasic -> httpBasic.disable())
-            .headers(headers -> headers.frameOptions().disable());
+                .maxSessionsPreventsLogin(false)
+            );
+
         return http.build();
     }
 }

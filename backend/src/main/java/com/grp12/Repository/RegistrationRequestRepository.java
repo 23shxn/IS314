@@ -1,7 +1,5 @@
 package com.grp12.Repository;
 
-
-
 import com.grp12.Model.RegistrationRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -31,4 +29,18 @@ public interface RegistrationRequestRepository extends JpaRepository<Registratio
     boolean existsByEmail(String email);
     
     boolean existsByDriversLicenseNumber(String driversLicenseNumber);
+    
+    // Find requests by status, ordered by creation date (newest first)
+    List<RegistrationRequest> findByStatusOrderByCreatedAtDesc(String status);
+    
+    // Check if phone number exists in registration requests
+    boolean existsByPhoneNumber(String phoneNumber);
+    
+    // Count requests by status
+    long countByStatus(String status);
+    
+    // Find all pending requests (alias for convenience)
+    default List<RegistrationRequest> findPendingRequests() {
+        return findByStatusOrderByCreatedAtDesc("PENDING");
+    }
 }

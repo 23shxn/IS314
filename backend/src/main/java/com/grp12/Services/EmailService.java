@@ -36,6 +36,8 @@ public class EmailService {
         helper.setText(buildEmailHtml(code), true);
         
         mailSender.send(message);
+        
+        System.out.println("Verification email sent to: " + email);
     }
 
     public boolean verifyCode(String email, String code) {
@@ -60,7 +62,7 @@ public class EmailService {
         return false;
     }
 
-    // NEW: Send approval notification
+    // Send approval notification
     public void sendApprovalNotification(String email, String firstName, String lastName, boolean isApproved) throws MessagingException {
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
@@ -76,6 +78,63 @@ public class EmailService {
         }
         
         mailSender.send(message);
+        
+        System.out.println("Approval notification sent to: " + email + " (approved: " + isApproved + ")");
+    }
+
+    // Password reset email method - make sure this is properly defined
+    public void sendPasswordResetEmail(String email, String resetToken) throws MessagingException {
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true);
+        
+        helper.setTo(email);
+        helper.setSubject("Password Reset - Ronaldo's Rentals");
+        helper.setText(buildPasswordResetEmailHtml(resetToken), true);
+        
+        mailSender.send(message);
+        
+        System.out.println("Password reset email sent to: " + email);
+    }
+
+    // Build password reset email HTML
+    private String buildPasswordResetEmailHtml(String resetToken) {
+        return "<!DOCTYPE html>" +
+                "<html>" +
+                "<head>" +
+                "<style>" +
+                "body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }" +
+                ".container { max-width: 600px; margin: 0 auto; padding: 20px; }" +
+                ".header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }" +
+                ".content { padding: 30px; background-color: #f9f9f9; }" +
+                ".code { font-size: 32px; font-weight: bold; color: #667eea; text-align: center; " +
+                "padding: 20px; background-color: white; border: 2px dashed #667eea; margin: 20px 0; border-radius: 8px; letter-spacing: 8px; }" +
+                ".footer { background: #333; color: white; padding: 20px; text-align: center; border-radius: 0 0 8px 8px; }" +
+                ".warning { background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 4px; margin: 15px 0; }" +
+                "</style>" +
+                "</head>" +
+                "<body>" +
+                "<div class='container'>" +
+                "<div class='header'>" +
+                "<h1>Password Reset Request</h1>" +
+                "</div>" +
+                "<div class='content'>" +
+                "<p>Hello,</p>" +
+                "<p>You have requested to reset your password for your Ronaldo's Rentals account.</p>" +
+                "<p>Your password reset code is:</p>" +
+                "<div class='code'>" + resetToken + "</div>" +
+                "<div class='warning'>" +
+                "<strong>⚠️ Important:</strong> This code will expire in 15 minutes for security reasons." +
+                "</div>" +
+                "<p>If you did not request this password reset, please ignore this email and your password will remain unchanged.</p>" +
+                "<p>Enter this code in the password reset form to set your new password.</p>" +
+                "</div>" +
+                "<div class='footer'>" +
+                "<p>&copy; 2024 Ronaldo's Rentals. All rights reserved.</p>" +
+                "<p>This is an automated message, please do not reply to this email.</p>" +
+                "</div>" +
+                "</div>" +
+                "</body>" +
+                "</html>";
     }
 
     private String buildApprovalEmailHtml(String firstName, String lastName) {

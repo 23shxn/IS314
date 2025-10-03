@@ -1,4 +1,3 @@
-
 CREATE TABLE IF NOT EXISTS registration_requests (
     id BIGSERIAL PRIMARY KEY,
     first_name VARCHAR(100) NOT NULL,
@@ -35,3 +34,8 @@ CREATE TABLE IF NOT EXISTS users (
 -- Create indexes for users table
 CREATE INDEX IF NOT EXISTS idx_user_email ON users(email);
 CREATE INDEX IF NOT EXISTS idx_user_license ON users(drivers_license_number);
+
+-- If using MySQL/PostgreSQL
+ALTER TABLE users MODIFY COLUMN created_at TIMESTAMP NULL;
+-- OR set a default value
+ALTER TABLE users MODIFY COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;

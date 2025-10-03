@@ -1,6 +1,7 @@
 package com.grp12.Model;
 
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "users", indexes = {
@@ -12,38 +13,52 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    @Column(name = "first_name", nullable = false, length = 100)
-    private String firstName;
-    
-    @Column(name = "last_name", nullable = false, length = 100)
-    private String lastName;
-    
-    @Column(name = "phone_number", nullable = false, length = 20)
-    private String phoneNumber;
-    
-    @Column(name = "email", nullable = false, unique = true, length = 255)
-    private String email;
-    
-    @Column(name = "password", length = 255)
-    private String password;
+    // Match database column order
+    @Lob
+    @Column(name = "drivers_license_image", columnDefinition = "TEXT")
+    private String driversLicenseImage; // Move to position 2
     
     @Column(name = "drivers_license_number", nullable = false, unique = true, length = 50)
-    private String driversLicenseNumber;
+    private String driversLicenseNumber; // Move to position 3
     
-    @Column(name = "drivers_license_image", columnDefinition = "TEXT")
-    private String driversLicenseImage; // Base64 string
+    @Column(name = "email", nullable = false, unique = true, length = 255)
+    private String email; // Now position 4
+    
+    @Column(name = "first_name", nullable = false, length = 100)
+    private String firstName; // Now position 5
+    
+    @Column(name = "last_name", nullable = false, length = 100)
+    private String lastName; // Now position 6
+    
+    @Column(name = "password", nullable = false, length = 255)
+    private String password; // Now position 7
+    
+    @Column(name = "phone_number", nullable = false, length = 20)
+    private String phoneNumber; // Now position 8
     
     @Column(name = "role", nullable = false, length = 50)
-    private String role;
+    private String role = "ROLE_CUSTOMER"; // Now position 9
     
     @Column(name = "status", nullable = false, length = 20)
-    private String status; // PENDING, APPROVED, REJECTED
+    private String status = "PENDING"; // PENDING, APPROVED, REJECTED
 
     @Column(name = "approved")
     private Boolean approved = false; // Use Boolean (wrapper) instead of boolean (primitive)
 
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    @PrePersist
+    protected void onCreate() {
+        if (createdAt == null) {
+            createdAt = LocalDateTime.now();
+        }
+    }
+
     // Default constructor
-    public User() {}
+    public User() {
+        this.createdAt = LocalDateTime.now(); // Set default value
+    }
 
     // Constructor for easy creation
     public User(String firstName, String lastName, String phoneNumber, String email, 
@@ -55,6 +70,7 @@ public class User {
         this.driversLicenseNumber = driversLicenseNumber;
         this.driversLicenseImage = driversLicenseImage;
         this.status = "PENDING";
+        this.createdAt = LocalDateTime.now(); // Set default value
     }
 
     // Getters and setters
@@ -80,7 +96,12 @@ public class User {
     public void setDriversLicenseNumber(String driversLicenseNumber) { this.driversLicenseNumber = driversLicenseNumber; }
     
     public String getDriversLicenseImage() { return driversLicenseImage; }
-    public void setDriversLicenseImage(String driversLicenseImage) { this.driversLicenseImage = driversLicenseImage; }
+    public void setDriversLicenseImage(String driversLicenseImage) {
+        if (driversLicenseImage != null && driversLicenseImage.length() > 500000) { // 500KB limit
+            throw new IllegalArgumentException("Image too large. Maximum size is 500KB");
+        }
+        this.driversLicenseImage = driversLicenseImage;
+    }
     
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
@@ -96,6 +117,14 @@ public class User {
         this.approved = approved;
     }
 
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
     @Override
     public String toString() {
         return "User{" +
@@ -103,8 +132,10 @@ public class User {
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
                 ", email='" + email + '\'' +
+                ", phoneNumber='" + phoneNumber + '\'' +
                 ", role='" + role + '\'' +
                 ", status='" + status + '\'' +
+                ", createdAt=" + createdAt +
                 '}';
     }
 }

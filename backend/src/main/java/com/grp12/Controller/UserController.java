@@ -285,4 +285,81 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
+
+    @PostMapping("/request-password-reset")
+    public ResponseEntity<?> requestPasswordReset(@RequestBody Map<String, String> request) {
+        try {
+            String email = request.get("email");
+            
+            if (email == null || email.trim().isEmpty()) {
+                return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Email is required"));
+            }
+            
+            // Validate email format
+            if (!email.matches("^[a-zA-Z0-9._%+-]+@gmail\\.com$")) {
+                return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Please enter a valid Gmail address"));
+            }
+            
+            userService.requestPasswordReset(email.trim());
+            
+            return ResponseEntity.ok()
+                .body(Map.of("message", "Password reset code sent to your email"));
+                
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest()
+                .body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            System.err.println("Password reset request error: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("error", "Failed to process password reset request"));
+        }
+    }
+    
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> request) {
+        try {
+            String email = request.get("email");
+            String resetToken = request.get("resetToken");
+            String newPassword = request.get("newPassword");
+            
+            if (email == null || resetToken == null || newPassword == null) {
+                return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Email, reset token, and new password are required"));
+            }
+            
+            userService.resetPassword(email.trim(), resetToken.trim(), newPassword);
+            
+            return ResponseEntity.ok()
+                .body(Map.of("message", "Password reset successful. You can now login with your new password."));
+                
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest()
+                .body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            System.err.println("Password reset error: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("error", "Failed to reset password"));
+        }
+    }
+
+    @PostMapping("/verify-reset-code")
+    public ResponseEntity<?> verifyResetCode(@RequestBody Map<String, String> request) {
+        try {
+            String email = request.get("email");
+            String resetToken = request.get("resetToken");
+            
+            // Verify the token without resetting the password
+            boolean isValid = userService.verifyResetToken(email, resetToken);
+            
+            if (isValid) {
+                return ResponseEntity.ok().body(Map.of("message", "Reset code verified successfully"));
+            } else {
+                return ResponseEntity.badRequest().body(Map.of("error", "Invalid or expired reset code"));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Failed to verify reset code"));
+        }
+    }
 }
