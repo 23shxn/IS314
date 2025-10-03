@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, MapPin, Car, Users, Fuel, Settings, ChevronLeft, ChevronRight, Eye } from 'lucide-react';
+import { Plus, MapPin, Car, ChevronLeft, ChevronRight, Eye } from 'lucide-react';
 import '../styles/VehicleSearch.css';
 
 const VehicleImageCarousel = ({ images, vehicleInfo }) => {
@@ -129,17 +129,25 @@ const VehicleSearch = ({ reservations, setReservations, currentUser }) => {
   const [viewingVehicle, setViewingVehicle] = useState(null);
   const navigate = useNavigate();
 
+  // Updated search params with separate pickup and dropoff locations
   const [searchParams, setSearchParams] = useState({
-    location: '',
+    pickupLocation: '',
+    dropoffLocation: '',
     vehicleType: '',
     minPrice: '',
-    maxPrice: '',
     startDate: '',
-    endDate: '',
-    fuelType: '',
-    transmission: '',
-    seatingCapacity: ''
+    endDate: ''
   });
+
+  // Predefined price ranges for dropdown
+  const priceRanges = [
+    { value: '', label: 'Any Price' },
+    { value: '0-50', label: 'Under $50' },
+    { value: '50-100', label: '$50 - $100' },
+    { value: '100-150', label: '$100 - $150' },
+    { value: '150-200', label: '$150 - $200' },
+    { value: '200+', label: '$200+' }
+  ];
 
   useEffect(() => {
     const fetchData = async () => {
@@ -182,34 +190,29 @@ const VehicleSearch = ({ reservations, setReservations, currentUser }) => {
   useEffect(() => {
     let results = [...vehicles];
 
-    if (searchParams.location) {
-      results = results.filter(v => v.location.toLowerCase().includes(searchParams.location.toLowerCase()));
+    // Filter by pickup location (where vehicles are available)
+    if (searchParams.pickupLocation) {
+      results = results.filter(v => v.location.toLowerCase().includes(searchParams.pickupLocation.toLowerCase()));
     }
+
+    // Filter by vehicle type
     if (searchParams.vehicleType) {
       results = results.filter(v => v.vehicleType.toLowerCase().includes(searchParams.vehicleType.toLowerCase()));
     }
+
+    // Filter by price range
     if (searchParams.minPrice) {
-      const minPrice = parseFloat(searchParams.minPrice);
-      if (!isNaN(minPrice) && minPrice >= 0) {
-        results = results.filter(v => v.pricePerDay >= minPrice);
-      }
-    }
-    if (searchParams.maxPrice) {
-      const maxPrice = parseFloat(searchParams.maxPrice);
-      if (!isNaN(maxPrice) && maxPrice >= 0) {
-        results = results.filter(v => v.pricePerDay <= maxPrice);
-      }
-    }
-    if (searchParams.fuelType) {
-      results = results.filter(v => v.fuelType.toLowerCase() === searchParams.fuelType.toLowerCase());
-    }
-    if (searchParams.transmission) {
-      results = results.filter(v => v.transmission.toLowerCase() === searchParams.transmission.toLowerCase());
-    }
-    if (searchParams.seatingCapacity) {
-      const capacity = parseInt(searchParams.seatingCapacity);
-      if (!isNaN(capacity)) {
-        results = results.filter(v => v.seatingCapacity >= capacity);
+      const priceRange = searchParams.minPrice;
+      if (priceRange === '0-50') {
+        results = results.filter(v => v.pricePerDay < 50);
+      } else if (priceRange === '50-100') {
+        results = results.filter(v => v.pricePerDay >= 50 && v.pricePerDay <= 100);
+      } else if (priceRange === '100-150') {
+        results = results.filter(v => v.pricePerDay >= 100 && v.pricePerDay <= 150);
+      } else if (priceRange === '150-200') {
+        results = results.filter(v => v.pricePerDay >= 150 && v.pricePerDay <= 200);
+      } else if (priceRange === '200+') {
+        results = results.filter(v => v.pricePerDay >= 200);
       }
     }
 
@@ -225,6 +228,12 @@ const VehicleSearch = ({ reservations, setReservations, currentUser }) => {
     // Validate dates
     if (!searchParams.startDate || !searchParams.endDate) {
       setError('Please select both start and end dates to reserve a vehicle');
+      return;
+    }
+
+    // Validate pickup location (required)
+    if (!searchParams.pickupLocation) {
+      setError('Please select a pickup location');
       return;
     }
     
@@ -245,12 +254,14 @@ const VehicleSearch = ({ reservations, setReservations, currentUser }) => {
 
     setError('');
     
-    // Create reservation object with proper structure
+    // Create reservation object with pickup and dropoff locations
     const reservation = {
       vehicle: vehicle,
       rentalDate: searchParams.startDate,
       returnDate: searchParams.endDate,
-      userId: currentUser ? currentUser.id : null // Include userId if authenticated, null otherwise
+      pickupLocation: searchParams.pickupLocation,
+      dropoffLocation: searchParams.dropoffLocation || searchParams.pickupLocation, // Default to pickup location if no dropoff specified
+      userId: currentUser ? currentUser.id : null
     };
 
     console.log('Navigating to car-detail with reservation:', reservation);
@@ -265,14 +276,11 @@ const VehicleSearch = ({ reservations, setReservations, currentUser }) => {
 
   const clearFilters = () => {
     setSearchParams({
-      location: '',
+      pickupLocation: '',
+      dropoffLocation: '',
       vehicleType: '',
       minPrice: '',
-      maxPrice: '',
-      fuelType: '',
-      transmission: '',
-      seatingCapacity: '',
-      startDate: searchParams.startDate,
+      startDate: searchParams.startDate, // Keep dates
       endDate: searchParams.endDate
     });
     setError('');
@@ -300,7 +308,7 @@ const VehicleSearch = ({ reservations, setReservations, currentUser }) => {
     <div className="vehicle-search-container">
       <header className="search-header">
         <h1>Find a Vehicle</h1>
-        <p>Select dates to book. Use additional filters to narrow down options.</p>
+        <p>Select dates and pickup location to book. Use filters to narrow down options.</p>
         {!currentUser && (
           <div className="auth-notice">
             <p>Please <a href="/login">log in</a> to make reservations.</p>
@@ -310,20 +318,6 @@ const VehicleSearch = ({ reservations, setReservations, currentUser }) => {
 
       <div className="search-form">
         <div className="form-row">
-          <div className="form-group">
-            <label><MapPin size={16} /> Location (Optional)</label>
-            <select value={searchParams.location} onChange={(e) => handleInputChange('location', e.target.value)}>
-              <option value="">All Locations</option>
-              {locations.map(loc => <option key={loc} value={loc}>{loc}</option>)}
-            </select>
-          </div>
-          <div className="form-group">
-            <label><Car size={16} /> Vehicle Type (Optional)</label>
-            <select value={searchParams.vehicleType} onChange={(e) => handleInputChange('vehicleType', e.target.value)}>
-              <option value="">All Types</option>
-              {vehicleTypes.map(type => <option key={type} value={type}>{type}</option>)}
-            </select>
-          </div>
           <div className="form-group required">
             <label>Start Date (Required)</label>
             <input
@@ -344,57 +338,50 @@ const VehicleSearch = ({ reservations, setReservations, currentUser }) => {
               required
             />
           </div>
+          <div className="form-group required">
+            <label><MapPin size={16} /> Pickup Location (Required)</label>
+            <select 
+              value={searchParams.pickupLocation} 
+              onChange={(e) => handleInputChange('pickupLocation', e.target.value)}
+              required
+            >
+              <option value="">Select Pickup Location</option>
+              {locations.map(loc => <option key={loc} value={loc}>{loc}</option>)}
+            </select>
+          </div>
         </div>
+        
         <div className="form-row">
           <div className="form-group">
-            <label>Min Price ($) (Optional)</label>
-            <input
-              type="number"
-              value={searchParams.minPrice}
-              onChange={(e) => handleInputChange('minPrice', e.target.value)}
-              placeholder="Min price"
-              min="0"
-            />
+            <label><MapPin size={16} /> Drop-off Location (Optional)</label>
+            <select 
+              value={searchParams.dropoffLocation} 
+              onChange={(e) => handleInputChange('dropoffLocation', e.target.value)}
+            >
+              <option value="">Same as pickup</option>
+              {locations.map(loc => <option key={loc} value={loc}>{loc}</option>)}
+            </select>
+            <small style={{ color: '#666', fontSize: '12px' }}>
+              Leave blank to return to pickup location
+            </small>
           </div>
           <div className="form-group">
-            <label>Max Price ($) (Optional)</label>
-            <input
-              type="number"
-              value={searchParams.maxPrice}
-              onChange={(e) => handleInputChange('maxPrice', e.target.value)}
-              placeholder="Max price"
-              min="0"
-            />
-          </div>
-          <div className="form-group">
-            <label><Fuel size={16} /> Fuel Type (Optional)</label>
-            <select value={searchParams.fuelType} onChange={(e) => handleInputChange('fuelType', e.target.value)}>
-              <option value="">All Fuel Types</option>
-              <option value="Petrol">Petrol</option>
-              <option value="Diesel">Diesel</option>
-              <option value="Electric">Electric</option>
-              <option value="Hybrid">Hybrid</option>
+            <label><Car size={16} /> Vehicle Type</label>
+            <select value={searchParams.vehicleType} onChange={(e) => handleInputChange('vehicleType', e.target.value)}>
+              <option value="">All Types</option>
+              {vehicleTypes.map(type => <option key={type} value={type}>{type}</option>)}
             </select>
           </div>
           <div className="form-group">
-            <label><Settings size={16} /> Transmission (Optional)</label>
-            <select value={searchParams.transmission} onChange={(e) => handleInputChange('transmission', e.target.value)}>
-              <option value="">All Transmissions</option>
-              <option value="Automatic">Automatic</option>
-              <option value="Manual">Manual</option>
-            </select>
-          </div>
-          <div className="form-group">
-            <label><Users size={16} /> Min Seats (Optional)</label>
-            <select value={searchParams.seatingCapacity} onChange={(e) => handleInputChange('seatingCapacity', e.target.value)}>
-              <option value="">Any</option>
-              <option value="2">2+ Seats</option>
-              <option value="4">4+ Seats</option>
-              <option value="5">5+ Seats</option>
-              <option value="7">7+ Seats</option>
+            <label>Price Range</label>
+            <select value={searchParams.minPrice} onChange={(e) => handleInputChange('minPrice', e.target.value)}>
+              {priceRanges.map(range => (
+                <option key={range.value} value={range.value}>{range.label}</option>
+              ))}
             </select>
           </div>
         </div>
+        
         <div className="form-actions">
           <button onClick={clearFilters} className="btn btn-secondary btn-small">
             Clear Filters
@@ -404,7 +391,12 @@ const VehicleSearch = ({ reservations, setReservations, currentUser }) => {
 
       <div className="results-summary">
         <h3>{filteredVehicles.length} vehicles found</h3>
-        {searchParams.startDate && <p>Available for pickup on {new Date(searchParams.startDate).toLocaleDateString('en-FJ')}</p>}
+        {searchParams.startDate && searchParams.pickupLocation && (
+          <p>Available for pickup on {new Date(searchParams.startDate).toLocaleDateString('en-FJ')} from {searchParams.pickupLocation}</p>
+        )}
+        {searchParams.dropoffLocation && searchParams.dropoffLocation !== searchParams.pickupLocation && (
+          <p>To be returned at {searchParams.dropoffLocation}</p>
+        )}
       </div>
 
       <div className="search-results">
@@ -430,9 +422,9 @@ const VehicleSearch = ({ reservations, setReservations, currentUser }) => {
                   <span className={`status-badge ${vehicle.status.toLowerCase()}`}>{vehicle.status}</span>
                 </div>
                 <div className="vehicle-details">
-                  <p><Car size={16} /> {vehicle.vehicleType} | <MapPin size={16} /> {vehicle.location}</p>
-                  <p><Users size={16} /> {vehicle.seatingCapacity} seats | <Fuel size={16} /> {vehicle.fuelType}</p>
-                  <p><Settings size={16} /> {vehicle.transmission} {vehicle.mileage ? `| ${vehicle.mileage} km` : ''}</p>
+                  <p><Car size={16} /> {vehicle.vehicleType} | <MapPin size={16} /> Available at {vehicle.location}</p>
+                  <p>Seats: {vehicle.seatingCapacity} | Fuel: {vehicle.fuelType} | {vehicle.transmission}</p>
+                  {vehicle.mileage && <p>Mileage: {vehicle.mileage} km</p>}
                   {vehicle.features && <p><strong>Features:</strong> {vehicle.features}</p>}
                 </div>
               </div>
@@ -444,7 +436,7 @@ const VehicleSearch = ({ reservations, setReservations, currentUser }) => {
                 <button
                   onClick={() => handleReservation(vehicle)}
                   className="btn btn-primary"
-                  disabled={vehicle.status !== 'Available' || !searchParams.startDate || !searchParams.endDate}
+                  disabled={vehicle.status !== 'Available' || !searchParams.startDate || !searchParams.endDate || !searchParams.pickupLocation}
                 >
                   <Plus size={16} /> Reserve
                 </button>
