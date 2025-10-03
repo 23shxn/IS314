@@ -165,7 +165,6 @@ public class UserService {
 
     public User approveUser(Long userId) {
         try {
-            // Get user details from RegistrationRequest, not User table
             RegistrationRequest request = registrationRequestRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Registration request not found"));
             
@@ -173,18 +172,17 @@ public class UserService {
                 throw new RuntimeException("Request already processed");
             }
             
-            // Create approved user
+            // Create user from registration request
             User user = new User();
             user.setFirstName(request.getFirstName());
             user.setLastName(request.getLastName());
-            user.setPhoneNumber(request.getPhoneNumber());
             user.setEmail(request.getEmail());
             user.setPassword(request.getPassword());
+            user.setPhoneNumber(request.getPhoneNumber());
             user.setDriversLicenseNumber(request.getDriversLicenseNumber());
             user.setDriversLicenseImage(request.getDriversLicenseImage());
             user.setRole("ROLE_CUSTOMER");
-            user.setStatus("APPROVED");
-            user.setApproved(true);
+            user.setStatus("APPROVED"); // Only set status, not approved
             
             // Save user to User table
             User savedUser = userRepository.save(user);
@@ -203,11 +201,10 @@ public class UserService {
                 );
                 System.out.println("Approval email sent to: " + request.getEmail());
             } catch (MessagingException e) {
-                // Log error but don't fail the approval process
                 System.err.println("Failed to send approval email: " + e.getMessage());
             }
             
-            return savedUser; // ADD THIS RETURN STATEMENT
+            return savedUser;
             
         } catch (Exception e) {
             System.err.println("Error in approveUser: " + e.getMessage());

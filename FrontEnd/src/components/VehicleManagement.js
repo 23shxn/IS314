@@ -744,37 +744,79 @@ const VehicleManagement = ({ setCurrentUser }) => {
                       <td data-label="Price/Day">${vehicle.pricePerDay}</td>
                       <td data-label="Location">{vehicle.location}</td>
                       <td data-label="Actions" className="table-actions">
-                        <button
-                          onClick={() => {
-                            setViewingVehicle(vehicle);
-                            setCurrentImageIndex(0);
-                          }}
-                          className="action-btn view"
-                          title="View Details"
-                        >
-                          <Eye className="action-icon" />
-                        </button>
-                        
-                        <select
-                          value={vehicle.status}
-                          onChange={(e) => handleStatusUpdate(vehicle.id, e.target.value)}
-                          className="status-select"
-                          disabled={loading}
-                        >
-                          <option value="Available">Available</option>
-                          <option value="Rented">Rented</option>
-                          <option value="Maintenance">Maintenance</option>
-                          <option value="Out_of_Service">Out of Service</option>
-                        </select>
-                        
-                        <button
-                          onClick={() => handleDeleteVehicle(vehicle.id)}
-                          className="action-btn delete"
-                          disabled={loading}
-                          title="Delete Vehicle"
-                        >
-                          <Trash2 className="action-icon" />
-                        </button>
+                        <div style={{ 
+                          display: 'flex', 
+                          justifyContent: 'center', 
+                          alignItems: 'center', 
+                          gap: '8px',
+                          padding: '4px'
+                        }}>
+                          <button
+                            onClick={() => {
+                              setViewingVehicle(vehicle);
+                              setCurrentImageIndex(0);
+                            }}
+                            className="action-btn view"
+                            title="View Details"
+                            style={{
+                              backgroundColor: '#17a2b8',
+                              color: 'white',
+                              border: 'none',
+                              borderRadius: '6px',
+                              padding: '8px',
+                              width: '36px',
+                              height: '36px',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center'
+                            }}
+                          >
+                            <Eye style={{ width: '16px', height: '16px' }} />
+                          </button>
+                          
+                          <select
+                            value={vehicle.status}
+                            onChange={(e) => handleStatusUpdate(vehicle.id, e.target.value)}
+                            className="status-select"
+                            disabled={loading}
+                            style={{
+                              padding: '6px 8px',
+                              border: '1px solid #ddd',
+                              borderRadius: '4px',
+                              fontSize: '12px',
+                              minWidth: '100px',
+                              height: '36px'
+                            }}
+                          >
+                            <option value="Available">Available</option>
+                            <option value="Rented">Rented</option>
+                            <option value="Maintenance">Maintenance</option>
+                            <option value="Out_of_Service">Out of Service</option>
+                          </select>
+                          
+                          <button
+                            onClick={() => handleDeleteVehicle(vehicle.id)}
+                            className="action-btn delete"
+                            disabled={loading}
+                            title="Delete Vehicle"
+                            style={{
+                              backgroundColor: '#dc3545',
+                              color: 'white',
+                              border: 'none',
+                              borderRadius: '6px',
+                              padding: '8px',
+                              width: '36px',
+                              height: '36px',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center'
+                            }}
+                          >
+                            <Trash2 style={{ width: '16px', height: '16px' }} />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}

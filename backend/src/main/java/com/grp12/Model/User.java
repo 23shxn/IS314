@@ -40,7 +40,7 @@ public class User {
     private String status; // PENDING, APPROVED, REJECTED
 
     @Column(name = "approved")
-    private boolean approved = false;
+    private Boolean approved = false; // Use Boolean (wrapper) instead of boolean (primitive)
 
     // Default constructor
     public User() {}
@@ -88,11 +88,11 @@ public class User {
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
 
-    public boolean isApproved() {
+    public Boolean getApproved() { // or isApproved()
         return approved;
     }
 
-    public void setApproved(boolean approved) {
+    public void setApproved(Boolean approved) {
         this.approved = approved;
     }
 

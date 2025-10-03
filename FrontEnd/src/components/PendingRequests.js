@@ -222,21 +222,48 @@ const PendingRequests = ({ setCurrentUser }) => {
                               href={`data:image/jpeg;base64,${request.driversLicenseImage}`}
                               target="_blank"
                               rel="noopener noreferrer"
+                              style={{
+                                cursor: 'pointer',
+                                display: 'inline-block'
+                              }}
+                              onClick={(e) => {
+                                // Force open in new tab if default doesn't work
+                                e.preventDefault();
+                                const newWindow = window.open();
+                                newWindow.document.write(`
+                                  <html>
+                                    <head><title>Driver's License - ${request.firstName} ${request.lastName}</title></head>
+                                    <body style="margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #f0f0f0;">
+                                      <img src="data:image/jpeg;base64,${request.driversLicenseImage}" 
+                                           alt="Driver's License" 
+                                           style="max-width: 100%; max-height: 100%; object-fit: contain;" />
+                                    </body>
+                                  </html>
+                                `);
+                                newWindow.document.close();
+                              }}
                             >
                               <img
                                 src={`data:image/jpeg;base64,${request.driversLicenseImage}`}
                                 alt={`${request.firstName}'s license`}
                                 className="license-image"
+                                style={{
+                                  maxWidth: '80px',
+                                  maxHeight: '60px',
+                                  objectFit: 'cover',
+                                  border: '1px solid #ddd',
+                                  borderRadius: '4px',
+                                  cursor: 'pointer'
+                                }}
                                 onError={(e) => {
                                   e.target.style.display = 'none';
-                                  e.target.parentElement.nextSibling.style.display = 'inline';
+                                  e.target.parentElement.parentElement.querySelector('.no-image').style.display = 'inline';
                                 }}
                               />
                             </a>
                           ) : (
-                            <span style={{ display: 'inline' }}>No Image</span>
+                            <span className="no-image" style={{ display: 'inline', color: '#666' }}>No Image</span>
                           )}
-                          <span style={{ display: 'none' }}>Invalid Image</span>
                         </td>
                         <td>{request.status}</td>
                         <td className="table-actions">
@@ -245,16 +272,46 @@ const PendingRequests = ({ setCurrentUser }) => {
                             className="action-btn approve"
                             disabled={loading}
                             title="Approve"
+                            style={{
+                              backgroundColor: '#28a745',
+                              color: 'white',
+                              border: 'none',
+                              borderRadius: '8px',
+                              padding: '10px',
+                              margin: '0 4px',
+                              width: '45px',
+                              height: '45px',
+                              cursor: 'pointer',
+                              display: 'inline-block',
+                              textAlign: 'center',
+                              verticalAlign: 'middle',
+                              position: 'relative'
+                            }}
                           >
-                            <Check className="action-icon" />
+                            <Check style={{ width: '20px', height: '20px', color: 'white' }} />
                           </button>
                           <button
                             onClick={() => handleReject(request.id)}
                             className="action-btn reject"
                             disabled={loading}
                             title="Reject"
+                            style={{
+                              backgroundColor: '#dc3545',
+                              color: 'white',
+                              border: 'none',
+                              borderRadius: '8px',
+                              padding: '10px',
+                              margin: '0 4px',
+                              width: '45px',
+                              height: '45px',
+                              cursor: 'pointer',
+                              display: 'inline-block',
+                              textAlign: 'center',
+                              verticalAlign: 'middle',
+                              position: 'relative'
+                            }}
                           >
-                            <X className="action-icon" />
+                            <X style={{ width: '20px', height: '20px', color: 'white' }} />
                           </button>
                         </td>
                       </tr>

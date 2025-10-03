@@ -91,11 +91,18 @@
   font-weight: 600;
   transition: all 0.3s;
   text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.action-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
 .action-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+  transform: none;
 }
 
 .action-btn.add-vehicle {
@@ -187,6 +194,17 @@
   border-bottom: 1px solid #dee2e6;
 }
 
+.vehicles-table td {
+  vertical-align: middle !important;
+  text-align: center !important;
+}
+
+.vehicles-table th:last-child,
+.vehicles-table td:last-child {
+  width: 200px !important;
+  min-width: 200px !important;
+}
+
 .vehicles-table th {
   background: #f8f9fa;
   font-weight: 600;
@@ -201,6 +219,10 @@
   display: flex;
   gap: 5px;
   align-items: center;
+  text-align: center !important;
+  white-space: nowrap !important;
+  padding: 8px !important;
+  vertical-align: middle !important;
 }
 
 .status-select {
@@ -209,6 +231,13 @@
   border-radius: 4px;
   font-size: 12px;
   background: white;
+  transition: border-color 0.2s ease;
+}
+
+.status-select:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
 }
 
 .status-badge {

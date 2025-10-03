@@ -38,8 +38,9 @@
 
 .requests-table th,
 .requests-table td {
-  padding: 12px;
-  text-align: left;
+  text-align: center;
+  vertical-align: middle;
+  padding: 12px 8px;
   border-bottom: 1px solid #ddd;
 }
 
@@ -48,8 +49,15 @@
   font-weight: bold;
 }
 
+.requests-table th:last-child,
+.requests-table td:last-child {
+  width: 120px !important;
+  min-width: 120px !important;
+}
+
 .requests-table td {
-  vertical-align: middle;
+  vertical-align: middle !important;
+  text-align: center !important;
 }
 
 .license-image {
@@ -60,13 +68,10 @@
 }
 
 .table-actions {
-  display: flex;
-  gap: 8px;
-  justify-content: center;
-  align-items: center;
-  flex-wrap: nowrap;
-  white-space: nowrap;
-  min-width: 100px;
+  text-align: center !important;
+  white-space: nowrap !important;
+  padding: 8px !important;
+  vertical-align: middle !important;
 }
 
 .requests-table .table-actions {
@@ -74,43 +79,104 @@
 }
 
 .action-btn {
-  padding: 8px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  font-size: 14px;
-  transition: background-color 0.2s;
+  padding: 10px !important;
+  margin: 0 6px !important;
+  border: none !important;
+  border-radius: 8px !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 45px !important;
+  height: 45px !important;
+  transition: all 0.2s ease !important;
+  vertical-align: middle !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
 }
 
 .action-btn.approve {
-  background-color: #28a745;
-  color: white;
+  background-color: #28a745 !important;
+  color: white !important;
 }
 
 .action-btn.approve:hover:not(:disabled) {
-  background-color: #218838;
+  background-color: #218838 !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15) !important;
 }
 
 .action-btn.reject {
-  background-color: #dc3545;
-  color: white;
+  background-color: #dc3545 !important;
+  color: white !important;
 }
 
 .action-btn.reject:hover:not(:disabled) {
-  background-color: #c82333;
+  background-color: #c82333 !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15) !important;
 }
 
 .action-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+  opacity: 0.6 !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
 }
 
 .action-icon {
-  width: 18px;
-  height: 18px;
+  width: 20px !important;
+  height: 20px !important;
+  color: white !important;
+}
+
+/* More specific selectors to override any conflicting styles */
+.pending-requests .requests-table .table-actions .action-btn {
+  padding: 10px !important;
+  margin: 0 6px !important;
+  border: none !important;
+  border-radius: 8px !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 45px !important;
+  height: 45px !important;
+  transition: all 0.2s ease !important;
+  vertical-align: middle !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+}
+
+.pending-requests .requests-table .table-actions .action-btn.approve {
+  background-color: #28a745 !important;
+  color: white !important;
+}
+
+.pending-requests .requests-table .table-actions .action-btn.approve:hover:not(:disabled) {
+  background-color: #218838 !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15) !important;
+}
+
+.pending-requests .requests-table .table-actions .action-btn.reject {
+  background-color: #dc3545 !important;
+  color: white !important;
+}
+
+.pending-requests .requests-table .table-actions .action-btn.reject:hover:not(:disabled) {
+  background-color: #c82333 !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15) !important;
+}
+
+.pending-requests .requests-table .table-actions .action-btn:disabled {
+  opacity: 0.6 !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+}
+
+.pending-requests .requests-table .table-actions .action-icon {
+  width: 20px !important;
+  height: 20px !important;
+  color: white !important;
 }
