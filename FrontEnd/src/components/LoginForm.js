@@ -220,20 +220,27 @@ const LoginForm = ({ setCurrentUser }) => {
 
   // New function to proceed with registration after email verification
   const proceedWithRegistration = async () => {
-    const formData = new FormData();
-    formData.append('firstName', credentials.firstName);
-    formData.append('lastName', credentials.lastName);
-    formData.append('phoneNumber', credentials.phoneNumber);
-    formData.append('email', credentials.email);
-    formData.append('password', credentials.password);
-    formData.append('confirmPassword', credentials.confirmPassword);
-    formData.append('driversLicenseNumber', credentials.driversLicenseNumber);
-    formData.append('driversLicenseImage', credentials.driversLicenseImage);
-
     try {
+      // Send as JSON, not FormData
+      const registrationData = {
+        firstName: credentials.firstName,
+        lastName: credentials.lastName,
+        phoneNumber: credentials.phoneNumber,
+        email: credentials.email,
+        password: credentials.password,
+        confirmPassword: credentials.confirmPassword,
+        driversLicenseNumber: credentials.driversLicenseNumber,
+        driversLicenseImage: credentials.driversLicenseImage // This is already base64 string
+      };
+
+      console.log('Sending registration data:', { ...registrationData, driversLicenseImage: 'base64_string', password: '[HIDDEN]' });
+
       const response = await fetch('http://localhost:8080/api/auth/register', {
         method: 'POST',
-        body: formData,
+        headers: { 
+          'Content-Type': 'application/json' // Send as JSON
+        },
+        body: JSON.stringify(registrationData), // Send as JSON string
         credentials: 'include'
       });
 
@@ -551,30 +558,34 @@ const LoginForm = ({ setCurrentUser }) => {
   };
 
   // Add image compression function
-  const compressImage = (file, maxWidth = 800, quality = 0.8) => {
-    return new Promise((resolve, reject) => {
+  const compressImage = (file, maxWidth = 800, maxHeight = 600, quality = 0.7) => {
+    return new Promise((resolve) => {
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
       const img = new Image();
       
       img.onload = () => {
-        const ratio = Math.min(maxWidth / img.width, maxWidth / img.height);
-        canvas.width = img.width * ratio;
-        canvas.height = img.height * ratio;
+        // Calculate new dimensions
+        let { width, height } = img;
         
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
-        
-        // Check size (aim for under 500KB)
-        if (compressedDataUrl.length > 500000) {
-          const smallerImage = canvas.toDataURL('image/jpeg', 0.5);
-          resolve(smallerImage);
-        } else {
-          resolve(compressedDataUrl);
+        if (width > maxWidth || height > maxHeight) {
+          const ratio = Math.min(maxWidth / width, maxHeight / height);
+          width *= ratio;
+          height *= ratio;
         }
+        
+        // Set canvas dimensions
+        canvas.width = width;
+        canvas.height = height;
+        
+        // Draw and compress
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        // Convert to base64 with compression
+        const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+        resolve(compressedDataUrl);
       };
       
-      img.onerror = () => reject(new Error('Failed to load image'));
       img.src = URL.createObjectURL(file);
     });
   };
@@ -582,39 +593,30 @@ const LoginForm = ({ setCurrentUser }) => {
   // Modify your existing handleFileChange function
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
-    if (!file) return;
-
-    if (!file.type.startsWith('image/')) {
-      setError('Please upload a valid image file');
-      e.target.value = '';
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      setError('Image file size must be less than 5MB');
-      e.target.value = '';
-      return;
-    }
-
-    try {
+    if (file) {
       setImageLoading(true);
-      setError('');
-
-      // Compress the image
-      const compressedImage = await compressImage(file, 800, 0.8);
-      
-      // Convert base64 to blob for FormData
-      const response = await fetch(compressedImage);
-      const blob = await response.blob();
-      const compressedFile = new File([blob], file.name, { type: 'image/jpeg' });
-
-      setCredentials({ ...credentials, driversLicenseImage: compressedFile });
-      setImageLoading(false);
-    } catch (error) {
-      console.error('Image compression failed:', error);
-      setError('Failed to process image. Please try a different image.');
-      setImageLoading(false);
-      e.target.value = '';
+      try {
+        console.log('Original file size:', file.size, 'bytes');
+        
+        // Compress the image
+        const compressedDataUrl = await compressImage(file);
+        
+        // Convert to base64 (remove data URL prefix)
+        const base64String = compressedDataUrl.split(',')[1];
+        
+        console.log('Compressed image size:', base64String.length * 0.75, 'bytes (approx)');
+        
+        setCredentials({
+          ...credentials,
+          driversLicenseImage: base64String
+        });
+        
+      } catch (error) {
+        console.error('Image compression error:', error);
+        setError('Failed to process image. Please try a different image.');
+      } finally {
+        setImageLoading(false);
+      }
     }
   };
 
@@ -964,9 +966,15 @@ const LoginForm = ({ setCurrentUser }) => {
                     required
                     disabled={loading || imageLoading}
                   />
-                  {imageLoading && <p className="processing-message">Processing image...</p>}
+                  {imageLoading && (
+                    <p className="processing-message" style={{ color: '#007bff', fontSize: '12px', marginTop: '5px' }}>
+                      📷 Compressing image...
+                    </p>
+                  )}
                   {credentials.driversLicenseImage && !imageLoading && (
-                    <p className="file-selected">Selected: {credentials.driversLicenseImage.name}</p>
+                    <p className="file-selected" style={{ color: '#28a745', fontSize: '12px', marginTop: '5px' }}>
+                      ✅ Image processed and ready
+                    </p>
                   )}
                 </div>
               </>

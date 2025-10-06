@@ -44,6 +44,9 @@ public class RegistrationRequest {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Column(name = "approved_at")
+    private LocalDateTime approvedAt;
+
     // Default constructor
     public RegistrationRequest() {
         this.createdAt = LocalDateTime.now();
@@ -105,6 +108,9 @@ public class RegistrationRequest {
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 
+    public LocalDateTime getApprovedAt() { return approvedAt; }
+    public void setApprovedAt(LocalDateTime approvedAt) { this.approvedAt = approvedAt; }
+
     @Override
     public String toString() {
         return "RegistrationRequest{" +
@@ -114,6 +120,7 @@ public class RegistrationRequest {
                 ", email='" + email + '\'' +
                 ", status='" + status + '\'' +
                 ", createdAt=" + createdAt +
+                ", approvedAt=" + approvedAt +
                 '}';
     }
 }

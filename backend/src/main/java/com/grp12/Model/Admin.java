@@ -28,12 +28,15 @@ public class Admin {
     @Column(name = "password", nullable = false, length = 255)
     private String password;
     
-    @Column(name = "role", nullable = false, length = 50)
-    private String role = "ROLE_ADMIN";
+    @Column(name = "role", nullable = false, length = 20)
+    private String role = "ADMIN"; // Default role
     
     @Column(name = "status", nullable = false, length = 20)
     private String status = "ACTIVE"; // ACTIVE, INACTIVE
     
+    @Column(name = "active", nullable = false)
+    private boolean active = true;
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
     
@@ -43,8 +46,9 @@ public class Admin {
     // Default constructor
     public Admin() {
         this.createdAt = LocalDateTime.now();
-        this.role = "ROLE_ADMIN";
+        this.role = "ADMIN"; // Fixed: was "ROLE_ADMIN", now consistent with field default
         this.status = "ACTIVE";
+        this.active = true;
     }
 
     // Constructor for easy creation
@@ -89,11 +93,27 @@ public class Admin {
         this.updatedAt = LocalDateTime.now();
     }
 
+    public boolean isActive() { return active; }
+    public void setActive(boolean active) { 
+        this.active = active; 
+        this.updatedAt = LocalDateTime.now();
+    }
+
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+
+    // Utility method to get full name
+    public String getFullName() {
+        return firstName + " " + lastName;
+    }
+
+    // Check if admin is super admin
+    public boolean isSuperAdmin() {
+        return "SUPER_ADMIN".equals(this.role);
+    }
 
     @Override
     public String toString() {
@@ -105,6 +125,7 @@ public class Admin {
                 ", email='" + email + '\'' +
                 ", role='" + role + '\'' +
                 ", status='" + status + '\'' +
+                ", active=" + active +
                 ", createdAt=" + createdAt +
                 '}';
     }

@@ -7,13 +7,14 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface RegistrationRequestRepository extends JpaRepository<RegistrationRequest, Long> {
     
     List<RegistrationRequest> findByStatus(String status);
     
-    List<RegistrationRequest> findByEmail(String email);
+    Optional<RegistrationRequest> findByEmail(String email);
     
     List<RegistrationRequest> findByDriversLicenseNumber(String driversLicenseNumber);
     

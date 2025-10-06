@@ -37,64 +37,29 @@ public class UserService {
     private final Map<String, String> passwordResetTokens = new ConcurrentHashMap<>();
     private final Map<String, LocalDateTime> tokenExpiryTimes = new ConcurrentHashMap<>();
 
-    public RegistrationRequest registerUser(User user) {
+    public RegistrationRequest registerUser(User user) {  // Change return type back to RegistrationRequest
         try {
-            // Validate inputs
-            if (!NAME_PATTERN.matcher(user.getFirstName()).matches()) {
-                throw new IllegalArgumentException("First name must contain only letters and spaces");
+            // Validate input
+            if (user.getEmail() == null || user.getPassword() == null) {
+                throw new IllegalArgumentException("Email and password are required");
             }
             
-            if (!NAME_PATTERN.matcher(user.getLastName()).matches()) {
-                throw new IllegalArgumentException("Last name must contain only letters and spaces");
-            }
-            
-            if (!PHONE_PATTERN.matcher(user.getPhoneNumber()).matches()) {
-                throw new IllegalArgumentException("Phone number must be exactly 7 digits");
-            }
-            
-            if (!EMAIL_PATTERN.matcher(user.getEmail()).matches()) {
-                throw new IllegalArgumentException("Email must end with @gmail.com");
-            }
-            
-            if (!PASSWORD_PATTERN.matcher(user.getPassword()).matches()) {
-                throw new IllegalArgumentException("Password must be at least 8 characters, including uppercase, lowercase, number, and special character");
-            }
-            
-            // Check if email already exists in User table (more efficient)
-            if (userRepository.existsByEmail(user.getEmail())) {
+            // Check if email already exists in users or pending requests
+            if (userRepository.findByEmail(user.getEmail()).isPresent()) {
                 throw new IllegalArgumentException("Email already exists");
             }
             
-            // Check if phone number already exists in User table
-            if (userRepository.existsByPhoneNumber(user.getPhoneNumber())) {
-                throw new IllegalArgumentException("Phone number already exists");
+            if (registrationRequestRepository.findByEmail(user.getEmail()).isPresent()) {
+                throw new IllegalArgumentException("Registration request already exists for this email");
             }
             
-            // Check if driver's license already exists in User table (more efficient)
-            if (userRepository.existsByDriversLicenseNumber(user.getDriversLicenseNumber())) {
-                throw new IllegalArgumentException("Driver's license number already exists");
-            }
-            
-            // Check in pending requests as well
-            if (registrationRequestRepository.existsByEmail(user.getEmail())) {
-                throw new IllegalArgumentException("Email already has a pending request");
-            }
-            
-            if (registrationRequestRepository.existsByPhoneNumber(user.getPhoneNumber())) {
-                throw new IllegalArgumentException("Phone number already has a pending request");
-            }
-            
-            if (registrationRequestRepository.existsByDriversLicenseNumber(user.getDriversLicenseNumber())) {
-                throw new IllegalArgumentException("Driver's license number already has a pending request");
-            }
-            
-            // Create new registration request
+            // Create RegistrationRequest instead of User
             RegistrationRequest request = new RegistrationRequest();
             request.setFirstName(user.getFirstName());
             request.setLastName(user.getLastName());
             request.setPhoneNumber(user.getPhoneNumber());
             request.setEmail(user.getEmail());
-            request.setPassword(passwordEncoder.encode(user.getPassword()));
+            request.setPassword(passwordEncoder.encode(user.getPassword())); // Encode password
             request.setDriversLicenseNumber(user.getDriversLicenseNumber());
             request.setDriversLicenseImage(user.getDriversLicenseImage());
             request.setStatus("PENDING");
@@ -102,6 +67,7 @@ public class UserService {
             
             RegistrationRequest savedRequest = registrationRequestRepository.save(request);
             System.out.println("Registration request created with ID: " + savedRequest.getId());
+            
             return savedRequest;
             
         } catch (Exception e) {
@@ -178,55 +144,42 @@ public class UserService {
         }
     }
 
-    public User approveUser(Long userId) {
-        try {
-            RegistrationRequest request = registrationRequestRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Registration request not found"));
-            
-            if (!"PENDING".equals(request.getStatus())) {
-                throw new RuntimeException("Request already processed");
-            }
-            
-            // Create user from registration request
-            User user = new User();
-            user.setFirstName(request.getFirstName());
-            user.setLastName(request.getLastName());
-            user.setEmail(request.getEmail());
-            user.setPassword(request.getPassword());
-            user.setPhoneNumber(request.getPhoneNumber());
-            user.setDriversLicenseNumber(request.getDriversLicenseNumber());
-            user.setDriversLicenseImage(request.getDriversLicenseImage());
-            user.setRole("ROLE_CUSTOMER");
-            user.setStatus("APPROVED");
-            // Set createdAt to current time instead of just checking if it's null
-            user.setCreatedAt(LocalDateTime.now());
-            
-            // Save user to User table
-            User savedUser = userRepository.save(user);
-            
-            // Update request status
-            request.setStatus("APPROVED");
-            registrationRequestRepository.save(request);
-            
-            // Send approval email
-            try {
-                emailService.sendApprovalNotification(
-                    request.getEmail(), 
-                    request.getFirstName(), 
-                    request.getLastName(), 
-                    true
-                );
-                System.out.println("Approval email sent to: " + request.getEmail());
-            } catch (MessagingException e) {
-                System.err.println("Failed to send approval email: " + e.getMessage());
-            }
-            
-            return savedUser;
-            
-        } catch (Exception e) {
-            System.err.println("Error in approveUser: " + e.getMessage());
-            throw new RuntimeException("Failed to approve user: " + e.getMessage());
+    public User approveUser(Long requestId) {
+        RegistrationRequest request = registrationRequestRepository.findById(requestId)
+            .orElseThrow(() -> new RuntimeException("Registration request not found"));
+        
+        if (!"PENDING".equals(request.getStatus())) {
+            throw new RuntimeException("Registration request is not pending");
         }
+        
+        // Create new user from registration request
+        User user = new User();
+        user.setFirstName(request.getFirstName());
+        user.setLastName(request.getLastName());
+        user.setEmail(request.getEmail());
+        user.setPhoneNumber(request.getPhoneNumber());
+        user.setDriversLicenseNumber(request.getDriversLicenseNumber());
+        user.setDriversLicenseImage(request.getDriversLicenseImage());
+        user.setPassword(request.getPassword());
+        user.setStatus("APPROVED");
+        user.setEmailVerified(true);
+        user.setCreatedAt(java.time.LocalDateTime.now());
+        
+        User savedUser = userRepository.save(user);
+        
+        // Update request status
+        request.setStatus("APPROVED");
+        request.setApprovedAt(java.time.LocalDateTime.now());
+        registrationRequestRepository.save(request);
+        
+        // Send approval email
+        try {
+            emailService.sendApprovalNotification(request.getEmail(), request.getFirstName(), request.getLastName(), true);
+        } catch (Exception e) {
+            System.err.println("Failed to send approval email: " + e.getMessage());
+        }
+        
+        return savedUser; // Return User, not RegistrationRequest
     }
 
     public void rejectUser(Long userId) {

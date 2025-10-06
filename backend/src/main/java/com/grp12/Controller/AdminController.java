@@ -1,6 +1,7 @@
 package com.grp12.Controller;
 
 import com.grp12.Model.Admin;
+import com.grp12.Repository.AdminRepository; // Add this import
 import com.grp12.Services.AdminService;
 import com.grp12.Services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,10 +11,12 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder; // Add this import
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpServletRequest;
+import java.time.LocalDateTime; // Add this import
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
@@ -31,6 +34,12 @@ public class AdminController {
     
     @Autowired
     private UserService userService;
+    
+    @Autowired
+    private AdminRepository adminRepository; // Add this
+    
+    @Autowired
+    private PasswordEncoder passwordEncoder; // Add this
 
     @PostMapping("/register")
     public ResponseEntity<?> registerAdmin(@RequestBody Admin admin) {
@@ -59,36 +68,48 @@ public class AdminController {
     public ResponseEntity<?> loginAdmin(@RequestBody Map<String, String> loginRequest, 
                                        HttpServletRequest request) {
         try {
-            String emailOrUsername = loginRequest.get("emailOrUsername");
+            String email = loginRequest.get("email");
             String password = loginRequest.get("password");
             
-            // Authenticate using Spring Security
-            UsernamePasswordAuthenticationToken authToken = 
-                new UsernamePasswordAuthenticationToken(emailOrUsername, password);
+            System.out.println("=== ADMIN LOGIN ATTEMPT ===");
+            System.out.println("Email/Username: " + email);
+            System.out.println("Password length: " + (password != null ? password.length() : 0));
             
-            Authentication authentication = authenticationManager.authenticate(authToken);
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-            
-            // Store authentication in session
-            request.getSession().setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, 
-                SecurityContextHolder.getContext());
-            
-            // Get admin details for response
-            Admin authenticatedAdmin = adminService.loginAdmin(emailOrUsername, password);
-            if (authenticatedAdmin != null) {
-                // Remove password from response for security
-                authenticatedAdmin.setPassword(null);
-                return ResponseEntity.ok(authenticatedAdmin);
+            // Check if admin exists before authentication
+            Admin existingAdmin = adminService.getAdminByEmail(email);
+            if (existingAdmin == null) {
+                existingAdmin = adminService.getAdminByUsername(email);
             }
             
-            Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", "Invalid credentials or account inactive");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+            if (existingAdmin == null) {
+                System.out.println("Admin not found in database");
+                return ResponseEntity.badRequest().body(Map.of("error", "Admin not found"));
+            }
+            
+            System.out.println("Found admin: " + existingAdmin.getUsername() + " with role: " + existingAdmin.getRole());
+            
+            // Try authentication
+            Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(email, password)
+            );
+            
+            System.out.println("Authentication successful");
+            
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            
+            // Save to session
+            HttpSessionSecurityContextRepository repo = new HttpSessionSecurityContextRepository();
+            repo.saveContext(SecurityContextHolder.getContext(), request, null);
+            
+            existingAdmin.setPassword(null); // Remove password from response
+            return ResponseEntity.ok(existingAdmin);
             
         } catch (Exception e) {
-            Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", "Login failed: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+            System.err.println("=== LOGIN ERROR ===");
+            System.err.println("Error type: " + e.getClass().getSimpleName());
+            System.err.println("Error message: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body(Map.of("error", "Invalid credentials"));
         }
     }
 
@@ -234,6 +255,76 @@ public class AdminController {
             Map<String, String> errorResponse = new HashMap<>();
             errorResponse.put("error", "Failed to get current admin: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
+    @PostMapping("/add-admin")
+    public ResponseEntity<?> addAdmin(@RequestBody Admin admin, HttpServletRequest request) {
+        try {
+            // Get current admin from security context
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication == null || !authentication.isAuthenticated() || 
+                authentication.getName().equals("anonymousUser")) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Not authenticated"));
+            }
+            
+            // Get current admin by email/username
+            String currentUsername = authentication.getName();
+            Admin currentAdmin = adminService.getAdminByEmail(currentUsername);
+            if (currentAdmin == null) {
+                currentAdmin = adminService.getAdminByUsername(currentUsername);
+            }
+            
+            if (currentAdmin == null || !"SUPER_ADMIN".equals(currentAdmin.getRole())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("error", "Only super admins can add new admin accounts"));
+            }
+
+            // Validate input
+            if (admin.getUsername() == null || admin.getUsername().trim().isEmpty()) {
+                return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Username is required"));
+            }
+            
+            if (admin.getEmail() == null || admin.getEmail().trim().isEmpty()) {
+                return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Email is required"));
+            }
+            
+            if (admin.getPassword() == null || admin.getPassword().length() < 6) {
+                return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Password must be at least 6 characters"));
+            }
+
+            // Check if username or email already exists
+            if (adminRepository.findByUsername(admin.getUsername()).isPresent()) {
+                return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Username already exists"));
+            }
+            
+            if (adminRepository.findByEmail(admin.getEmail()).isPresent()) {
+                return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Email already exists"));
+            }
+
+            // Set admin properties
+            admin.setPassword(passwordEncoder.encode(admin.getPassword()));
+            admin.setRole("ADMIN"); // New admins get regular admin role
+            admin.setCreatedAt(LocalDateTime.now());
+            admin.setActive(true); // Make sure new admin is active
+            
+            Admin savedAdmin = adminRepository.save(admin);
+            savedAdmin.setPassword(null); // Remove password from response
+            
+            return ResponseEntity.ok().body(Map.of(
+                "message", "Admin added successfully",
+                "admin", savedAdmin
+            ));
+            
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                .body(Map.of("error", "Failed to add admin: " + e.getMessage()));
         }
     }
 }

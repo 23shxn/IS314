@@ -4,6 +4,7 @@ import com.grp12.Model.User;
 import com.grp12.Model.RegistrationRequest;
 import com.grp12.Services.UserService;
 import com.grp12.Services.EmailService;
+import com.grp12.Services.ImageCompressionService; // Add this
 import com.grp12.Repository.RegistrationRequestRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -29,70 +30,64 @@ import java.util.Optional;
 @RequestMapping("/api/auth")
 @CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
 public class UserController {
+
     @Autowired
     private UserService userService;
-    
+
+    @Autowired
+    private ImageCompressionService imageCompressionService; // Make sure this is added
+
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@RequestBody User user) {
+        try {
+            // Compress the drivers license image if it exists
+            if (user.getDriversLicenseImage() != null && !user.getDriversLicenseImage().trim().isEmpty()) {
+                System.out.println("Compressing drivers license image...");
+                String compressedImage = imageCompressionService.compressBase64Image(user.getDriversLicenseImage());
+
+                if (compressedImage == null) {
+                    return ResponseEntity.badRequest()
+                        .body(Map.of("error", "Invalid image format. Please upload a valid image."));
+                }
+
+                user.setDriversLicenseImage(compressedImage);
+                System.out.println("Image compression completed successfully");
+            }
+
+            // Validate user input
+            if (userService.getUserByEmail(user.getEmail()) != null) {
+                return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Email already exists"));
+            }
+
+            // Register user - this now returns RegistrationRequest
+            RegistrationRequest registrationRequest = userService.registerUser(user);
+            
+            return ResponseEntity.ok().body(Map.of(
+                "message", "Registration request submitted successfully! Please wait for admin approval.",
+                "request", Map.of(
+                    "id", registrationRequest.getId(),
+                    "email", registrationRequest.getEmail(),
+                    "status", registrationRequest.getStatus()
+                )
+            ));
+
+        } catch (Exception e) {
+            System.err.println("Registration error: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.badRequest()
+                .body(Map.of("error", "Registration failed: " + e.getMessage()));
+        }
+    }
+
     @Autowired
     private AuthenticationManager authenticationManager;
-    
+
     @Autowired
     private EmailService emailService;
 
     @Autowired
     private RegistrationRequestRepository registrationRequestRepository;
-
-    @PostMapping("/register")
-    public ResponseEntity<?> register(
-            @RequestParam("firstName") String firstName,
-            @RequestParam("lastName") String lastName,
-            @RequestParam("phoneNumber") String phoneNumber,
-            @RequestParam("email") String email,
-            @RequestParam("password") String password,
-            @RequestParam("confirmPassword") String confirmPassword,
-            @RequestParam("driversLicenseNumber") String driversLicenseNumber,
-            @RequestParam("driversLicenseImage") MultipartFile driversLicenseImage) {
-        
-        try {
-            // Validate file
-            if (driversLicenseImage.isEmpty()) {
-                Map<String, String> errorResponse = new HashMap<>();
-                errorResponse.put("error", "Driver's license image is required");
-                return ResponseEntity.badRequest().body(errorResponse);
-            }
-
-            // Validate confirm password
-            if (!password.equals(confirmPassword)) {
-                Map<String, String> errorResponse = new HashMap<>();
-                errorResponse.put("error", "Passwords do not match");
-                return ResponseEntity.badRequest().body(errorResponse);
-            }
-
-            User user = new User();
-            user.setFirstName(firstName);
-            user.setLastName(lastName);
-            user.setPhoneNumber(phoneNumber);
-            user.setEmail(email);
-            user.setPassword(password);
-            user.setDriversLicenseNumber(driversLicenseNumber);
-            user.setDriversLicenseImage(Base64.getEncoder().encodeToString(driversLicenseImage.getBytes()));
-            
-            RegistrationRequest request = userService.registerUser(user);
-            return ResponseEntity.ok(request);
-            
-        } catch (IllegalArgumentException e) {
-            Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", e.getMessage());
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
-        } catch (IOException e) {
-            Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", "Failed to process image file");
-            return ResponseEntity.badRequest().body(errorResponse);
-        } catch (Exception e) {
-            Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", "Registration failed: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
-        }
-    }
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody User user, HttpServletRequest request) {

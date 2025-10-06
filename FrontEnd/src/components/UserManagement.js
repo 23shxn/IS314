@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { LogOut, Layout, Users, Car, ClipboardList, ToolCase } from 'lucide-react';
@@ -73,7 +72,13 @@ const UserManagement = ({ setCurrentUser }) => {
 
   const isValidBase64 = (str) => {
     try {
-      return str && typeof str === 'string' && str.trim().length > 0 && !str.includes('data:');
+      if (!str || typeof str !== 'string' || str.trim().length === 0) {
+        return false;
+      }
+      
+      // Check if it's a valid base64 string
+      const base64Regex = /^[A-Za-z0-9+/]*={0,2}$/;
+      return base64Regex.test(str) && str.length > 100; // Minimum length check
     } catch {
       return false;
     }
@@ -159,26 +164,23 @@ const UserManagement = ({ setCurrentUser }) => {
                         <td>{user.phoneNumber}</td>
                         <td>{user.driversLicenseNumber}</td>
                         <td>
-                          {isValidBase64(user.driversLicenseImage) ? (
-                            <a
-                              href={`data:image/jpeg;base64,${user.driversLicenseImage}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
+                          {user.driversLicenseImage && isValidBase64(user.driversLicenseImage) ? (
+                            <div className="image-container">
                               <img
                                 src={`data:image/jpeg;base64,${user.driversLicenseImage}`}
                                 alt={`${user.firstName}'s license`}
                                 className="license-image"
+                                style={{ maxWidth: '100px', maxHeight: '100px', objectFit: 'cover' }}
                                 onError={(e) => {
                                   e.target.style.display = 'none';
-                                  e.target.parentElement.nextSibling.style.display = 'inline';
+                                  e.target.nextElementSibling.style.display = 'inline';
                                 }}
                               />
-                            </a>
+                              <span style={{ display: 'none', color: '#999' }}>Invalid Image</span>
+                            </div>
                           ) : (
-                            <span style={{ display: 'inline' }}>No Image</span>
+                            <span style={{ color: '#999' }}>No Image</span>
                           )}
-                          <span style={{ display: 'none' }}>Invalid Image</span>
                         </td>
                       </tr>
                     ))}

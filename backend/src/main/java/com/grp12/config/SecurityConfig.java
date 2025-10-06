@@ -14,6 +14,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -51,40 +52,52 @@ public class SecurityConfig {
 
     @Bean
     public UserDetailsService userDetailsService() {
-        return email -> {
-            try {
-                Optional<Admin> adminOpt = adminRepository.findByEmailOrUsername(email, email);
-                if (adminOpt.isPresent()) {
-                    Admin admin = adminOpt.get();
-                    if ("ACTIVE".equals(admin.getStatus())) {
-                        return org.springframework.security.core.userdetails.User.builder()
-                                .username(admin.getEmail())
-                                .password(admin.getPassword())
-                                .authorities(List.of(new SimpleGrantedAuthority("ROLE_ADMIN")))
-                                .build();
-                    }
-                }
-            } catch (Exception e) {
-                System.err.println("Error loading admin: " + e.getMessage());
-            }
+        return new UserDetailsService() {
+            @Autowired
+            private UserRepository userRepository;
             
-            try {
-                Optional<User> userOpt = userRepository.findByEmail(email);
-                if (userOpt.isPresent()) {
-                    User user = userOpt.get();
-                    if ("APPROVED".equals(user.getStatus())) {
-                        return org.springframework.security.core.userdetails.User.builder()
-                                .username(user.getEmail())
-                                .password(user.getPassword())
-                                .authorities(List.of(new SimpleGrantedAuthority("ROLE_CUSTOMER")))
-                                .build();
-                    }
+            @Autowired
+            private AdminRepository adminRepository;
+
+            @Override
+            public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+                System.out.println("=== LOADING USER: " + username + " ===");
+                
+                // First try to find regular user
+                Optional<User> userOptional = userRepository.findByEmail(username);
+                if (userOptional.isEmpty()) {
+                    userOptional = userRepository.findByEmail(username);
                 }
-            } catch (Exception e) {
-                System.err.println("Error loading user: " + e.getMessage());
+                
+                if (userOptional.isPresent()) {
+                    User user = userOptional.get();
+                    System.out.println("Found regular user: " + user.getEmail());
+                    return org.springframework.security.core.userdetails.User.builder()
+                        .username(user.getEmail())
+                        .password(user.getPassword())
+                        .roles("USER")
+                        .build();
+                }
+                
+                // Then try to find admin user
+                Optional<Admin> adminOptional = adminRepository.findByEmail(username);
+                if (adminOptional.isEmpty()) {
+                    adminOptional = adminRepository.findByUsername(username);
+                }
+                
+                if (adminOptional.isPresent()) {
+                    Admin admin = adminOptional.get();
+                    System.out.println("Found admin user: " + admin.getEmail() + " with role: " + admin.getRole());
+                    return org.springframework.security.core.userdetails.User.builder()
+                        .username(admin.getEmail())
+                        .password(admin.getPassword())
+                        .roles(admin.getRole()) // This should be "ADMIN" or "SUPER_ADMIN"
+                        .build();
+                }
+                
+                System.out.println("User not found: " + username);
+                throw new UsernameNotFoundException("User not found: " + username);
             }
-            
-            throw new UsernameNotFoundException("User not found: " + email);
         };
     }
 
@@ -123,10 +136,15 @@ public class SecurityConfig {
                 .requestMatchers("/api/vehicles/locations").permitAll()
                 .requestMatchers("/api/vehicles/types").permitAll()
                 
-                // Admin endpoints - require admin role
-                .requestMatchers("/api/auth/admin/login").permitAll()
-                .requestMatchers("/api/auth/admin/**").hasRole("ADMIN")
+                // Admin public endpoints - MUST come before the secured admin endpoints
+                .requestMatchers("/api/admin/login").permitAll()
+                .requestMatchers("/api/admin/register").permitAll()
+                .requestMatchers("/api/admin/is-first-admin").permitAll()
+                .requestMatchers("/api/admin/add-admin").permitAll() // Add this if needed
+                
+                // Admin secured endpoints - comes AFTER the public ones
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                .requestMatchers("/api/auth/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/auth/users/**").hasRole("ADMIN")
                 .requestMatchers("/api/auth/pending-requests").hasRole("ADMIN")
                 .requestMatchers("/api/auth/approve-user/**").hasRole("ADMIN")

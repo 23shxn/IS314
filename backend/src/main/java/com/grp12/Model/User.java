@@ -16,7 +16,7 @@ public class User {
     // Match database column order
     @Lob
     @Column(name = "drivers_license_image", columnDefinition = "TEXT")
-    private String driversLicenseImage; // Move to position 2
+    private String driversLicenseImage; // Should be String, not File or byte[]
     
     @Column(name = "drivers_license_number", nullable = false, unique = true, length = 50)
     private String driversLicenseNumber; // Move to position 3
@@ -44,6 +44,9 @@ public class User {
 
     @Column(name = "approved")
     private Boolean approved = false; // Use Boolean (wrapper) instead of boolean (primitive)
+
+    @Column(name = "email_verified")
+    private Boolean emailVerified = false;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
@@ -97,9 +100,6 @@ public class User {
     
     public String getDriversLicenseImage() { return driversLicenseImage; }
     public void setDriversLicenseImage(String driversLicenseImage) {
-        if (driversLicenseImage != null && driversLicenseImage.length() > 500000) { // 500KB limit
-            throw new IllegalArgumentException("Image too large. Maximum size is 500KB");
-        }
         this.driversLicenseImage = driversLicenseImage;
     }
     
@@ -115,6 +115,14 @@ public class User {
 
     public void setApproved(Boolean approved) {
         this.approved = approved;
+    }
+
+    public Boolean getEmailVerified() {
+        return emailVerified;
+    }
+
+    public void setEmailVerified(Boolean emailVerified) {
+        this.emailVerified = emailVerified;
     }
 
     public LocalDateTime getCreatedAt() {
@@ -135,6 +143,8 @@ public class User {
                 ", phoneNumber='" + phoneNumber + '\'' +
                 ", role='" + role + '\'' +
                 ", status='" + status + '\'' +
+                ", approved=" + approved +
+                ", emailVerified=" + emailVerified +
                 ", createdAt=" + createdAt +
                 '}';
     }
