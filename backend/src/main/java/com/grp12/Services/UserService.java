@@ -37,29 +37,43 @@ public class UserService {
     private final Map<String, String> passwordResetTokens = new ConcurrentHashMap<>();
     private final Map<String, LocalDateTime> tokenExpiryTimes = new ConcurrentHashMap<>();
 
-    public RegistrationRequest registerUser(User user) {  // Change return type back to RegistrationRequest
+    public RegistrationRequest registerUser(User user) {
         try {
             // Validate input
             if (user.getEmail() == null || user.getPassword() == null) {
                 throw new IllegalArgumentException("Email and password are required");
             }
             
-            // Check if email already exists in users or pending requests
-            if (userRepository.findByEmail(user.getEmail()).isPresent()) {
-                throw new IllegalArgumentException("Email already exists");
+            // Check if email already exists for APPROVED users only
+            Optional<User> existingUser = userRepository.findByEmail(user.getEmail());
+            if (existingUser.isPresent() && "APPROVED".equals(existingUser.get().getStatus())) {
+                throw new IllegalArgumentException("Email already registered and approved");
             }
             
-            if (registrationRequestRepository.findByEmail(user.getEmail()).isPresent()) {
-                throw new IllegalArgumentException("Registration request already exists for this email");
+            // Check for pending registration requests
+            Optional<RegistrationRequest> existingRequest = registrationRequestRepository.findByEmail(user.getEmail());
+            if (existingRequest.isPresent() && "PENDING".equals(existingRequest.get().getStatus())) {
+                throw new IllegalArgumentException("Registration request already pending for this email");
             }
             
-            // Create RegistrationRequest instead of User
+            // Clean up old rejected/non-approved records
+            if (existingUser.isPresent() && !"APPROVED".equals(existingUser.get().getStatus())) {
+                userRepository.delete(existingUser.get());
+                System.out.println("Deleted old non-approved user record for: " + user.getEmail());
+            }
+            
+            if (existingRequest.isPresent() && "REJECTED".equals(existingRequest.get().getStatus())) {
+                registrationRequestRepository.delete(existingRequest.get());
+                System.out.println("Deleted old rejected registration request for: " + user.getEmail());
+            }
+            
+            // Create RegistrationRequest
             RegistrationRequest request = new RegistrationRequest();
             request.setFirstName(user.getFirstName());
             request.setLastName(user.getLastName());
             request.setPhoneNumber(user.getPhoneNumber());
             request.setEmail(user.getEmail());
-            request.setPassword(passwordEncoder.encode(user.getPassword())); // Encode password
+            request.setPassword(passwordEncoder.encode(user.getPassword()));
             request.setDriversLicenseNumber(user.getDriversLicenseNumber());
             request.setDriversLicenseImage(user.getDriversLicenseImage());
             request.setStatus("PENDING");
@@ -259,6 +273,20 @@ public class UserService {
                 throw e;
             }
             throw new RuntimeException("Failed to update user status: " + e.getMessage());
+        }
+    }
+
+    public void deleteUser(Long userId) {
+        try {
+            User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
+            
+            userRepository.delete(user);
+            System.out.println("User deleted successfully: " + user.getEmail());
+            
+        } catch (Exception e) {
+            System.err.println("Error in deleteUser: " + e.getMessage());
+            throw new RuntimeException("Failed to delete user: " + e.getMessage());
         }
     }
 

@@ -54,11 +54,34 @@ public class UserController {
                 System.out.println("Image compression completed successfully");
             }
 
-            // Validate user input
-            if (userService.getUserByEmail(user.getEmail()) != null) {
+            // Modified validation - check for approved users only
+            User existingUser = userService.getUserByEmail(user.getEmail());
+            if (existingUser != null && existingUser.getApproved()) {
                 return ResponseEntity.badRequest()
-                    .body(Map.of("error", "Email already exists"));
+                    .body(Map.of("error", "Email already registered and approved"));
             }
+            
+            // Also check for pending registration requests
+            Optional<RegistrationRequest> existingRequest = registrationRequestRepository.findByEmailAndStatus(
+                user.getEmail(), "PENDING");
+            if (existingRequest.isPresent()) {
+                return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Registration request already pending for this email"));
+            }
+
+            // If there's a rejected user/request, allow re-registration by cleaning up old data
+            if (existingUser != null && !existingUser.getApproved()) {
+                // Remove the old rejected user record
+                userService.deleteUser(existingUser.getId());
+            }
+            
+            // Remove any old rejected registration requests
+            registrationRequestRepository.findByEmail(user.getEmail())
+                .ifPresent(oldRequest -> {
+                    if ("REJECTED".equals(oldRequest.getStatus())) {
+                        registrationRequestRepository.delete(oldRequest);
+                    }
+                });
 
             // Register user - this now returns RegistrationRequest
             RegistrationRequest registrationRequest = userService.registerUser(user);

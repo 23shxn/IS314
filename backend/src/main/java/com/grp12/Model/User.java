@@ -16,34 +16,34 @@ public class User {
     // Match database column order
     @Lob
     @Column(name = "drivers_license_image", columnDefinition = "TEXT")
-    private String driversLicenseImage; // Should be String, not File or byte[]
+    private String driversLicenseImage;
     
     @Column(name = "drivers_license_number", nullable = false, unique = true, length = 50)
-    private String driversLicenseNumber; // Move to position 3
+    private String driversLicenseNumber;
     
     @Column(name = "email", nullable = false, unique = true, length = 255)
-    private String email; // Now position 4
+    private String email;
     
     @Column(name = "first_name", nullable = false, length = 100)
-    private String firstName; // Now position 5
+    private String firstName;
     
     @Column(name = "last_name", nullable = false, length = 100)
-    private String lastName; // Now position 6
+    private String lastName;
     
     @Column(name = "password", nullable = false, length = 255)
-    private String password; // Now position 7
+    private String password;
     
     @Column(name = "phone_number", nullable = false, length = 20)
-    private String phoneNumber; // Now position 8
+    private String phoneNumber;
     
     @Column(name = "role", nullable = false, length = 50)
-    private String role = "ROLE_CUSTOMER"; // Now position 9
+    private String role = "ROLE_CUSTOMER";
     
     @Column(name = "status", nullable = false, length = 20)
     private String status = "PENDING"; // PENDING, APPROVED, REJECTED
 
     @Column(name = "approved")
-    private Boolean approved = false; // Use Boolean (wrapper) instead of boolean (primitive)
+    private Boolean approved = false;
 
     @Column(name = "email_verified")
     private Boolean emailVerified = false;
@@ -60,7 +60,7 @@ public class User {
 
     // Default constructor
     public User() {
-        this.createdAt = LocalDateTime.now(); // Set default value
+        this.createdAt = LocalDateTime.now();
     }
 
     // Constructor for easy creation
@@ -73,18 +73,20 @@ public class User {
         this.driversLicenseNumber = driversLicenseNumber;
         this.driversLicenseImage = driversLicenseImage;
         this.status = "PENDING";
-        this.createdAt = LocalDateTime.now(); // Set default value
+        this.approved = false;
+        this.emailVerified = false;
+        this.createdAt = LocalDateTime.now();
     }
 
-    // New constructor
-    public User(Long id, String email, String password, String firstName, String lastName, Boolean approved, Boolean emailVerified) {
+    // Updated constructor
+    public User(Long id, String email, String password, String firstName, String lastName, Boolean emailVerified, Boolean approved) {
         this.id = id;
         this.email = email;
         this.password = password;
         this.firstName = firstName;
         this.lastName = lastName;
-        this.approved = approved;
         this.emailVerified = emailVerified;
+        this.approved = approved;
         this.createdAt = LocalDateTime.now();
     }
 
@@ -121,7 +123,7 @@ public class User {
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
 
-    public Boolean getApproved() { // or isApproved()
+    public Boolean getApproved() {
         return approved;
     }
 
