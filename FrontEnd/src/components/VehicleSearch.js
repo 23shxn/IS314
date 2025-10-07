@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Plus, MapPin, Car, ChevronLeft, ChevronRight, Eye } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
+import { Plus, MapPin, Car, ChevronLeft, ChevronRight, Eye, Calendar, Users, Fuel } from 'lucide-react';
 import '../styles/VehicleSearch.css';
 
 const VehicleImageCarousel = ({ images, vehicleInfo }) => {
@@ -225,6 +225,12 @@ const VehicleSearch = ({ reservations, setReservations, currentUser }) => {
   };
 
   const handleReservation = (vehicle) => {
+    // Validate required fields
+    if (!currentUser) {
+      setError('Please log in to make a reservation');
+      return;
+    }
+
     // Validate dates
     if (!searchParams.startDate || !searchParams.endDate) {
       setError('Please select both start and end dates to reserve a vehicle');
@@ -254,23 +260,25 @@ const VehicleSearch = ({ reservations, setReservations, currentUser }) => {
 
     setError('');
     
-    // Create reservation object with pickup and dropoff locations
-    const reservation = {
-      vehicle: vehicle,
-      rentalDate: searchParams.startDate,
-      returnDate: searchParams.endDate,
-      pickupLocation: searchParams.pickupLocation,
-      dropoffLocation: searchParams.dropoffLocation || searchParams.pickupLocation, // Default to pickup location if no dropoff specified
-      userId: currentUser ? currentUser.id : null
+    // Create reservation object that matches CarDetail expectations
+    const reservationData = {
+      reservation: {
+        vehicle: vehicle,
+        rentalDate: searchParams.startDate,
+        returnDate: searchParams.endDate,
+        pickupLocation: searchParams.pickupLocation,
+        dropoffLocation: searchParams.dropoffLocation || searchParams.pickupLocation,
+        userId: currentUser.id,
+        customerName: `${currentUser.firstName} ${currentUser.lastName}`,
+        customerEmail: currentUser.email
+      }
     };
 
-    console.log('Navigating to car-detail with reservation:', reservation);
+    console.log('Navigating to car-detail with reservation data:', reservationData);
     
-    // Navigate to car detail page
+    // Navigate to car detail page with state
     navigate('/car-detail', { 
-      state: { 
-        reservation: reservation
-      } 
+      state: reservationData
     });
   };
 
@@ -307,25 +315,32 @@ const VehicleSearch = ({ reservations, setReservations, currentUser }) => {
     }
   };
 
+  const handleViewDetails = (vehicle) => {
+    setViewingVehicle(vehicle);
+  };
+
   useEffect(() => {
     // Listen for reservation changes and refresh
-    refreshVehicles();
+    if (reservations) {
+      refreshVehicles();
+    }
   }, [reservations]);
 
-  if (loading) {
+  if (error) {
     return (
-      <div className="loading">
-        <Car size={48} />
-        <p>Loading vehicles...</p>
+      <div className="vehicle-search-container">
+        <div className="error-message">
+          <p>{error}</p>
+          <button onClick={() => setError('')} className="btn btn-secondary">Clear Error</button>
+        </div>
       </div>
     );
   }
 
-  if (error) {
+  if (loading) {
     return (
-      <div className="error">
-        <p>{error}</p>
-        <button onClick={() => setError('')}>Clear Error</button>
+      <div className="vehicle-search-container">
+        <div className="loading-message">Loading vehicles...</div>
       </div>
     );
   }
@@ -433,42 +448,66 @@ const VehicleSearch = ({ reservations, setReservations, currentUser }) => {
             <p>Adjust your filters or dates to find available vehicles.</p>
           </div>
         ) : (
-          filteredVehicles.map((vehicle) => (
-            <div key={vehicle.id} className="vehicle-card">
-              <div className="vehicle-image" onClick={() => setViewingVehicle(vehicle)}>
-                <VehicleImageCarousel
-                  images={[vehicle.vehicleImage1, vehicle.vehicleImage2, vehicle.vehicleImage3]}
-                  vehicleInfo={{ make: vehicle.make, model: vehicle.model }}
-                />
-                <button className="action-btn view"><Eye size={16} /></button>
-              </div>
-              <div className="vehicle-info">
-                <div className="vehicle-header">
-                  <h4>{vehicle.make} {vehicle.model} ({vehicle.year})</h4>
-                  <span className={`status-badge ${vehicle.status.toLowerCase()}`}>{vehicle.status}</span>
+          filteredVehicles.map((vehicle) => {
+            const images = [vehicle.vehicleImage1, vehicle.vehicleImage2, vehicle.vehicleImage3];
+            
+            return (
+              <div key={vehicle.id} className="vehicle-card">
+                <div className="vehicle-image">
+                  <VehicleImageCarousel 
+                    images={images} 
+                    vehicleInfo={vehicle} 
+                  />
+                  
+                  {/* View details button */}
+                  <button
+                    onClick={() => handleViewDetails(vehicle)}
+                    className="action-btn view"
+                    title="View Details"
+                    type="button"
+                  >
+                    <Eye size={18} />
+                  </button>
                 </div>
-                <div className="vehicle-details">
-                  <p><Car size={16} /> {vehicle.vehicleType} | <MapPin size={16} /> Available at {vehicle.location}</p>
-                  <p>Seats: {vehicle.seatingCapacity} | Fuel: {vehicle.fuelType} | {vehicle.transmission}</p>
-                  {vehicle.mileage && <p>Mileage: {vehicle.mileage} km</p>}
-                  {vehicle.features && <p><strong>Features:</strong> {vehicle.features}</p>}
+                
+                <div className="vehicle-info">
+                  <div className="vehicle-header">
+                    <h4>{vehicle.year} {vehicle.make} {vehicle.model}</h4>
+                    <span className="status-badge available">{vehicle.status}</span>
+                  </div>
+                  
+                  <div className="vehicle-details">
+                    <p><Car size={16} /><strong>Type:</strong> {vehicle.vehicleType}</p>
+                    <p><Users size={16} /><strong>Seats:</strong> {vehicle.seatingCapacity}</p>
+                    <p><Fuel size={16} /><strong>Fuel:</strong> {vehicle.fuelType}</p>
+                    <p><MapPin size={16} /><strong>Location:</strong> {vehicle.location}</p>
+                  </div>
+                </div>
+                
+                <div className="vehicle-booking">
+                  <div className="price-info">
+                    <span className="price">FJD {vehicle.pricePerDay}</span>
+                    <span className="price-label">per day</span>
+                  </div>
+                  
+                  <button
+                    onClick={() => handleReservation(vehicle)}
+                    className="btn btn-primary"
+                    disabled={!currentUser}
+                  >
+                    <Calendar size={16} />
+                    Reserve
+                  </button>
+                  
+                  {!currentUser && (
+                    <small style={{ color: '#dc3545', fontSize: '12px', textAlign: 'center', marginTop: '4px' }}>
+                      Please log in to reserve
+                    </small>
+                  )}
                 </div>
               </div>
-              <div className="vehicle-booking">
-                <div className="price-info">
-                  <span className="price">${vehicle.pricePerDay}</span>
-                  <span className="price-label">per day</span>
-                </div>
-                <button
-                  onClick={() => handleReservation(vehicle)}
-                  className="btn btn-primary"
-                  disabled={vehicle.status !== 'Available' || !searchParams.startDate || !searchParams.endDate || !searchParams.pickupLocation}
-                >
-                  <Plus size={16} /> Reserve
-                </button>
-              </div>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
 
