@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Base64;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 @RestController
@@ -317,26 +318,101 @@ public class VehicleController {
     // Update vehicle (admin only)
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> updateVehicle(@PathVariable Long id, @RequestBody Vehicle vehicle) {
+    public ResponseEntity<?> updateVehicle(
+            @PathVariable Long id,
+            @RequestParam(value = "make", required = false) String make,
+            @RequestParam(value = "model", required = false) String model,
+            @RequestParam(value = "vehicleType", required = false) String vehicleType,
+            @RequestParam(value = "year", required = false) Integer year,
+            @RequestParam(value = "color", required = false) String color,
+            @RequestParam(value = "licensePlate", required = false) String licensePlate,
+            @RequestParam(value = "vin", required = false) String vin,
+            @RequestParam(value = "fuelType", required = false) String fuelType,
+            @RequestParam(value = "transmission", required = false) String transmission,
+            @RequestParam(value = "seatingCapacity", required = false) Integer seatingCapacity,
+            @RequestParam(value = "mileage", required = false) Integer mileage,
+            @RequestParam(value = "pricePerDay", required = false) BigDecimal pricePerDay,
+            @RequestParam(value = "location", required = false) String location,
+            @RequestParam(value = "description", required = false) String description,
+            @RequestParam(value = "features", required = false) String features,
+            @RequestParam(value = "vehicleImage1", required = false) MultipartFile vehicleImage1,
+            @RequestParam(value = "vehicleImage2", required = false) MultipartFile vehicleImage2,
+            @RequestParam(value = "vehicleImage3", required = false) MultipartFile vehicleImage3) {
+        
         try {
-            // Validate the vehicle data before updating
-            if (vehicle.getLicensePlate() != null) {
-                validateVehicleParameters(vehicle.getLicensePlate(), vehicle.getSeatingCapacity(), 
-                    vehicle.getVehicleType(), vehicle.getFuelType(), vehicle.getTransmission(), 
-                    vehicle.getLocation());
+            Optional<Vehicle> vehicleOpt = vehicleRepository.findById(id);
+            if (!vehicleOpt.isPresent()) {
+                return ResponseEntity.notFound().build();
             }
             
-            vehicle.setId(id);
-            Vehicle updatedVehicle = vehicleService.saveVehicle(vehicle);
-            return ResponseEntity.ok(updatedVehicle);
-        } catch (IllegalArgumentException e) {
-            Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+            Vehicle vehicle = vehicleOpt.get();
+            
+            // Update fields only if provided
+            if (make != null) vehicle.setMake(make);
+            if (model != null) vehicle.setModel(model);
+            if (vehicleType != null) vehicle.setVehicleType(vehicleType);
+            if (year != null) vehicle.setYear(year);
+            if (color != null) vehicle.setColor(color);
+            if (licensePlate != null) vehicle.setLicensePlate(licensePlate);
+            if (vin != null) vehicle.setVin(vin);
+            if (fuelType != null) vehicle.setFuelType(fuelType);
+            if (transmission != null) vehicle.setTransmission(transmission);
+            if (seatingCapacity != null) vehicle.setSeatingCapacity(seatingCapacity);
+            if (mileage != null) vehicle.setMileage(mileage);
+            if (pricePerDay != null) vehicle.setPricePerDay(pricePerDay);
+            if (location != null) vehicle.setLocation(location);
+            if (description != null) vehicle.setDescription(description);
+            if (features != null) vehicle.setFeatures(features);
+            
+            // Handle image updates
+            if (vehicleImage1 != null && !vehicleImage1.isEmpty()) {
+                if (!isValidImageType(vehicleImage1)) {
+                    return ResponseEntity.status(400).body(Map.of("error", "Invalid image format for vehicleImage1. Only JPEG, PNG, JPG, and WEBP are allowed."));
+                }
+                try {
+                    String base64Image = Base64.getEncoder().encodeToString(vehicleImage1.getBytes());
+                    vehicle.setVehicleImage1(base64Image);
+                } catch (IOException e) {
+                    return ResponseEntity.status(400).body(Map.of("error", "Failed to process vehicleImage1: " + e.getMessage()));
+                }
+            }
+            
+            if (vehicleImage2 != null && !vehicleImage2.isEmpty()) {
+                if (!isValidImageType(vehicleImage2)) {
+                    return ResponseEntity.status(400).body(Map.of("error", "Invalid image format for vehicleImage2. Only JPEG, PNG, JPG, and WEBP are allowed."));
+                }
+                try {
+                    String base64Image = Base64.getEncoder().encodeToString(vehicleImage2.getBytes());
+                    vehicle.setVehicleImage2(base64Image);
+                } catch (IOException e) {
+                    return ResponseEntity.status(400).body(Map.of("error", "Failed to process vehicleImage2: " + e.getMessage()));
+                }
+            }
+            
+            if (vehicleImage3 != null && !vehicleImage3.isEmpty()) {
+                if (!isValidImageType(vehicleImage3)) {
+                    return ResponseEntity.status(400).body(Map.of("error", "Invalid image format for vehicleImage3. Only JPEG, PNG, JPG, and WEBP are allowed."));
+                }
+                try {
+                    String base64Image = Base64.getEncoder().encodeToString(vehicleImage3.getBytes());
+                    vehicle.setVehicleImage3(base64Image);
+                } catch (IOException e) {
+                    return ResponseEntity.status(400).body(Map.of("error", "Failed to process vehicleImage3: " + e.getMessage()));
+                }
+            }
+            
+            // Save updated vehicle
+            vehicle.preUpdate(); // Update the timestamp
+            Vehicle updatedVehicle = vehicleRepository.save(vehicle);
+            
+            return ResponseEntity.ok().body(Map.of(
+                "message", "Vehicle updated successfully",
+                "vehicle", updatedVehicle
+            ));
+            
         } catch (Exception e) {
-            Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", "Failed to update vehicle: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("error", "Failed to update vehicle: " + e.getMessage()));
         }
     }
     

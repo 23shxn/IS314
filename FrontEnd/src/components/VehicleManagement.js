@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { LogOut, Layout, Users, Car, ClipboardList, ToolCase, Check, X, Plus, Trash2, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
+import { LogOut, Layout, Users, Car, ClipboardList, ToolCase, Check, X, Plus, Trash2, Eye, ChevronLeft, ChevronRight, Edit } from 'lucide-react';
 import '../styles/VehicleManagement.css';
 
 const VehicleManagement = ({ setCurrentUser }) => {
@@ -33,6 +33,8 @@ const VehicleManagement = ({ setCurrentUser }) => {
     vehicleImage3: null
   });
   const [formError, setFormError] = useState('');
+  const [editingVehicle, setEditingVehicle] = useState(null);
+  const [showEditForm, setShowEditForm] = useState(false);
 
   useEffect(() => {
     console.log('VehicleManagement mounted, fetching vehicles...');
@@ -311,6 +313,111 @@ const VehicleManagement = ({ setCurrentUser }) => {
     }
   };
 
+  const handleEditVehicle = (vehicle) => {
+    setEditingVehicle(vehicle);
+    setNewVehicle({
+      licensePlate: vehicle.licensePlate,
+      make: vehicle.make,
+      model: vehicle.model,
+      year: vehicle.year.toString(),
+      vehicleType: vehicle.vehicleType,
+      color: vehicle.color,
+      vin: vehicle.vin || '',
+      fuelType: vehicle.fuelType,
+      transmission: vehicle.transmission,
+      seatingCapacity: vehicle.seatingCapacity.toString(),
+      mileage: vehicle.mileage?.toString() || '',
+      pricePerDay: vehicle.pricePerDay.toString(),
+      location: vehicle.location,
+      description: vehicle.description || '',
+      features: vehicle.features || '',
+      vehicleImage1: null,
+      vehicleImage2: null,
+      vehicleImage3: null
+    });
+    setShowEditForm(true);
+    setShowAddForm(false);
+    setFormError('');
+  };
+
+  const handleUpdateVehicle = async (e) => {
+    e.preventDefault();
+    setFormError('');
+    setLoading(true);
+
+    // Validation
+    if (!validateLicensePlate(newVehicle.licensePlate)) {
+      setFormError('License plate must be in format: AB 123 (2 letters, space, 3 numbers)');
+      setLoading(false);
+      return;
+    }
+
+    if (!validateSeatingCapacity(newVehicle.seatingCapacity)) {
+      setFormError('Seating capacity must be at least 2');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+      
+      // Add all text fields
+      if (newVehicle.licensePlate) formData.append('licensePlate', newVehicle.licensePlate);
+      if (newVehicle.make) formData.append('make', newVehicle.make);
+      if (newVehicle.model) formData.append('model', newVehicle.model);
+      if (newVehicle.year) formData.append('year', newVehicle.year);
+      if (newVehicle.vehicleType) formData.append('vehicleType', newVehicle.vehicleType);
+      if (newVehicle.color) formData.append('color', newVehicle.color);
+      if (newVehicle.vin) formData.append('vin', newVehicle.vin);
+      if (newVehicle.fuelType) formData.append('fuelType', newVehicle.fuelType);
+      if (newVehicle.transmission) formData.append('transmission', newVehicle.transmission);
+      if (newVehicle.seatingCapacity) formData.append('seatingCapacity', newVehicle.seatingCapacity);
+      if (newVehicle.mileage) formData.append('mileage', newVehicle.mileage);
+      if (newVehicle.pricePerDay) formData.append('pricePerDay', newVehicle.pricePerDay);
+      if (newVehicle.location) formData.append('location', newVehicle.location);
+      if (newVehicle.description) formData.append('description', newVehicle.description);
+      if (newVehicle.features) formData.append('features', newVehicle.features);
+      
+      // Add image files only if selected
+      if (newVehicle.vehicleImage1) formData.append('vehicleImage1', newVehicle.vehicleImage1);
+      if (newVehicle.vehicleImage2) formData.append('vehicleImage2', newVehicle.vehicleImage2);
+      if (newVehicle.vehicleImage3) formData.append('vehicleImage3', newVehicle.vehicleImage3);
+
+      const response = await fetch(`http://localhost:8080/api/vehicles/${editingVehicle.id}`, {
+        method: 'PUT',
+        body: formData,
+        credentials: 'include'
+        // Don't set Content-Type header - let browser set it automatically
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        setShowEditForm(false);
+        setEditingVehicle(null);
+        fetchVehicles(); // Refresh the vehicles list
+        setFormError('');
+        
+        // Reset form
+        setNewVehicle({
+          licensePlate: '', make: '', model: '', year: '', vehicleType: '',
+          color: '', vin: '', fuelType: '', transmission: '', seatingCapacity: '',
+          mileage: '', pricePerDay: '', location: '', description: '', features: '',
+          vehicleImage1: null, vehicleImage2: null, vehicleImage3: null
+        });
+        
+        alert('Vehicle updated successfully!');
+      } else {
+        const errorData = await response.json();
+        setFormError(errorData.error || 'Failed to update vehicle');
+      }
+    } catch (err) {
+      setFormError('Failed to connect to the server');
+      console.error('Update vehicle error:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const VehicleDetailModal = ({ vehicle, onClose }) => {
     if (!vehicle) return null;
     
@@ -453,14 +560,15 @@ const VehicleManagement = ({ setCurrentUser }) => {
             </button>
           </div>
 
-          {showAddForm && (
+          {(showAddForm || showEditForm) && (
             <div className="card add-vehicle-form">
-              <h3>Add New Vehicle</h3>
+              <h3>{showEditForm ? 'Edit Vehicle' : 'Add New Vehicle'}</h3>
               {formError && <p className="error-text">{formError}</p>}
-              <form onSubmit={handleAddVehicle} encType="multipart/form-data">
+              <form onSubmit={showEditForm ? handleUpdateVehicle : handleAddVehicle} encType="multipart/form-data">
+                
                 <div className="form-grid">
                   <div className="form-group">
-                    <label htmlFor="licensePlate">License Plate * (Format: AB 123)</label>
+                    <label htmlFor="licensePlate">License Plate *</label>
                     <input
                       type="text"
                       id="licensePlate"
@@ -468,16 +576,14 @@ const VehicleManagement = ({ setCurrentUser }) => {
                       value={newVehicle.licensePlate}
                       onChange={handleInputChange}
                       placeholder="AB 123"
-                      maxLength="6"
-                      style={{
-                        borderColor: newVehicle.licensePlate && !validateLicensePlate(newVehicle.licensePlate) ? '#dc3545' : ''
-                      }}
                       required
+                      className={!validateLicensePlate(newVehicle.licensePlate) && newVehicle.licensePlate ? 'invalid' : ''}
                     />
-                    {newVehicle.licensePlate && !validateLicensePlate(newVehicle.licensePlate) && (
-                      <small style={{ color: '#dc3545' }}>Format should be: AB 123 (2 letters, space, 3 numbers)</small>
+                    {!validateLicensePlate(newVehicle.licensePlate) && newVehicle.licensePlate && (
+                      <small className="field-error">Format: AB 123 (2 letters, space, 3 numbers)</small>
                     )}
                   </div>
+
                   <div className="form-group">
                     <label htmlFor="make">Make *</label>
                     <input
@@ -486,10 +592,11 @@ const VehicleManagement = ({ setCurrentUser }) => {
                       name="make"
                       value={newVehicle.make}
                       onChange={handleInputChange}
-                      placeholder="Enter make"
+                      placeholder="Toyota"
                       required
                     />
                   </div>
+
                   <div className="form-group">
                     <label htmlFor="model">Model *</label>
                     <input
@@ -498,10 +605,11 @@ const VehicleManagement = ({ setCurrentUser }) => {
                       name="model"
                       value={newVehicle.model}
                       onChange={handleInputChange}
-                      placeholder="Enter model"
+                      placeholder="Camry"
                       required
                     />
                   </div>
+
                   <div className="form-group">
                     <label htmlFor="year">Year *</label>
                     <input
@@ -510,10 +618,13 @@ const VehicleManagement = ({ setCurrentUser }) => {
                       name="year"
                       value={newVehicle.year}
                       onChange={handleInputChange}
-                      placeholder="Enter year"
+                      placeholder="2023"
+                      min="1980"
+                      max="2025"
                       required
                     />
                   </div>
+
                   <div className="form-group">
                     <label htmlFor="vehicleType">Vehicle Type *</label>
                     <select
@@ -523,13 +634,17 @@ const VehicleManagement = ({ setCurrentUser }) => {
                       onChange={handleInputChange}
                       required
                     >
-                      <option value="">Select vehicle type</option>
+                      <option value="">Select Type</option>
                       <option value="Sedan">Sedan</option>
                       <option value="SUV">SUV</option>
+                      <option value="Hatchback">Hatchback</option>
                       <option value="Truck">Truck</option>
-                      <option value="Van">Van</option>
+                      <option value="Convertible">Convertible</option>
+                      <option value="Coupe">Coupe</option>
+                      <option value="Wagon">Wagon</option>
                     </select>
                   </div>
+
                   <div className="form-group">
                     <label htmlFor="color">Color *</label>
                     <input
@@ -538,10 +653,11 @@ const VehicleManagement = ({ setCurrentUser }) => {
                       name="color"
                       value={newVehicle.color}
                       onChange={handleInputChange}
-                      placeholder="Enter color"
+                      placeholder="White"
                       required
                     />
                   </div>
+
                   <div className="form-group">
                     <label htmlFor="vin">VIN</label>
                     <input
@@ -550,9 +666,10 @@ const VehicleManagement = ({ setCurrentUser }) => {
                       name="vin"
                       value={newVehicle.vin}
                       onChange={handleInputChange}
-                      placeholder="Enter VIN"
+                      placeholder="1HGBH41JXMN109186"
                     />
                   </div>
+
                   <div className="form-group">
                     <label htmlFor="fuelType">Fuel Type *</label>
                     <select
@@ -562,13 +679,14 @@ const VehicleManagement = ({ setCurrentUser }) => {
                       onChange={handleInputChange}
                       required
                     >
-                      <option value="">Select fuel type</option>
+                      <option value="">Select Fuel Type</option>
                       <option value="Petrol">Petrol</option>
                       <option value="Diesel">Diesel</option>
                       <option value="Electric">Electric</option>
                       <option value="Hybrid">Hybrid</option>
                     </select>
                   </div>
+
                   <div className="form-group">
                     <label htmlFor="transmission">Transmission *</label>
                     <select
@@ -578,54 +696,60 @@ const VehicleManagement = ({ setCurrentUser }) => {
                       onChange={handleInputChange}
                       required
                     >
-                      <option value="">Select transmission</option>
-                      <option value="Automatic">Automatic</option>
+                      <option value="">Select Transmission</option>
                       <option value="Manual">Manual</option>
+                      <option value="Automatic">Automatic</option>
+                      <option value="CVT">CVT</option>
                     </select>
                   </div>
+
                   <div className="form-group">
-                    <label htmlFor="seatingCapacity">Seating Capacity * (Minimum 2)</label>
+                    <label htmlFor="seatingCapacity">Seating Capacity *</label>
                     <input
                       type="number"
                       id="seatingCapacity"
                       name="seatingCapacity"
                       value={newVehicle.seatingCapacity}
                       onChange={handleInputChange}
-                      placeholder="Enter seating capacity"
+                      placeholder="5"
                       min="2"
-                      style={{
-                        borderColor: newVehicle.seatingCapacity && !validateSeatingCapacity(newVehicle.seatingCapacity) ? '#dc3545' : ''
-                      }}
+                      max="12"
                       required
+                      className={!validateSeatingCapacity(newVehicle.seatingCapacity) && newVehicle.seatingCapacity ? 'invalid' : ''}
                     />
-                    {newVehicle.seatingCapacity && !validateSeatingCapacity(newVehicle.seatingCapacity) && (
-                      <small style={{ color: '#dc3545' }}>Seating capacity must be at least 2</small>
+                    {!validateSeatingCapacity(newVehicle.seatingCapacity) && newVehicle.seatingCapacity && (
+                      <small className="field-error">Must be at least 2</small>
                     )}
                   </div>
+
                   <div className="form-group">
-                    <label htmlFor="mileage">Mileage</label>
+                    <label htmlFor="mileage">Mileage (km)</label>
                     <input
                       type="number"
                       id="mileage"
                       name="mileage"
                       value={newVehicle.mileage}
                       onChange={handleInputChange}
-                      placeholder="Enter mileage"
+                      placeholder="50000"
+                      min="0"
                     />
                   </div>
+
                   <div className="form-group">
-                    <label htmlFor="pricePerDay">Price Per Day *</label>
+                    <label htmlFor="pricePerDay">Price Per Day (FJD) *</label>
                     <input
                       type="number"
                       id="pricePerDay"
                       name="pricePerDay"
                       value={newVehicle.pricePerDay}
                       onChange={handleInputChange}
-                      placeholder="Enter price per day"
+                      placeholder="80.00"
+                      min="1"
                       step="0.01"
                       required
                     />
                   </div>
+
                   <div className="form-group">
                     <label htmlFor="location">Location *</label>
                     <select
@@ -635,12 +759,16 @@ const VehicleManagement = ({ setCurrentUser }) => {
                       onChange={handleInputChange}
                       required
                     >
-                      <option value="">Select location</option>
+                      <option value="">Select Location</option>
                       <option value="Suva">Suva</option>
                       <option value="Nadi">Nadi</option>
                       <option value="Lautoka">Lautoka</option>
+                      <option value="Labasa">Labasa</option>
+                      <option value="Ba">Ba</option>
+                      <option value="Sigatoka">Sigatoka</option>
                     </select>
                   </div>
+
                   <div className="form-group full-width">
                     <label htmlFor="description">Description</label>
                     <textarea
@@ -648,9 +776,11 @@ const VehicleManagement = ({ setCurrentUser }) => {
                       name="description"
                       value={newVehicle.description}
                       onChange={handleInputChange}
-                      placeholder="Enter description"
+                      placeholder="Brief description of the vehicle..."
+                      rows="3"
                     />
                   </div>
+
                   <div className="form-group full-width">
                     <label htmlFor="features">Features</label>
                     <textarea
@@ -658,46 +788,75 @@ const VehicleManagement = ({ setCurrentUser }) => {
                       name="features"
                       value={newVehicle.features}
                       onChange={handleInputChange}
-                      placeholder="Enter features (e.g., AC, GPS)"
+                      placeholder="Air conditioning, GPS, Bluetooth, etc."
+                      rows="2"
                     />
                   </div>
+
                   <div className="form-group">
-                    <label htmlFor="vehicleImage1">Vehicle Image 1 * (Main)</label>
+                    <label htmlFor="vehicleImage1">Vehicle Image 1 {!showEditForm && '*'}</label>
                     <input
                       type="file"
                       id="vehicleImage1"
                       name="vehicleImage1"
-                      accept="image/*"
                       onChange={(e) => handleImageChange(e, 1)}
-                      required
+                      accept="image/*"
+                      required={!showEditForm}
                     />
+                    {showEditForm && <small>Leave empty to keep current image</small>}
                   </div>
+
                   <div className="form-group">
-                    <label htmlFor="vehicleImage2">Vehicle Image 2 * (Interior/Side)</label>
+                    <label htmlFor="vehicleImage2">Vehicle Image 2 {!showEditForm && '*'}</label>
                     <input
                       type="file"
                       id="vehicleImage2"
                       name="vehicleImage2"
-                      accept="image/*"
                       onChange={(e) => handleImageChange(e, 2)}
-                      required
+                      accept="image/*"
+                      required={!showEditForm}
                     />
+                    {showEditForm && <small>Leave empty to keep current image</small>}
                   </div>
+
                   <div className="form-group">
-                    <label htmlFor="vehicleImage3">Vehicle Image 3 * (Back/Detail)</label>
+                    <label htmlFor="vehicleImage3">Vehicle Image 3 {!showEditForm && '*'}</label>
                     <input
                       type="file"
                       id="vehicleImage3"
                       name="vehicleImage3"
-                      accept="image/*"
                       onChange={(e) => handleImageChange(e, 3)}
-                      required
+                      accept="image/*"
+                      required={!showEditForm}
                     />
+                    {showEditForm && <small>Leave empty to keep current image</small>}
                   </div>
                 </div>
-                <button type="submit" className="action-btn submit" disabled={loading}>
-                  {loading ? 'Adding...' : 'Add Vehicle'}
-                </button>
+
+                <div className="form-actions">
+                  <button type="submit" className="btn-primary" disabled={loading}>
+                    {loading ? (showEditForm ? 'Updating...' : 'Adding...') : (showEditForm ? 'Update Vehicle' : 'Add Vehicle')}
+                  </button>
+                  <button 
+                    type="button" 
+                    className="btn-secondary" 
+                    onClick={() => {
+                      setShowAddForm(false);
+                      setShowEditForm(false);
+                      setEditingVehicle(null);
+                      setFormError('');
+                      // Reset form
+                      setNewVehicle({
+                        licensePlate: '', make: '', model: '', year: '', vehicleType: '',
+                        color: '', vin: '', fuelType: '', transmission: '', seatingCapacity: '',
+                        mileage: '', pricePerDay: '', location: '', description: '', features: '',
+                        vehicleImage1: null, vehicleImage2: null, vehicleImage3: null
+                      });
+                    }}
+                  >
+                    Cancel
+                  </button>
+                </div>
               </form>
             </div>
           )}
@@ -726,6 +885,7 @@ const VehicleManagement = ({ setCurrentUser }) => {
                     <th>Price/Day</th>
                     <th>Location</th>
                     <th>Actions</th>
+                    <th>Edit</th> {/* New column */}
                   </tr>
                 </thead>
                 <tbody>
@@ -744,13 +904,7 @@ const VehicleManagement = ({ setCurrentUser }) => {
                       <td data-label="Price/Day">${vehicle.pricePerDay}</td>
                       <td data-label="Location">{vehicle.location}</td>
                       <td data-label="Actions" className="table-actions">
-                        <div style={{ 
-                          display: 'flex', 
-                          justifyContent: 'center', 
-                          alignItems: 'center', 
-                          gap: '8px',
-                          padding: '4px'
-                        }}>
+                        <div className="actions-container">
                           <button
                             onClick={() => {
                               setViewingVehicle(vehicle);
@@ -758,21 +912,8 @@ const VehicleManagement = ({ setCurrentUser }) => {
                             }}
                             className="action-btn view"
                             title="View Details"
-                            style={{
-                              backgroundColor: '#17a2b8',
-                              color: 'white',
-                              border: 'none',
-                              borderRadius: '6px',
-                              padding: '8px',
-                              width: '36px',
-                              height: '36px',
-                              cursor: 'pointer',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center'
-                            }}
                           >
-                            <Eye style={{ width: '16px', height: '16px' }} />
+                            <Eye size={16} />
                           </button>
                           
                           <select
@@ -780,14 +921,7 @@ const VehicleManagement = ({ setCurrentUser }) => {
                             onChange={(e) => handleStatusUpdate(vehicle.id, e.target.value)}
                             className="status-select"
                             disabled={loading}
-                            style={{
-                              padding: '6px 8px',
-                              border: '1px solid #ddd',
-                              borderRadius: '4px',
-                              fontSize: '12px',
-                              minWidth: '100px',
-                              height: '36px'
-                            }}
+                            title="Change Status"
                           >
                             <option value="Available">Available</option>
                             <option value="Rented">Rented</option>
@@ -800,23 +934,22 @@ const VehicleManagement = ({ setCurrentUser }) => {
                             className="action-btn delete"
                             disabled={loading}
                             title="Delete Vehicle"
-                            style={{
-                              backgroundColor: '#dc3545',
-                              color: 'white',
-                              border: 'none',
-                              borderRadius: '6px',
-                              padding: '8px',
-                              width: '36px',
-                              height: '36px',
-                              cursor: 'pointer',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center'
-                            }}
                           >
-                            <Trash2 style={{ width: '16px', height: '16px' }} />
+                            <Trash2 size={16} />
                           </button>
                         </div>
+                      </td>
+                      {/* Alternative edit button with more prominent styling */}
+                      <td data-label="Edit" className="table-edit">
+                        <button
+                          onClick={() => handleEditVehicle(vehicle)}
+                          className="edit-btn-primary"
+                          disabled={loading}
+                          title="Edit Vehicle Details"
+                        >
+                          <Edit size={16} />
+                          Edit Details
+                        </button>
                       </td>
                     </tr>
                   ))}
