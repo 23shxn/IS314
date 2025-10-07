@@ -13,8 +13,6 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -26,7 +24,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 
 @Configuration
@@ -52,51 +49,49 @@ public class SecurityConfig {
 
     @Bean
     public UserDetailsService userDetailsService() {
-        return new UserDetailsService() {
-            @Autowired
-            private UserRepository userRepository;
+        return username -> {
+            System.out.println("=== LOADING USER: " + username + " ===");
             
-            @Autowired
-            private AdminRepository adminRepository;
-
-            @Override
-            public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-                System.out.println("=== LOADING USER: " + username + " ===");
-                
-                // First try to find regular user
-                Optional<User> userOptional = userRepository.findByEmail(username);
-                if (userOptional.isEmpty()) {
-                    userOptional = userRepository.findByEmail(username);
-                }
-                
-                if (userOptional.isPresent()) {
-                    User user = userOptional.get();
-                    System.out.println("Found regular user: " + user.getEmail());
-                    return org.springframework.security.core.userdetails.User.builder()
-                        .username(user.getEmail())
-                        .password(user.getPassword())
-                        .roles("USER")
-                        .build();
-                }
-                
-                // Then try to find admin user
+            try {
+                // First try to find admin user by email or username
                 Optional<Admin> adminOptional = adminRepository.findByEmail(username);
-                if (adminOptional.isEmpty()) {
+                if (!adminOptional.isPresent()) {
+                    // If not found by email, try by username
                     adminOptional = adminRepository.findByUsername(username);
                 }
                 
                 if (adminOptional.isPresent()) {
                     Admin admin = adminOptional.get();
-                    System.out.println("Found admin user: " + admin.getEmail() + " with role: " + admin.getRole());
+                    System.out.println("Found admin user: " + admin.getEmail());
                     return org.springframework.security.core.userdetails.User.builder()
                         .username(admin.getEmail())
                         .password(admin.getPassword())
-                        .roles(admin.getRole()) // This should be "ADMIN" or "SUPER_ADMIN"
+                        .authorities("ROLE_ADMIN")
+                        .build();
+                }
+                
+                // Then try to find regular user - use auth-specific query that avoids BLOB
+                Optional<User> userOptional = userRepository.findByEmailForAuth(username);
+                if (userOptional.isPresent()) {
+                    User user = userOptional.get();
+                    System.out.println("Found regular user: " + user.getEmail());
+                    
+                    // Create UserDetails without accessing BLOB fields
+                    return org.springframework.security.core.userdetails.User.builder()
+                        .username(user.getEmail())
+                        .password(user.getPassword())
+                        .authorities("ROLE_USER")
+                        .disabled(!user.getApproved()) // Use getApproved() method
                         .build();
                 }
                 
                 System.out.println("User not found: " + username);
                 throw new UsernameNotFoundException("User not found: " + username);
+                
+            } catch (Exception e) {
+                System.err.println("Error in UserDetailsService: " + e.getMessage());
+                e.printStackTrace();
+                throw new UsernameNotFoundException("Error loading user: " + username, e);
             }
         };
     }

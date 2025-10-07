@@ -76,6 +76,18 @@ public class User {
         this.createdAt = LocalDateTime.now(); // Set default value
     }
 
+    // New constructor
+    public User(Long id, String email, String password, String firstName, String lastName, Boolean approved, Boolean emailVerified) {
+        this.id = id;
+        this.email = email;
+        this.password = password;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.approved = approved;
+        this.emailVerified = emailVerified;
+        this.createdAt = LocalDateTime.now();
+    }
+
     // Getters and setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }

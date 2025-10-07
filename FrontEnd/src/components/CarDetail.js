@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Car, MapPin, CheckCircle, CalendarDays, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Car, MapPin, CalendarDays, ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
 import axios from 'axios';
 import '../styles/CarDetail.css';
 
@@ -40,8 +40,7 @@ const CarDetail = ({ reservations, setReservations, currentUser }) => {
   const { state } = useLocation();
   const navigate = useNavigate();
   const [reservation, setReservation] = useState(state?.reservation);
-  const [amenities, setAmenities] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [amenities, setAmenities] = useState(['none']); // Default to 'none'
   const [error, setError] = useState('');
 
   // Update the availableAmenities to match backend EXACTLY
@@ -61,7 +60,6 @@ const CarDetail = ({ reservations, setReservations, currentUser }) => {
   }, [reservation, currentUser, navigate]);
 
   const formatDate = (date) => new Date(date).toLocaleDateString('en-FJ', { timeZone: 'Pacific/Fiji' });
-  const formatDateForBackend = (date) => new Date(date).toISOString().split('T')[0]; // Convert to YYYY-MM-DD
 
   // Fix the days calculation to match backend logic
   const days = reservation ? 
@@ -96,68 +94,20 @@ const CarDetail = ({ reservations, setReservations, currentUser }) => {
     });
   };
 
-  const confirmBooking = async () => {
+  const proceedToCheckout = () => {
     if (!amenities.length) {
-      setError('Select at least one amenity or "None"');
+      setError('Please select at least one amenity option or "None"');
       return;
     }
     
-    setLoading(true);
-    setError('');
-    
-    try {
-      // Debug logging to match backend calculation
-      console.log('Frontend calculation debug:');
-      console.log('- Rental date:', reservation.rentalDate);
-      console.log('- Return date:', reservation.returnDate);
-      console.log('- Days calculated:', days);
-      console.log('- Price per day:', reservation.vehicle.pricePerDay);
-      console.log('- Base price:', basePrice);
-      console.log('- Selected amenities:', amenities);
-      console.log('- Amenity cost:', amenityCost);
-      console.log('- Total price:', totalPrice);
-      
-      const data = {
-        vehicle: { id: reservation.vehicle.id },
-        userId: currentUser.id,
-        rentalDate: formatDateForBackend(reservation.rentalDate),
-        returnDate: formatDateForBackend(reservation.returnDate),
-        status: 'Confirmed',
+    navigate('/checkout', {
+      state: {
+        reservation: reservation,
         amenities: amenities,
-        totalPrice: parseFloat(totalPrice.toFixed(2))
-      };
-      
-      console.log('Booking request data:', data);
-      
-      const response = await axios.post('http://localhost:8080/api/reservations', data, {
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        withCredentials: true
-      });
-      
-      console.log('Booking response:', response.data);
-      setReservations(prev => [...prev, { ...response.data, vehicle: reservation.vehicle }]);
-      alert(`Successfully booked ${reservation.vehicle.make} ${reservation.vehicle.model}!`);
-      navigate('/reservations');
-      
-    } catch (err) {
-      console.error('Booking error:', err);
-      console.error('Error response:', err.response?.data);
-      
-      let errorMessage = 'Booking failed. Please try again.';
-      if (err.response?.data?.error) {
-        errorMessage = err.response.data.error;
-      } else if (err.response?.data?.message) {
-        errorMessage = err.response.data.message;
-      } else if (err.response?.data) {
-        errorMessage = typeof err.response.data === 'string' ? err.response.data : JSON.stringify(err.response.data);
+        totalPrice: totalPrice,
+        currentUser: currentUser
       }
-      
-      setError(errorMessage);
-    } finally {
-      setLoading(false);
-    }
+    });
   };
 
   if (!reservation) return <div className="loading">Loading...</div>;
@@ -180,7 +130,7 @@ const CarDetail = ({ reservations, setReservations, currentUser }) => {
     <div className="car-detail-container">
       <header className="detail-header">
         <h1>Car Detail</h1>
-        <p>Review your reservation</p>
+        <p>Review your selection and choose amenities</p>
       </header>
       <div className="detail-content">
         <div className="detail-main">
@@ -216,19 +166,37 @@ const CarDetail = ({ reservations, setReservations, currentUser }) => {
         <div className="detail-sidebar">
           {error && <div className="error"><p>{error}</p><button onClick={() => setError('')}>Clear</button></div>}
           <div className="pickup-dropoff">
-            <div className="pickup"><h4>Pick-up</h4><p><CalendarDays size={16} /> {formatDate(reservation.rentalDate)}</p><p><MapPin size={16} /> {vehicle.location}</p></div>
-            <div className="dropoff"><h4>Drop-off</h4><p><CalendarDays size={16} /> {formatDate(reservation.returnDate)}</p></div>
+            <div className="pickup">
+              <h4>Pick-up</h4>
+              <p><CalendarDays size={16} /> {formatDate(reservation.rentalDate)}</p>
+              <p><MapPin size={16} /> {vehicle.location}</p>
+            </div>
+            <div className="dropoff">
+              <h4>Drop-off</h4>
+              <p><CalendarDays size={16} /> {formatDate(reservation.returnDate)}</p>
+            </div>
           </div>
           <div className="pricing">
             <p>Base Price ({days} day{days > 1 ? 's' : ''}): <span>{basePrice.toFixed(2)} FJD</span></p>
             {amenities.length > 0 && !amenities.includes('none') && (
               <p>Amenities: <span>+{amenityCost.toFixed(2)} FJD</span></p>
             )}
-            <p>Total: <span>{totalPrice.toFixed(2)} FJD</span></p>
-            <button onClick={confirmBooking} className="btn primary" disabled={loading || !currentUser}>
-              <CheckCircle size={18} /> {loading ? 'Confirming...' : 'Confirm'}
+            <hr />
+            <p><strong>Total: <span>{totalPrice.toFixed(2)} FJD</span></strong></p>
+            
+            <button 
+              onClick={proceedToCheckout} 
+              className="btn primary" 
+              disabled={!currentUser || !amenities.length}
+            >
+              <ArrowRight size={18} /> Proceed to Checkout
             </button>
-            <button onClick={() => navigate('/search')} className="btn secondary">Cancel</button>
+            <button 
+              onClick={() => navigate('/search')} 
+              className="btn secondary"
+            >
+              Back to Search
+            </button>
           </div>
         </div>
       </div>

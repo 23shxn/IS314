@@ -1,0 +1,316 @@
+/* Reusing CSS variables from CarDetail.css */
+:root {
+    --primary: #007bff;
+    --secondary: #6c757d;
+    --text: #333;
+    --muted: #666;
+    --border: #ddd;
+    --shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    --bg: linear-gradient(to bottom, #f4f7fa, #ffffff);
+    --accent: #f8f9fa;
+  }
+  
+  .car-detail-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 30px;
+    background: var(--bg);
+    min-height: 100vh;
+  }
+  
+  .detail-header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 20px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+  }
+  
+  .detail-header h1 {
+    font-size: 28px;
+    color: var(--text);
+    margin-bottom: 10px;
+  }
+  
+  .detail-header p {
+    color: var(--muted);
+    font-size: 16px;
+  }
+  
+  .detail-content {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 30px;
+  }
+  
+  .detail-main {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+  }
+  
+  .detail-main h2 {
+    font-size: 24px;
+    margin-bottom: 25px;
+    text-align: center;
+    color: var(--text);
+  }
+  
+  .customer-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .form-group label {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  
+  .form-group input {
+    padding: 12px;
+    font-size: 16px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    outline: none;
+    transition: border-color 0.3s ease;
+  }
+  
+  .form-group input:focus {
+    border-color: var(--primary);
+  }
+  
+  .form-group input.input-error {
+    border-color: #721c24;
+  }
+  
+  .error-text {
+    color: #721c24;
+    font-size: 14px;
+  }
+  
+  .error {
+    background: #f8d7da;
+    color: #721c24;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 25px;
+  }
+  
+  .error p {
+    margin: 0 0 10px;
+    font-size: 16px;
+  }
+  
+  .error button {
+    background: #721c24;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+  
+  .error button:hover {
+    background: #5a1a1e;
+  }
+  
+  .detail-sidebar {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+  }
+  
+  .summary-section h4 {
+    font-size: 18px;
+    color: var(--text);
+    margin: 0 0 12px;
+  }
+  
+  .summary-section p {
+    font-size: 16px;
+    color: var(--text);
+    margin: 8px 0;
+  }
+  
+  .summary-section p strong {
+    color: var(--primary);
+  }
+  
+  .pickup-dropoff {
+    margin: 20px 0;
+  }
+  
+  .pickup, .dropoff {
+    margin-bottom: 15px;
+  }
+  
+  .pickup h4, .dropoff h4 {
+    margin: 0 0 8px;
+    font-size: 18px;
+    color: var(--text);
+  }
+  
+  .pickup p, .dropoff p {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 8px 0;
+    font-size: 16px;
+  }
+  
+  .amenities {
+    margin: 20px 0;
+  }
+  
+  .amenities h4 {
+    font-size: 18px;
+    color: var(--text);
+    margin-bottom: 12px;
+  }
+  
+  .pricing {
+    border-top: 1px solid var(--border);
+    padding-top: 25px;
+  }
+  
+  .pricing p {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    font-size: 16px;
+  }
+  
+  .pricing p span {
+    font-weight: 600;
+    color: var(--primary);
+  }
+  
+  .pricing hr {
+    margin: 0.5rem 0;
+    border: none;
+    border-top: 1px solid #ddd;
+  }
+  
+  .btn {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    transition: background 0.3s ease, transform 0.2s ease;
+  }
+  
+  .btn.primary {
+    background: var(--primary);
+    color: white;
+  }
+  
+  .btn.primary:hover {
+    background: #0056b3;
+    transform: translateY(-2px);
+  }
+  
+  .btn.secondary {
+    background: var(--secondary);
+    color: white;
+    margin-top: 15px;
+  }
+  
+  .btn.secondary:hover {
+    background: #5a6268;
+    transform: translateY(-2px);
+  }
+  
+  .form-section {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background-color: #fafafa;
+  }
+  
+  .form-section h2 {
+    margin-bottom: 1rem;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .form-row {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .form-group.half {
+    flex: 1;
+  }
+  
+  .form-group.third {
+    flex: 1;
+  }
+  
+  .form-group select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+  }
+  
+  .security-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #666;
+    font-size: 0.9rem;
+    margin: 1rem 0;
+    padding: 0.5rem;
+    background-color: #f0f8ff;
+    border-radius: 4px;
+  }
+  
+  .input-error {
+    border-color: #e74c3c !important;
+    background-color: #fff5f5;
+  }
+  
+  .error-text {
+    color: #e74c3c;
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
+    display: block;
+  }
+  
+  @media (max-width: 768px) {
+    .form-row {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    
+    .form-group.half,
+    .form-group.third {
+      flex: none;
+    }
+  }

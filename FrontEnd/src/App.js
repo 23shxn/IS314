@@ -35,6 +35,7 @@ import FAQs from './components/FAQs';
 import Contact from './components/Contact';
 import CompleteBooking from './components/CompleteBooking';
 import CarDetail from './components/CarDetail';
+import Checkout from './components/Checkout';
 
 const App = () => {
   const [currentUser, setCurrentUser] = useState(null);
@@ -228,6 +229,16 @@ const App = () => {
                   currentUser={currentUser}
                 />
               </CustomerRoute>
+            } 
+          />
+          <Route 
+            path="/checkout" 
+            element={
+              <Checkout 
+                reservations={reservations} 
+                setReservations={setReservations} 
+                currentUser={currentUser} 
+              />
             } 
           />
 
