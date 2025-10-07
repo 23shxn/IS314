@@ -286,6 +286,32 @@ const VehicleSearch = ({ reservations, setReservations, currentUser }) => {
     setError('');
   };
 
+  const refreshVehicles = async () => {
+    // Re-fetch vehicles to get updated availability
+    setLoading(true);
+    try {
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+      const vehiclesRes = await fetch(`${apiUrl}/api/vehicles/available`);
+      
+      if (vehiclesRes.ok) {
+        const data = await vehiclesRes.json();
+        setVehicles(Array.isArray(data) ? data : []);
+      } else {
+        setError('Failed to refresh vehicles');
+      }
+    } catch (err) {
+      setError('Failed to connect to server');
+      console.error('Refresh error:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    // Listen for reservation changes and refresh
+    refreshVehicles();
+  }, [reservations]);
+
   if (loading) {
     return (
       <div className="loading">

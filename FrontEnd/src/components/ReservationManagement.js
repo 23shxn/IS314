@@ -1,16 +1,43 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Calendar, Car, MapPin, Clock, CheckCircle, X, Eye } from 'lucide-react';
+import axios from 'axios';
 
 const ReservationManagement = ({ reservations, setReservations, currentUser }) => {
   const [selectedReservation, setSelectedReservation] = useState(null);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleCancelReservation = (reservationId) => {
-    if (window.confirm('Are you sure you want to cancel this reservation?')) {
-      setReservations(prevReservations => 
-        prevReservations.filter(res => res.id !== reservationId)
+  const cancelReservation = async (reservationId) => {
+    if (!window.confirm('Are you sure you want to cancel this reservation?')) {
+      return;
+    }
+    
+    try {
+      setLoading(true);
+      const response = await axios.put(
+        `http://localhost:8080/api/reservations/${reservationId}/cancel`,
+        {},
+        {
+          headers: { 'Content-Type': 'application/json' },
+          withCredentials: true
+        }
       );
+      
+      // Update local state to reflect cancellation
+      setReservations(prev => prev.map(reservation => 
+        reservation.id === reservationId 
+          ? { ...reservation, status: 'Cancelled' }
+          : reservation
+      ));
+      
+      alert('Reservation cancelled successfully!');
+      
+    } catch (error) {
+      console.error('Error cancelling reservation:', error);
+      alert('Failed to cancel reservation. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -160,7 +187,7 @@ const ReservationManagement = ({ reservations, setReservations, currentUser }) =
                   
                   {reservation.status.toLowerCase() === 'confirmed' && (
                     <button
-                      onClick={() => handleCancelReservation(reservation.id)}
+                      onClick={() => cancelReservation(reservation.id)}
                       style={{
                         padding: '0.5rem',
                         border: '1px solid #e74c3c',
@@ -388,7 +415,7 @@ const ReservationManagement = ({ reservations, setReservations, currentUser }) =
               {selectedReservation.status.toLowerCase() === 'confirmed' && (
                 <button
                   onClick={() => {
-                    handleCancelReservation(selectedReservation.id);
+                    cancelReservation(selectedReservation.id);
                     setSelectedReservation(null);
                   }}
                   className="btn-danger"
@@ -450,5 +477,6 @@ const ReservationManagement = ({ reservations, setReservations, currentUser }) =
     </div>
   );
 };
+
 
 export default ReservationManagement;

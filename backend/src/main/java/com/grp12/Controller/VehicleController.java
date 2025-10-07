@@ -1,6 +1,7 @@
 package com.grp12.Controller;
 
 import com.grp12.Model.Vehicle;
+import com.grp12.Repository.VehicleRepository; // Add this import
 import com.grp12.Services.VehicleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -25,62 +26,57 @@ public class VehicleController {
     @Autowired
     private VehicleService vehicleService;
     
+    // Add this missing dependency
+    @Autowired
+    private VehicleRepository vehicleRepository;
+    
     // License plate pattern: AB 123 (2 letters, space, 3 numbers)
     private static final Pattern LICENSE_PLATE_PATTERN = Pattern.compile("^[A-Za-z]{2}\\s\\d{3}$");
     
     // Public endpoint - Get all available vehicles for search
     @GetMapping("/available")
-    public ResponseEntity<?> getAvailableVehicles() {
+    public ResponseEntity<List<Vehicle>> getAvailableVehicles(
+        @RequestParam(required = false) String location,
+        @RequestParam(required = false) String vehicleType) {
+        
         try {
-            List<Vehicle> vehicles = vehicleService.getAvailableVehicles();
+            List<Vehicle> vehicles;
+            
+            if (location != null && !location.isEmpty() && vehicleType != null && !vehicleType.isEmpty()) {
+                vehicles = vehicleRepository.findByLocationAndVehicleTypeAndStatus(location, vehicleType, "Available");
+            } else if (location != null && !location.isEmpty()) {
+                vehicles = vehicleRepository.findByLocationAndStatus(location, "Available");
+            } else if (vehicleType != null && !vehicleType.isEmpty()) {
+                vehicles = vehicleRepository.findByVehicleTypeAndStatus(vehicleType, "Available");
+            } else {
+                vehicles = vehicleRepository.findByStatus("Available"); // Only available vehicles
+            }
+            
             return ResponseEntity.ok(vehicles);
         } catch (Exception e) {
-            Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", "Failed to fetch available vehicles: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
-        }
-    }
-    
-    // Public endpoint - Search vehicles with filters
-    @GetMapping("/search")
-    public ResponseEntity<?> searchVehicles(
-            @RequestParam(required = false) String location,
-            @RequestParam(required = false) String vehicleType,
-            @RequestParam(required = false) Double minPrice,
-            @RequestParam(required = false) Double maxPrice) {
-        try {
-            List<Vehicle> vehicles = vehicleService.searchVehicles(location, vehicleType, minPrice, maxPrice, "Available");
-            return ResponseEntity.ok(vehicles);
-        } catch (Exception e) {
-            Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", "Failed to search vehicles: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
     
     // Public endpoint - Get distinct locations for dropdown
     @GetMapping("/locations")
-    public ResponseEntity<?> getLocations() {
+    public ResponseEntity<List<String>> getVehicleLocations() {
         try {
-            List<String> locations = vehicleService.getDistinctLocations();
+            List<String> locations = vehicleRepository.findDistinctLocations();
             return ResponseEntity.ok(locations);
         } catch (Exception e) {
-            Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", "Failed to fetch locations: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
     
     // Public endpoint - Get distinct vehicle types for dropdown
     @GetMapping("/types")
-    public ResponseEntity<?> getVehicleTypes() {
+    public ResponseEntity<List<String>> getVehicleTypes() {
         try {
-            List<String> types = vehicleService.getDistinctVehicleTypes();
+            List<String> types = vehicleRepository.findDistinctVehicleTypes();
             return ResponseEntity.ok(types);
         } catch (Exception e) {
-            Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", "Failed to fetch vehicle types: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
     

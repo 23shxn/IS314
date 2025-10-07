@@ -2,14 +2,19 @@ package com.grp12.Controller;
 
 import com.grp12.Model.Reservation;
 import com.grp12.Model.Vehicle;
+import com.grp12.Repository.ReservationRepository;
+import com.grp12.Repository.VehicleRepository;
 import com.grp12.Services.ReservationService;
 import com.grp12.Services.VehicleService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/reservations")
@@ -21,6 +26,13 @@ public class ReservationController {
 
     @Autowired
     private VehicleService vehicleService;
+
+    // Add these missing repository dependencies
+    @Autowired
+    private ReservationRepository reservationRepository;
+
+    @Autowired
+    private VehicleRepository vehicleRepository;
 
     @PostMapping
     public ResponseEntity<?> createReservation(@RequestBody Reservation reservation) {
@@ -60,6 +72,10 @@ public class ReservationController {
             // Save reservation via service
             Reservation savedReservation = reservationService.createReservation(reservation);
 
+            // Mark vehicle as rented after successful reservation
+            vehicle.setStatus("Rented"); // Use status instead of availability
+            vehicleRepository.save(vehicle);
+
             // Create a lightweight response to avoid sending large vehicle data (e.g., base64 images)
             ReservationResponse response = new ReservationResponse();
             response.setId(savedReservation.getId());
@@ -80,6 +96,50 @@ public class ReservationController {
             return ResponseEntity.status(400).body(new ErrorResponse("Invalid date format: " + e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(500).body(new ErrorResponse("Failed to create reservation: " + e.getMessage()));
+        }
+    }
+
+    @PutMapping("/{id}/cancel")
+    public ResponseEntity<?> cancelReservation(@PathVariable Long id) {
+        try {
+            Optional<Reservation> reservationOpt = reservationRepository.findById(id);
+            if (!reservationOpt.isPresent()) {
+                return ResponseEntity.notFound().build();
+            }
+            
+            Reservation reservation = reservationOpt.get();
+            
+            // Update reservation status
+            reservation.setStatus("Cancelled");
+            reservationRepository.save(reservation);
+            
+            // Update vehicle status - make it available again
+            Vehicle vehicle = reservation.getVehicle();
+            if (vehicle != null) {
+                vehicle.setStatus("Available"); // Use status instead of availability
+                vehicleRepository.save(vehicle);
+            }
+            
+            return ResponseEntity.ok().body(Map.of(
+                "message", "Reservation cancelled successfully",
+                "reservation", reservation
+            ));
+            
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("error", "Failed to cancel reservation: " + e.getMessage()));
+        }
+    }
+
+    // Add endpoint to get user reservations
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<?> getUserReservations(@PathVariable Long userId) {
+        try {
+            List<Reservation> reservations = reservationRepository.findByUserId(userId);
+            return ResponseEntity.ok(reservations);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("error", "Failed to get reservations: " + e.getMessage()));
         }
     }
 }
@@ -112,6 +172,7 @@ class ReservationResponse {
     private java.time.LocalDateTime createdAt;
     private java.time.LocalDateTime updatedAt;
 
+    // Getters and setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public Long getVehicleId() { return vehicleId; }

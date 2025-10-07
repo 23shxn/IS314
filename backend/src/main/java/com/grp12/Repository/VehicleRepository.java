@@ -1,7 +1,5 @@
 package com.grp12.Repository;
 
-
-
 import com.grp12.Model.Vehicle;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -49,10 +47,10 @@ public interface VehicleRepository extends JpaRepository<Vehicle, Long> {
                                          @Param("maxPrice") Double maxPrice,
                                          @Param("status") String status);
     
-    @Query("SELECT DISTINCT v.location FROM Vehicle v ORDER BY v.location")
+    @Query("SELECT DISTINCT v.location FROM Vehicle v WHERE v.status = 'Available'")
     List<String> findDistinctLocations();
     
-    @Query("SELECT DISTINCT v.vehicleType FROM Vehicle v ORDER BY v.vehicleType")
+    @Query("SELECT DISTINCT v.vehicleType FROM Vehicle v WHERE v.status = 'Available'")
     List<String> findDistinctVehicleTypes();
     
     boolean existsByLicensePlate(String licensePlate);
@@ -61,4 +59,15 @@ public interface VehicleRepository extends JpaRepository<Vehicle, Long> {
     
     @Query("SELECT COUNT(v) FROM Vehicle v WHERE v.status = :status")
     Long countByStatus(@Param("status") String status);
+
+    List<Vehicle> findByLocationAndVehicleTypeAndStatus(String location, String vehicleType, String status);
+
+    @Query("SELECT v FROM Vehicle v WHERE v.location = :location")
+    List<Vehicle> findVehiclesByLocation(@Param("location") String location);
+    
+    @Query("SELECT v FROM Vehicle v WHERE v.vehicleType = :vehicleType")
+    List<Vehicle> findVehiclesByType(@Param("vehicleType") String vehicleType);
+    
+    @Query("SELECT v FROM Vehicle v WHERE v.location = :location AND v.vehicleType = :vehicleType")
+    List<Vehicle> findVehiclesByLocationAndType(@Param("location") String location, @Param("vehicleType") String vehicleType);
 }
