@@ -86,14 +86,86 @@ public class EmailService {
     public void sendPasswordResetEmail(String email, String resetToken) throws MessagingException {
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
-        
+
         helper.setTo(email);
         helper.setSubject("Password Reset - Ronaldo's Rentals");
         helper.setText(buildPasswordResetEmailHtml(resetToken), true);
-        
+
         mailSender.send(message);
-        
+
         System.out.println("Password reset email sent to: " + email);
+    }
+
+    // Send cancellation notification
+    public void sendCancellationEmail(String email, String firstName, String lastName, Long reservationId, String vehicleName) throws MessagingException {
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true);
+
+        helper.setTo(email);
+        helper.setSubject("Reservation Cancelled - Ronaldo's Rentals");
+        helper.setText(buildCancellationEmailHtml(firstName, lastName, reservationId, vehicleName), true);
+
+        mailSender.send(message);
+
+        System.out.println("Cancellation email sent to: " + email);
+    }
+
+    // Send reservation confirmation notification
+    public void sendReservationConfirmationEmail(String email, String firstName, String lastName, Long reservationId, String vehicleName, String rentalDate, String returnDate, String totalPrice) throws MessagingException {
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true);
+
+        helper.setTo(email);
+        helper.setSubject("Reservation Confirmed - Ronaldo's Rentals");
+        helper.setText(buildReservationConfirmationEmailHtml(firstName, lastName, reservationId, vehicleName, rentalDate, returnDate, totalPrice), true);
+
+        mailSender.send(message);
+
+        System.out.println("Reservation confirmation email sent to: " + email);
+    }
+
+    private String buildReservationConfirmationEmailHtml(String firstName, String lastName, Long reservationId, String vehicleName, String rentalDate, String returnDate, String totalPrice) {
+        return "<!DOCTYPE html>" +
+                "<html>" +
+                "<head>" +
+                "<style>" +
+                "body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }" +
+                ".container { max-width: 600px; margin: 0 auto; padding: 20px; }" +
+                ".header { background-color: #27ae60; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }" +
+                ".content { padding: 30px; background-color: #f9f9f9; }" +
+                ".footer { text-align: center; margin-top: 20px; color: #666; font-size: 14px; }" +
+                ".info-box { background-color: #d4edda; border: 1px solid #c3e6cb; padding: 15px; border-radius: 4px; margin: 15px 0; }" +
+                "</style>" +
+                "</head>" +
+                "<body>" +
+                "<div class='container'>" +
+                "<div class='header'>" +
+                "<h1>🚗 Ronaldo's Rentals</h1>" +
+                "<h2>Reservation Confirmed!</h2>" +
+                "</div>" +
+                "<div class='content'>" +
+                "<h3>Dear " + firstName + " " + lastName + ",</h3>" +
+                "<div class='info-box'>" +
+                "<p><strong>Your reservation has been successfully confirmed!</strong></p>" +
+                "</div>" +
+                "<p><strong>Reservation Details:</strong></p>" +
+                "<ul>" +
+                "<li><strong>Reservation ID:</strong> " + reservationId + "</li>" +
+                "<li><strong>Vehicle:</strong> " + vehicleName + "</li>" +
+                "<li><strong>Rental Date:</strong> " + rentalDate + "</li>" +
+                "<li><strong>Return Date:</strong> " + returnDate + "</li>" +
+                "<li><strong>Total Price:</strong> $" + totalPrice + "</li>" +
+                "</ul>" +
+                "<p>Thank you for choosing Ronaldo's Rentals. We look forward to serving you!</p>" +
+                "<p>If you have any questions about your reservation, please contact our support team.</p>" +
+                "</div>" +
+                "<div class='footer'>" +
+                "<p>© 2025 Ronaldo's Rentals. All rights reserved.</p>" +
+                "<p>This email was sent to " + firstName + " " + lastName + "</p>" +
+                "</div>" +
+                "</div>" +
+                "</body>" +
+                "</html>";
     }
 
     // Build password reset email HTML
@@ -272,6 +344,47 @@ public class EmailService {
                 "<div class='footer'>" +
                 "<p>© 2025 Ronaldo's Rentals. All rights reserved.</p>" +
                 "<p>This is an automated message, please do not reply to this email.</p>" +
+                "</div>" +
+                "</div>" +
+                "</body>" +
+                "</html>";
+    }
+
+    private String buildCancellationEmailHtml(String firstName, String lastName, Long reservationId, String vehicleName) {
+        return "<!DOCTYPE html>" +
+                "<html>" +
+                "<head>" +
+                "<style>" +
+                "body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }" +
+                ".container { max-width: 600px; margin: 0 auto; padding: 20px; }" +
+                ".header { background-color: #e74c3c; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }" +
+                ".content { padding: 30px; background-color: #f9f9f9; }" +
+                ".footer { text-align: center; margin-top: 20px; color: #666; font-size: 14px; }" +
+                ".info-box { background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 4px; margin: 15px 0; }" +
+                "</style>" +
+                "</head>" +
+                "<body>" +
+                "<div class='container'>" +
+                "<div class='header'>" +
+                "<h1>🚗 Ronaldo's Rentals</h1>" +
+                "<h2>Reservation Cancelled</h2>" +
+                "</div>" +
+                "<div class='content'>" +
+                "<h3>Dear " + firstName + " " + lastName + ",</h3>" +
+                "<div class='info-box'>" +
+                "<p><strong>Your reservation has been successfully cancelled.</strong></p>" +
+                "</div>" +
+                "<p><strong>Reservation Details:</strong></p>" +
+                "<ul>" +
+                "<li><strong>Reservation ID:</strong> " + reservationId + "</li>" +
+                "<li><strong>Vehicle:</strong> " + vehicleName + "</li>" +
+                "</ul>" +
+                "<p>If this cancellation was made in error or if you have any questions, please contact our support team immediately.</p>" +
+                "<p>You can make a new reservation anytime through our website.</p>" +
+                "</div>" +
+                "<div class='footer'>" +
+                "<p>© 2025 Ronaldo's Rentals. All rights reserved.</p>" +
+                "<p>This email was sent to " + firstName + " " + lastName + "</p>" +
                 "</div>" +
                 "</div>" +
                 "</body>" +

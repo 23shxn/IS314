@@ -173,16 +173,16 @@ const AdminLogin = ({ setCurrentUser }) => {
         }
 
         const admin = await response.json();
-        
-        // Ensure the admin object has the role property
+
+        // Use the actual role from backend response
         const adminWithRole = {
           ...admin,
-          role: 'admin',
+          role: admin.role || 'ADMIN', // Default to ADMIN if not set
           name: `${admin.firstName || ''} ${admin.lastName || ''}`.trim() || admin.username || admin.email
         };
-        
+
         setCurrentUser(adminWithRole);
-        navigate('/admin/dashboard');
+        navigate(admin.role === 'SUPER_ADMIN' ? '/manager/dashboard' : '/admin/dashboard');
         
       } catch (err) {
         console.error('Admin login error:', err);

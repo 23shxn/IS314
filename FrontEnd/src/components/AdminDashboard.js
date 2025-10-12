@@ -53,7 +53,7 @@ const AdminDashboard = ({ currentUser, cars, reservations, users, pendingRequest
             className={`sidebar-btn ${location.pathname === '/admin/users' ? 'active' : ''}`}
           >
             <Users className="btn-icon" />
-            <span>User Management</span>
+            <span>Customer Infofrmation</span>
           </button>
           <button 
             onClick={() => handleNavigation('maintenance')} 

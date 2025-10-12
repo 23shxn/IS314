@@ -7,7 +7,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class BackendApplication {
 
     public static void main(String[] args) {
-        // Disable problematic auto-configurations
         System.setProperty("spring.web.resources.add-mappings", "false");
         System.setProperty("spring.autoconfigure.exclude", "org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration");
         

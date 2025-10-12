@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Calendar, Car, MapPin, Clock, CheckCircle, X, Eye } from 'lucide-react';
 import axios from 'axios';
 
@@ -7,38 +7,10 @@ const ReservationManagement = ({ reservations, setReservations, currentUser }) =
   const [selectedReservation, setSelectedReservation] = useState(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const cancelReservation = async (reservationId) => {
-    if (!window.confirm('Are you sure you want to cancel this reservation?')) {
-      return;
-    }
-    
-    try {
-      setLoading(true);
-      const response = await axios.put(
-        `http://localhost:8080/api/reservations/${reservationId}/cancel`,
-        {},
-        {
-          headers: { 'Content-Type': 'application/json' },
-          withCredentials: true
-        }
-      );
-      
-      // Update local state to reflect cancellation
-      setReservations(prev => prev.map(reservation => 
-        reservation.id === reservationId 
-          ? { ...reservation, status: 'Cancelled' }
-          : reservation
-      ));
-      
-      alert('Reservation cancelled successfully!');
-      
-    } catch (error) {
-      console.error('Error cancelling reservation:', error);
-      alert('Failed to cancel reservation. Please try again.');
-    } finally {
-      setLoading(false);
-    }
+  const cancelReservation = (reservationId) => {
+    navigate(`/cancel/${reservationId}`);
   };
 
   const getStatusColor = (status) => {
@@ -60,6 +32,18 @@ const ReservationManagement = ({ reservations, setReservations, currentUser }) =
       <div style={{ marginBottom: '2rem' }}>
         <h2 style={{ color: '#2c3e50', marginBottom: '0.5rem' }}>My Reservations</h2>
         <p style={{ color: '#666' }}>Manage your vehicle reservations</p>
+        {location.state?.successMessage && (
+          <div style={{
+            backgroundColor: '#d4edda',
+            color: '#155724',
+            padding: '1rem',
+            borderRadius: '8px',
+            marginBottom: '1rem',
+            border: '1px solid #c3e6cb'
+          }}>
+            <strong>Success!</strong> {location.state.successMessage}
+          </div>
+        )}
       </div>
 
       {userReservations.length === 0 ? (

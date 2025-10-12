@@ -7,8 +7,9 @@ const Navigation = ({ currentUser, setCurrentUser }) => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Don't render navigation for admin users or admin pages (from original)
-  if (currentUser?.role === 'admin' || location.pathname.startsWith('/admin')) {
+  // Don't render navigation for admin users or admin pages
+  if (currentUser?.role === 'admin' || currentUser?.role === 'SUPER_ADMIN' ||
+      location.pathname.startsWith('/admin') || location.pathname.startsWith('/manager')) {
     return null;
   }
 
@@ -36,8 +37,8 @@ const Navigation = ({ currentUser, setCurrentUser }) => {
           {currentUser?.role === 'customer' ? (
             <>
               <Link
-                to="/"
-                className={`nav-link ${isActive('/') ? 'active' : ''}`}
+                to="/home"
+                className={`nav-link ${isActive('/home') ? 'active' : ''}`}
               >
                 Home
               </Link>
@@ -70,8 +71,8 @@ const Navigation = ({ currentUser, setCurrentUser }) => {
             // Show basic navigation for non-logged in users (enhanced from second version)
             <>
               <Link
-                to="/"
-                className={`nav-link ${isActive('/') ? 'active' : ''}`}
+                to="/home"
+                className={`nav-link ${isActive('/home') ? 'active' : ''}`}
               >
                 Home
               </Link>

@@ -1,0 +1,234 @@
+.cancel-page.container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 1.25rem;
+  }
+  
+  .summary-page.container {
+    max-width: 30%;
+    margin: 0 auto;
+    padding: 1.25rem;
+  }
+  
+  .title {
+    color: #2a1742;
+    text-align: center;
+    margin-bottom: 1rem;
+  }
+  
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  
+  .card {
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 12px;
+    padding: 16px 18px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+  }
+  
+  .card h3 {
+    color: #6b21a8;
+    margin-bottom: 8px;
+  }
+  
+  .card h2 {
+    color: #ffffff;
+    margin-bottom: 8px;
+  }
+  
+  .divider {
+    margin: 10px 0;
+    height: 1px;
+    background: #eee;
+  }
+  
+  .policy-list {
+    margin: 8px 0 12px;
+    padding-left: 18px;
+    color: #444;
+  }
+  .policy-list li { margin-bottom: 6px; }
+  
+  .confirm {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 10px 0 6px;
+    font-weight: 500;
+  }
+  
+  .actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+  
+  .btn-primary, .btn-danger, .btn-ghost {
+    border: none;
+    padding: 10px 16px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: transform .15s ease, box-shadow .2s ease, opacity .2s ease;
+  }
+  
+  .btn-primary {
+    background: linear-gradient(135deg, #6b21a8, #7b2cc8);
+    color: #fff;
+  }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(123,44,200,.25); }
+  
+  .btn-danger {
+    background: linear-gradient(135deg, #dc3545, #e74c3c);
+    color: #fff;
+  }
+  .btn-danger:disabled { opacity: .6; cursor: not-allowed; }
+  .btn-danger:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(220,53,69,.25); }
+  
+  .btn-ghost {
+    background: transparent;
+    color: #6b21a8;
+    border: 1px solid #d9c6ef;
+  }
+  .btn-ghost:hover { background: #f6f0ff; }
+  
+  .center {
+    display: grid;
+    place-items: center;
+    gap: 10px;
+    text-align: center;
+  }
+  
+  .error-card {
+    color: #b42318;
+    background: #fff5f5;
+    border-color: #ffd1d1;
+  }
+  
+  .success-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #0f5132;
+    background: #ecfdf5;
+    border-color: #c6f7e2;
+  }
+  
+  .badge.ok {
+    width: 28px; height: 28px;
+    display: grid; place-items: center;
+    border-radius: 50%;
+    background: #10b981;
+    color: #fff; font-weight: 800;
+  }
+  
+  .info-card { margin-top: 12px; }
+  
+  .muted { color: #6b7280; }
+  .small { font-size: .9rem; }
+  
+  .spinner {
+    width: 22px; height: 22px;
+    border: 3px solid #ddd;
+    border-top-color: #6b21a8;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  
+  @media (max-width: 768px) {
+    .grid { grid-template-columns: 1fr; }
+  }
+  
+  /* Mock payment modal overlay */
+  .payment-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+  }
+  
+  .payment-modal {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    width: 360px;
+    box-shadow: 0 6px 30px rgba(0,0,0,0.2);
+    animation: fadeIn 0.3s ease;
+  }
+  
+  .payment-modal h3 {
+    color: #6b21a8;
+    margin-bottom: 8px;
+  }
+  
+  .card-field {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 10px;
+  }
+  
+  .card-field label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  
+  .card-field input {
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 8px;
+    letter-spacing: 1px;
+  }
+  
+  .error-text {
+    color: #dc3545;
+    font-size: 0.8rem;
+    margin-top: 3px;
+  }
+  
+  .card-field input.invalid {
+    border-color: #dc3545;
+  }
+  
+  
+  /* Fix overlapping input fields inside payment modal */
+  .row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: nowrap;
+  }
+  
+  .row .card-field {
+    flex: 1;             /* make both fields share equal width */
+    min-width: 0;        /* prevent overflow */
+  }
+  
+  .row .card-field input {
+    width: 100%;         /* ensure input fits its container */
+    box-sizing: border-box;
+  }
+  
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  
+  @media (max-width: 480px) {
+    .row {
+      flex-wrap: wrap;
+    }
+    .row .card-field {
+      flex: 1 1 100%;
+    }
+  }
+  

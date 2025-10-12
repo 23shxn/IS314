@@ -63,10 +63,11 @@ public class SecurityConfig {
                 if (adminOptional.isPresent()) {
                     Admin admin = adminOptional.get();
                     System.out.println("Found admin user: " + admin.getEmail());
+                    String authority = "SUPER_ADMIN".equals(admin.getRole()) ? "ROLE_SUPER_ADMIN" : "ROLE_ADMIN";
                     return org.springframework.security.core.userdetails.User.builder()
                         .username(admin.getEmail())
                         .password(admin.getPassword())
-                        .authorities("ROLE_ADMIN")
+                        .authorities(authority)
                         .build();
                 }
                 
@@ -138,12 +139,12 @@ public class SecurityConfig {
                 .requestMatchers("/api/admin/add-admin").permitAll() // Add this if needed
                 
                 // Admin secured endpoints - comes AFTER the public ones
-                .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                .requestMatchers("/api/auth/admin/**").hasRole("ADMIN")
-                .requestMatchers("/api/auth/users/**").hasRole("ADMIN")
-                .requestMatchers("/api/auth/pending-requests").hasRole("ADMIN")
-                .requestMatchers("/api/auth/approve-user/**").hasRole("ADMIN")
-                .requestMatchers("/api/auth/reject-user/**").hasRole("ADMIN")
+                .requestMatchers("/api/admin/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
+                .requestMatchers("/api/auth/admin/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
+                .requestMatchers("/api/auth/users/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
+                .requestMatchers("/api/auth/pending-requests").hasAnyRole("ADMIN", "SUPER_ADMIN")
+                .requestMatchers("/api/auth/approve-user/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
+                .requestMatchers("/api/auth/reject-user/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
                 
                 // All other endpoints require authentication
                 .anyRequest().authenticated()

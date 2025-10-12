@@ -60,7 +60,7 @@ public class UserController {
                 return ResponseEntity.badRequest()
                     .body(Map.of("error", "Email already registered and approved"));
             }
-            
+
             // Also check for pending registration requests
             Optional<RegistrationRequest> existingRequest = registrationRequestRepository.findByEmailAndStatus(
                 user.getEmail(), "PENDING");
@@ -74,7 +74,7 @@ public class UserController {
                 // Remove the old rejected user record
                 userService.deleteUser(existingUser.getId());
             }
-            
+
             // Remove any old rejected registration requests
             registrationRequestRepository.findByEmail(user.getEmail())
                 .ifPresent(oldRequest -> {
@@ -85,7 +85,7 @@ public class UserController {
 
             // Register user - this now returns RegistrationRequest
             RegistrationRequest registrationRequest = userService.registerUser(user);
-            
+
             return ResponseEntity.ok().body(Map.of(
                 "message", "Registration request submitted successfully! Please wait for admin approval.",
                 "request", Map.of(
@@ -116,16 +116,16 @@ public class UserController {
     public ResponseEntity<?> login(@RequestBody User user, HttpServletRequest request) {
         try {
             // Authenticate using Spring Security
-            UsernamePasswordAuthenticationToken authToken = 
+            UsernamePasswordAuthenticationToken authToken =
                 new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword());
-            
+
             Authentication authentication = authenticationManager.authenticate(authToken);
             SecurityContextHolder.getContext().setAuthentication(authentication);
-            
+
             // Store authentication in session
-            request.getSession().setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, 
+            request.getSession().setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
                 SecurityContextHolder.getContext());
-            
+
             // Get user details for response
             User authenticatedUser = userService.loginUser(user.getEmail(), user.getPassword());
             if (authenticatedUser != null) {
@@ -138,10 +138,10 @@ public class UserController {
                 response.put("phoneNumber", authenticatedUser.getPhoneNumber());
                 response.put("status", authenticatedUser.getStatus());
                 response.put("role", "customer"); // Explicitly set the role
-                
+
                 return ResponseEntity.ok(response);
             }
-            
+
             Map<String, String> errorResponse = new HashMap<>();
             errorResponse.put("error", "Invalid email, password, or account not approved");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
@@ -157,7 +157,7 @@ public class UserController {
     public ResponseEntity<?> getCurrentUserAuth() {
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            
+
             if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
                 Map<String, String> errorResponse = new HashMap<>();
                 errorResponse.put("error", "Not authenticated");
@@ -166,7 +166,7 @@ public class UserController {
 
             String email = auth.getName();
             User user = userService.getUserByEmail(email);
-            
+
             if (user == null) {
                 Map<String, String> errorResponse = new HashMap<>();
                 errorResponse.put("error", "User not found");
@@ -197,7 +197,7 @@ public class UserController {
         try {
             SecurityContextHolder.clearContext();
             request.getSession().invalidate();
-            
+
             Map<String, String> response = new HashMap<>();
             response.put("message", "Logged out successfully");
             return ResponseEntity.ok(response);
@@ -209,7 +209,7 @@ public class UserController {
     }
 
     @GetMapping("/requests/pending")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     public ResponseEntity<?> getPendingRequests() {
         try {
             List<RegistrationRequest> requests = userService.getPendingRequests();
@@ -222,12 +222,12 @@ public class UserController {
     }
 
     @PostMapping("/approve/{requestId}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     public ResponseEntity<?> approveRegistration(@PathVariable Long requestId) {
         try {
             // Use approveUser instead of approveRegistration
             User user = userService.approveUser(requestId);
-            
+
             // Email notification is already handled in approveUser method
             return ResponseEntity.ok(Map.of(
                 "message", "User approved successfully! Notification email sent.",
@@ -245,12 +245,12 @@ public class UserController {
     }
 
     @PostMapping("/reject/{requestId}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     public ResponseEntity<?> rejectRegistration(@PathVariable Long requestId) {
         try {
             // Use rejectUser instead of rejectRegistration
             userService.rejectUser(requestId);
-            
+
             // Email notification is already handled in rejectUser method
             Map<String, String> response = new HashMap<>();
             response.put("message", "Registration rejected successfully! Notification email sent.");
@@ -267,7 +267,7 @@ public class UserController {
     }
 
     @GetMapping("/users/customers")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     public ResponseEntity<?> getAllCustomers() {
         try {
             List<User> customers = userService.getAllCustomers();
@@ -279,13 +279,31 @@ public class UserController {
         }
     }
 
+    // NEW: Delete user endpoint for SUPER_ADMIN only
+    @DeleteMapping("/users/{userId}")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    public ResponseEntity<?> deleteUser(@PathVariable Long userId) {
+        try {
+            userService.deleteUser(userId);
+            return ResponseEntity.ok(Map.of("message", "User deleted successfully"));
+        } catch (RuntimeException e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(errorResponse);
+        } catch (Exception e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Failed to delete user: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
     @GetMapping("/current")
     public ResponseEntity<?> getCurrentUser() {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            if (authentication != null && authentication.isAuthenticated() && 
+            if (authentication != null && authentication.isAuthenticated() &&
                 !authentication.getName().equals("anonymousUser")) {
-                
+
                 String email = authentication.getName();
                 User user = userService.getUserByEmail(email);
                 if (user != null) {
@@ -293,7 +311,7 @@ public class UserController {
                     return ResponseEntity.ok(user);
                 }
             }
-            
+
             Map<String, String> errorResponse = new HashMap<>();
             errorResponse.put("error", "Not authenticated");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
@@ -308,23 +326,23 @@ public class UserController {
     public ResponseEntity<?> requestPasswordReset(@RequestBody Map<String, String> request) {
         try {
             String email = request.get("email");
-            
+
             if (email == null || email.trim().isEmpty()) {
                 return ResponseEntity.badRequest()
                     .body(Map.of("error", "Email is required"));
             }
-            
+
             // Validate email format
             if (!email.matches("^[a-zA-Z0-9._%+-]+@gmail\\.com$")) {
                 return ResponseEntity.badRequest()
                     .body(Map.of("error", "Please enter a valid Gmail address"));
             }
-            
+
             userService.requestPasswordReset(email.trim());
-            
+
             return ResponseEntity.ok()
                 .body(Map.of("message", "Password reset code sent to your email"));
-                
+
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest()
                 .body(Map.of("error", e.getMessage()));
@@ -334,24 +352,24 @@ public class UserController {
                 .body(Map.of("error", "Failed to process password reset request"));
         }
     }
-    
+
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> request) {
         try {
             String email = request.get("email");
             String resetToken = request.get("resetToken");
             String newPassword = request.get("newPassword");
-            
+
             if (email == null || resetToken == null || newPassword == null) {
                 return ResponseEntity.badRequest()
                     .body(Map.of("error", "Email, reset token, and new password are required"));
             }
-            
+
             userService.resetPassword(email.trim(), resetToken.trim(), newPassword);
-            
+
             return ResponseEntity.ok()
                 .body(Map.of("message", "Password reset successful. You can now login with your new password."));
-                
+
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest()
                 .body(Map.of("error", e.getMessage()));
@@ -367,10 +385,10 @@ public class UserController {
         try {
             String email = request.get("email");
             String resetToken = request.get("resetToken");
-            
+
             // Verify the token without resetting the password
             boolean isValid = userService.verifyResetToken(email, resetToken);
-            
+
             if (isValid) {
                 return ResponseEntity.ok().body(Map.of("message", "Reset code verified successfully"));
             } else {

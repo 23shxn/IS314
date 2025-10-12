@@ -25,10 +25,14 @@ import CustomerDashboard from './components/CustomerDashboard';
 import VehicleSearch from './components/VehicleSearch';
 import ReservationManagement from './components/ReservationManagement';
 import AdminDashboard from './components/AdminDashboard';
+import SuperAdminDashboardModified from './components/SuperAdminDashboardModified';
+import VehicleManagementModified from './components/VehicleManagementModified';
 import VehicleManagement from './components/VehicleManagement';
 import VehicleMaintenance from './components/VehicleMaintenance';
+import VehicleMaintenanceModified from './components/VehicleMaintenanceModified';
 import PendingRequests from './components/PendingRequests';
 import UserManagement from './components/UserManagement';
+import UserManagementModified from './components/UserManagementModified';
 import LandingPage from './components/LandingPage';
 import AboutUs from './components/AboutUs';
 import FAQs from './components/FAQs';
@@ -36,6 +40,7 @@ import Contact from './components/Contact';
 import CompleteBooking from './components/CompleteBooking';
 import CarDetail from './components/CarDetail';
 import Checkout from './components/Checkout';
+import Cancellation from './components/Cancellation';
 
 const App = () => {
   const [currentUser, setCurrentUser] = useState(null);
@@ -57,7 +62,7 @@ const App = () => {
   }, [currentUser]);
 
   const fetchInitialData = async () => {
-    if (currentUser?.role === 'admin') {
+    if (currentUser?.role === 'admin' || currentUser?.role === 'SUPER_ADMIN') {
       try {
         const [vehiclesRes, usersRes, pendingRes] = await Promise.all([
           fetch('http://localhost:8080/api/vehicles/all', {
@@ -87,6 +92,29 @@ const App = () => {
       } catch (error) {
         console.error('Failed to fetch initial data:', error);
       }
+    } else if (currentUser?.role === 'customer') {
+      try {
+        const [vehiclesRes, reservationsRes] = await Promise.all([
+          fetch('http://localhost:8080/api/vehicles/available', {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include'
+          }),
+          fetch(`http://localhost:8080/api/reservations/user/${currentUser.id}`, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include'
+          })
+        ]);
+
+        const vehiclesData = await vehiclesRes.json();
+        const reservationsData = await reservationsRes.json();
+
+        if (vehiclesRes.ok) setCars(Array.isArray(vehiclesData) ? vehiclesData : []);
+        if (reservationsRes.ok) setReservations(Array.isArray(reservationsData) ? reservationsData : []);
+      } catch (error) {
+        console.error('Failed to fetch data for customer:', error);
+      }
     }
   };
 
@@ -95,7 +123,18 @@ const App = () => {
     if (!currentUser) {
       return <Navigate to="/admin/login" replace />;
     }
-    if (currentUser.role !== 'admin') {
+    if (currentUser.role !== 'ADMIN') {
+      return <Navigate to="/admin/login" replace />;
+    }
+    return React.cloneElement(children, { currentUser, setCurrentUser, cars, users, pendingRequests });
+  };
+
+  // Component to protect super admin routes
+  const SuperAdminRoute = ({ children, setCurrentUser }) => {
+    if (!currentUser) {
+      return <Navigate to="/admin/login" replace />;
+    }
+    if (currentUser.role !== 'SUPER_ADMIN') {
       return <Navigate to="/admin/login" replace />;
     }
     return React.cloneElement(children, { currentUser, setCurrentUser, cars, users, pendingRequests });
@@ -117,8 +156,11 @@ const App = () => {
     if (!currentUser) {
       return children;
     }
-    if (currentUser.role === 'admin') {
+    if (currentUser.role === 'ADMIN') {
       return <Navigate to="/admin/dashboard" replace />;
+    }
+    if (currentUser.role === 'SUPER_ADMIN') {
+      return <Navigate to="/manager/dashboard" replace />;
     }
     if (currentUser.role === 'customer') {
       return <Navigate to="/dashboard" replace />;
@@ -137,6 +179,7 @@ const App = () => {
         <Routes>
           {/* Public Routes - Available to everyone */}
           <Route path="/" element={<LandingPage currentUser={currentUser} />} />
+          <Route path="/home" element={<LandingPage currentUser={currentUser} />} />
           <Route path="/about" element={<AboutUs />} />
           <Route path="/faqs" element={<FAQs />} />
           <Route path="/contact" element={<Contact />} />
@@ -212,6 +255,18 @@ const App = () => {
             } 
           />
           <Route 
+            path="/cancel/:id" 
+            element={
+              <CustomerRoute>
+                <Cancellation 
+                  reservations={reservations} 
+                  setReservations={setReservations} 
+                  currentUser={currentUser}
+                />
+              </CustomerRoute>
+            } 
+          />
+          <Route 
             path="/pickup" 
             element={
               <CustomerRoute>
@@ -240,6 +295,58 @@ const App = () => {
                 currentUser={currentUser} 
               />
             } 
+          />
+
+          {/* Manager (Super Admin) Protected Routes */}
+          <Route
+            path="/manager/dashboard"
+            element={
+              <SuperAdminRoute setCurrentUser={setCurrentUser}>
+                <SuperAdminDashboardModified
+                  currentUser={currentUser}
+                  cars={cars}
+                  reservations={reservations}
+                  users={users}
+                  pendingRequests={pendingRequests}
+                />
+              </SuperAdminRoute>
+            }
+          />
+          <Route
+            path="/manager/vehicles"
+            element={
+              <SuperAdminRoute setCurrentUser={setCurrentUser}>
+                <VehicleManagementModified />
+              </SuperAdminRoute>
+            }
+          />
+          <Route
+            path="/manager/maintenance"
+            element={
+              <SuperAdminRoute setCurrentUser={setCurrentUser}>
+                <VehicleMaintenanceModified
+                  cars={cars}
+                  maintenanceRecords={maintenanceRecords}
+                  setMaintenanceRecords={setMaintenanceRecords}
+                />
+              </SuperAdminRoute>
+            }
+          />
+          <Route
+            path="/manager/pending-requests"
+            element={
+              <SuperAdminRoute setCurrentUser={setCurrentUser}>
+                <PendingRequests />
+              </SuperAdminRoute>
+            }
+          />
+          <Route
+            path="/manager/users"
+            element={
+              <SuperAdminRoute setCurrentUser={setCurrentUser}>
+                <UserManagementModified />
+              </SuperAdminRoute>
+            }
           />
 
           {/* Admin Protected Routes */}
@@ -295,15 +402,17 @@ const App = () => {
           />
 
           {/* Catch-all route - redirect to appropriate default page */}
-          <Route 
-            path="*" 
+          <Route
+            path="*"
             element={
-              currentUser?.role === 'admin' ? 
-                <Navigate to="/admin/dashboard" replace /> : 
-                currentUser?.role === 'customer' ? 
-                  <Navigate to="/dashboard" replace /> : 
-                  <Navigate to="/" replace />
-            } 
+              currentUser?.role === 'ADMIN' ?
+                <Navigate to="/admin/dashboard" replace /> :
+                currentUser?.role === 'SUPER_ADMIN' ?
+                  <Navigate to="/manager/dashboard" replace /> :
+                  currentUser?.role === 'customer' ?
+                    <Navigate to="/dashboard" replace /> :
+                    <Navigate to="/" replace />
+            }
           />
         </Routes>
       </div>

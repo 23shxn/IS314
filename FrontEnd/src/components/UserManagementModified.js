@@ -5,13 +5,13 @@ import '../styles/UserManagement.css';
 
 const UserManagement = ({ setCurrentUser, currentUser }) => {
   const navigate = useNavigate();
-  const location = useLocation()
+  const location = useLocation();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   // Determine user role
-  const isSuperAdmin = currentUser?.role === 'SUPER_ADMIN'
+  const isSuperAdmin = currentUser?.role === 'SUPER_ADMIN';
   const isAdmin = currentUser?.role === 'ADMIN';
 
   useEffect(() => {
