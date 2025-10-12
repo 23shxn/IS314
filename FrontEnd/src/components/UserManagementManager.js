@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { LogOut, Layout, Users, Car, ClipboardList, ToolCase, Trash2, UserPlus } from 'lucide-react';
 import '../styles/UserManagement.css';
 
-const UserManagement = ({ setCurrentUser, currentUser }) => {
+const UserManagementManager = ({ setCurrentUser, currentUser }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [users, setUsers] = useState([]);
@@ -247,4 +247,4 @@ const UserManagement = ({ setCurrentUser, currentUser }) => {
   );
 };
 
-export default UserManagement;
+export default UserManagementManager;

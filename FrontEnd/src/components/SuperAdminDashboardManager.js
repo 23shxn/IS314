@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { LogOut, Layout, Users, Car, ClipboardList, ToolCase, UserPlus, Check, X } from 'lucide-react';
 import '../styles/SuperAdminDashboard.css';
 
-const SuperAdminDashboard = ({ setCurrentUser, currentUser }) => {
+const SuperAdminDashboardModified = ({ setCurrentUser, currentUser }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [stats, setStats] = useState({
@@ -327,4 +327,4 @@ const SuperAdminDashboard = ({ setCurrentUser, currentUser }) => {
   );
 };
 
-export default SuperAdminDashboard;
+export default SuperAdminDashboardModified;

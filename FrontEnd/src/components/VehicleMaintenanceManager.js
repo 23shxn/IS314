@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { LogOut, Layout, Users, Car, ClipboardList, ToolCase, Plus, Edit, Trash2, FileText, Check, X } from 'lucide-react';
 import '../styles/VehicleMaintenance.css';
 
-const VehicleMaintenance = ({ setCurrentUser, currentUser }) => {
+const VehicleMaintenanceManager = ({ setCurrentUser, currentUser }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [vehicles, setVehicles] = useState([]);
@@ -874,4 +874,4 @@ const VehicleMaintenance = ({ setCurrentUser, currentUser }) => {
   );
 };
 
-export default VehicleMaintenance;
+export default VehicleMaintenanceManager;

@@ -25,14 +25,14 @@ import CustomerDashboard from './components/CustomerDashboard';
 import VehicleSearch from './components/VehicleSearch';
 import ReservationManagement from './components/ReservationManagement';
 import AdminDashboard from './components/AdminDashboard';
-import SuperAdminDashboardModified from './components/SuperAdminDashboardModified';
-import VehicleManagementModified from './components/VehicleManagementModified';
+import SuperAdminDashboardManager from './components/SuperAdminDashboardManager';
+import UserManagementManager from './components/UserManagementManager';
+import VehicleManagementManager from './components/VehicleManagementManager';
 import VehicleManagement from './components/VehicleManagement';
 import VehicleMaintenance from './components/VehicleMaintenance';
-import VehicleMaintenanceModified from './components/VehicleMaintenanceModified';
+import VehicleMaintenanceManager from './components/VehicleMaintenanceManager';
 import PendingRequests from './components/PendingRequests';
 import UserManagement from './components/UserManagement';
-import UserManagementModified from './components/UserManagementModified';
 import LandingPage from './components/LandingPage';
 import AboutUs from './components/AboutUs';
 import FAQs from './components/FAQs';
@@ -302,7 +302,7 @@ const App = () => {
             path="/manager/dashboard"
             element={
               <SuperAdminRoute setCurrentUser={setCurrentUser}>
-                <SuperAdminDashboardModified
+                <SuperAdminDashboardManager
                   currentUser={currentUser}
                   cars={cars}
                   reservations={reservations}
@@ -316,7 +316,7 @@ const App = () => {
             path="/manager/vehicles"
             element={
               <SuperAdminRoute setCurrentUser={setCurrentUser}>
-                <VehicleManagementModified />
+                <VehicleManagementManager />
               </SuperAdminRoute>
             }
           />
@@ -324,7 +324,7 @@ const App = () => {
             path="/manager/maintenance"
             element={
               <SuperAdminRoute setCurrentUser={setCurrentUser}>
-                <VehicleMaintenanceModified
+                <VehicleMaintenanceManager
                   cars={cars}
                   maintenanceRecords={maintenanceRecords}
                   setMaintenanceRecords={setMaintenanceRecords}
@@ -344,7 +344,7 @@ const App = () => {
             path="/manager/users"
             element={
               <SuperAdminRoute setCurrentUser={setCurrentUser}>
-                <UserManagementModified />
+                <UserManagementManager />
               </SuperAdminRoute>
             }
           />

@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { LogOut, Layout, Users, Car, ClipboardList, ToolCase, Check, X, Plus, Trash2, Eye, ChevronLeft, ChevronRight, Edit } from 'lucide-react';
 import '../styles/VehicleManagement.css';
 
-const VehicleManagement = ({ setCurrentUser }) => {
+const VehicleManagementManager = ({ setCurrentUser }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [vehicles, setVehicles] = useState([]);
@@ -599,7 +599,7 @@ const VehicleManagement = ({ setCurrentUser }) => {
     <div className="admin-dashboard">
       <nav className="sidebar">
         <div className="sidebar-header">
-          <h2>Ronaldo's Rentals Admin Dashboard</h2>
+          <h2>Ronaldo's Rentals Super Admin Dashboard</h2>
         </div>
         <div className="sidebar-menu">
           <button
@@ -1123,4 +1123,4 @@ const VehicleManagement = ({ setCurrentUser }) => {
   );
 };
 
-export default VehicleManagement;
+export default VehicleManagementManager;
