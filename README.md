@@ -41,6 +41,8 @@ A full-stack vehicle rental reservation system built with Spring Boot (Java) bac
 5. Access the application:
    - Frontend: http://localhost:3000
    - Backend API: http://localhost:8080
+   - Postgresql DB: psql -h localhost -p 5434 -U postgres -d postgres
+
 
 ### Development Setup (without Docker)
 
