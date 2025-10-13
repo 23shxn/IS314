@@ -151,8 +151,9 @@ const Checkout = ({ reservations, setReservations, currentUser }) => {
       };
 
       console.log('Checkout - Booking request data:', data);
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8080';
 
-      const response = await axios.post('http://localhost:8080/api/reservations', data, {
+      const response = await axios.post(`${apiUrl}/api/reservations`, data, {
         headers: { 'Content-Type': 'application/json' },
         withCredentials: true
       });

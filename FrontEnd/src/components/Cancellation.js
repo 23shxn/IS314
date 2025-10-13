@@ -99,8 +99,9 @@ export default function CancelReservation({ reservations, setReservations, curre
     if (feePreview?.cancellationFee > 0 && !validatePayment()) return;
 
     setPaymentLoading(true);
+    const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8080';
     try {
-      await axios.put(`http://localhost:8080/api/reservations/${id}/cancel`, {}, {
+      await axios.put(`${apiUrl}/api/reservations/${id}/cancel`, {}, {
         headers: { 'Content-Type': 'application/json' },
         withCredentials: true
       });
