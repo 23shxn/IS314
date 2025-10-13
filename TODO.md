@@ -1,8 +1,6 @@
-# Cancellation Fix TODO
+# TODO: Remove Unnecessary Comments
 
-## Tasks
-- [x] Update Cancellation.js: Remove successMessage display and setSuccessMessage call, instead navigate to "/reservations" with success message in state
-- [x] Update ReservationManagement.js: Add useLocation import, add success message display at top of component if location.state.successMessage exists
-
-## Followup
-- [ ] Test the cancellation flow to ensure success message appears on reservations screen
+- [x] Remove // comments from all .java files in backend/src/main/java
+- [x] Remove // comments from all .js and .jsx files in FrontEnd/src
+- [ ] Verify removal by reading a sample file
+- [ ] Test backend build to ensure no syntax errors

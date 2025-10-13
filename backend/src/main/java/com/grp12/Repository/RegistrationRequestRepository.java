@@ -16,7 +16,7 @@ public interface RegistrationRequestRepository extends JpaRepository<Registratio
     List<RegistrationRequest> findByDriversLicenseNumber(String driversLicenseNumber);
     List<RegistrationRequest> findByEmailOrDriversLicenseNumber(String email, String driversLicenseNumber);
     
-    // Replace the problematic method with a custom query
+   
     @Query("SELECT r FROM RegistrationRequest r WHERE r.status = 'PENDING' ORDER BY r.createdAt ASC")
     List<RegistrationRequest> findPendingRequestsOrderByCreatedAt();
     

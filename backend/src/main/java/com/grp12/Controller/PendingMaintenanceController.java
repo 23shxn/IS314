@@ -72,7 +72,8 @@ public class PendingMaintenanceController {
                     .body(Map.of("error", "Admin not found"));
             }
 
-            // Check if super admin - allow direct add
+           
+            
             if ("SUPER_ADMIN".equals(currentAdmin.getRole())) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(Map.of("error", "Super admins should use direct add endpoint"));

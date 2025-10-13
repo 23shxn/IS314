@@ -158,7 +158,7 @@ public class Vehicle {
     public String getImageUrl() { return imageUrl; }
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
     
-    // Multiple image getters and setters
+   
     public String getVehicleImage1() { return vehicleImage1; }
     public void setVehicleImage1(String vehicleImage1) { this.vehicleImage1 = vehicleImage1; }
     

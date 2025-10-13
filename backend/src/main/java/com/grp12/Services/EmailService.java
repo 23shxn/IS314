@@ -17,7 +17,7 @@ public class EmailService {
     @Autowired
     private JavaMailSender mailSender;
 
-    // In-memory storage for verification codes
+   
     private final Map<String, VerificationData> verificationCodes = new ConcurrentHashMap<>();
 
     public void sendVerificationCode(String email) throws MessagingException {
@@ -55,7 +55,7 @@ public class EmailService {
         
         // Check if code matches
         if (data.code.equals(code)) {
-            verificationCodes.remove(email); // Remove after successful verification
+            verificationCodes.remove(email); 
             return true;
         }
         
@@ -82,7 +82,7 @@ public class EmailService {
         System.out.println("Approval notification sent to: " + email + " (approved: " + isApproved + ")");
     }
 
-    // Password reset email method - make sure this is properly defined
+    // Password reset email method 
     public void sendPasswordResetEmail(String email, String resetToken) throws MessagingException {
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
@@ -391,7 +391,7 @@ public class EmailService {
                 "</html>";
     }
 
-    // Inner class to store verification data
+   
     private static class VerificationData {
         final String code;
         final long expirationTime;

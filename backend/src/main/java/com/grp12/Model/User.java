@@ -13,7 +13,7 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    // Match database column order
+    
     @Lob
     @Column(name = "drivers_license_image", columnDefinition = "TEXT")
     private String driversLicenseImage;
@@ -78,7 +78,7 @@ public class User {
         this.createdAt = LocalDateTime.now();
     }
 
-    // Updated constructor
+  
     public User(Long id, String email, String password, String firstName, String lastName, Boolean emailVerified, Boolean approved) {
         this.id = id;
         this.email = email;
