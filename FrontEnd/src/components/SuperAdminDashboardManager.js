@@ -50,28 +50,28 @@ const SuperAdminDashboardModified = ({ setCurrentUser, currentUser }) => {
   const fetchStats = async () => {
     setLoading(true);
     try {
-      // Fetch pending requests count
+
       const pendingResponse = await fetch('http://localhost:8080/api/vehicles/pending/all', {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include'
       });
 
-      // Fetch pending maintenance count
+
       const maintenanceResponse = await fetch('http://localhost:8080/api/maintenance/pending/all', {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include'
       });
 
-      // Fetch vehicle stats
+
       const vehicleResponse = await fetch('http://localhost:8080/api/vehicles/all', {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include'
       });
 
-      // Fetch user stats
+
       const userResponse = await fetch('http://localhost:8080/api/auth/users/customers', {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },

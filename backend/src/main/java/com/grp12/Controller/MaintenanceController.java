@@ -20,7 +20,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/maintenance")
-@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
+@CrossOrigin(origins = "http:
 public class MaintenanceController {
 
     @Autowired
@@ -29,7 +29,7 @@ public class MaintenanceController {
     @Autowired
     private ImageCompressionService imageCompressionService;
 
-    // Get all maintenance records (ADMIN, SUPER_ADMIN)
+    
     @GetMapping("/all")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     public ResponseEntity<?> getAllMaintenanceRecords() {
@@ -42,7 +42,7 @@ public class MaintenanceController {
         }
     }
 
-    // Get maintenance records by car ID (ADMIN, SUPER_ADMIN)
+    
     @GetMapping("/car/{carId}")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     public ResponseEntity<?> getMaintenanceRecordsByCar(@PathVariable Long carId) {
@@ -55,7 +55,7 @@ public class MaintenanceController {
         }
     }
 
-    // Create maintenance record (SUPER_ADMIN only - for direct creation)
+    
     @PostMapping("/create")
     @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ResponseEntity<?> createMaintenanceRecord(
@@ -72,13 +72,13 @@ public class MaintenanceController {
             @RequestParam(value = "receipt", required = false) MultipartFile receipt) {
 
         try {
-            // Validate required fields
+            
             if (carId == null || type == null || type.trim().isEmpty() || date == null || date.trim().isEmpty()) {
                 return ResponseEntity.badRequest()
                     .body(Map.of("error", "Car ID, type, and date are required"));
             }
 
-            // Create maintenance record
+            
             MaintenanceRecord record = new MaintenanceRecord();
             record.setCarId(carId);
             record.setType(type.trim());
@@ -116,7 +116,7 @@ public class MaintenanceController {
         }
     }
 
-    // Update maintenance record (SUPER_ADMIN only)
+    
     @PutMapping("/{recordId}")
     @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ResponseEntity<?> updateMaintenanceRecord(
@@ -141,7 +141,7 @@ public class MaintenanceController {
 
             MaintenanceRecord record = recordOpt.get();
 
-            // Update fields if provided
+            
             if (type != null && !type.trim().isEmpty()) record.setType(type.trim());
             if (description != null) record.setDescription(description.trim());
             if (cost != null && !cost.trim().isEmpty()) record.setCost(new BigDecimal(cost));
@@ -178,7 +178,7 @@ public class MaintenanceController {
         }
     }
 
-    // Delete maintenance record (SUPER_ADMIN only)
+    
     @DeleteMapping("/{recordId}")
     @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ResponseEntity<?> deleteMaintenanceRecord(@PathVariable Long recordId) {

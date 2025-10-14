@@ -15,7 +15,7 @@ public class MaintenanceRecord {
     private Long carId;
 
     @Column(name = "type", nullable = false, length = 50)
-    private String type; // Routine Service, Repair, Inspection, Emergency Repair
+    private String type; 
 
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
@@ -33,7 +33,7 @@ public class MaintenanceRecord {
     private String mechanic;
 
     @Column(name = "status", nullable = false, length = 20)
-    private String status; // Pending, In Progress, Completed, Overdue
+    private String status; 
 
     @Column(name = "notes", columnDefinition = "TEXT")
     private String notes;
@@ -42,17 +42,17 @@ public class MaintenanceRecord {
     private Integer mileage;
 
     @Column(name = "receipt", columnDefinition = "TEXT")
-    private String receipt; // Base64 encoded receipt image
+    private String receipt; 
 
     @Column(name = "completed_at", nullable = false)
     private LocalDateTime completedAt;
 
-    // Default constructor
+    
     public MaintenanceRecord() {
         this.completedAt = LocalDateTime.now();
     }
 
-    // Constructor from PendingMaintenanceRecord
+    
     public MaintenanceRecord(PendingMaintenanceRecord pending) {
         this.carId = pending.getCarId();
         this.type = pending.getType();
@@ -68,7 +68,7 @@ public class MaintenanceRecord {
         this.completedAt = LocalDateTime.now();
     }
 
-    // Getters and setters
+    
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

@@ -53,10 +53,10 @@ public class SecurityConfig {
             System.out.println("=== LOADING USER: " + username + " ===");
             
             try {
-                // First try to find admin user by email or username
+                
                 Optional<Admin> adminOptional = adminRepository.findByEmail(username);
                 if (!adminOptional.isPresent()) {
-                    // If not found by email, try by username
+                    
                     adminOptional = adminRepository.findByUsername(username);
                 }
                 
@@ -71,18 +71,18 @@ public class SecurityConfig {
                         .build();
                 }
                 
-                // Then try to find regular user - use auth-specific query that avoids BLOB
+                
                 Optional<User> userOptional = userRepository.findByEmailForAuth(username);
                 if (userOptional.isPresent()) {
                     User user = userOptional.get();
                     System.out.println("Found regular user: " + user.getEmail());
                     
-                    // Create UserDetails without accessing BLOB fields
+                    
                     return org.springframework.security.core.userdetails.User.builder()
                         .username(user.getEmail())
                         .password(user.getPassword())
                         .authorities("ROLE_USER")
-                        .disabled(!user.getApproved()) // Use getApproved() method
+                        .disabled(!user.getApproved()) 
                         .build();
                 }
                 
@@ -100,7 +100,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(Arrays.asList("http://localhost:3000"));
+        configuration.setAllowedOriginPatterns(Arrays.asList("http:
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
@@ -117,7 +117,7 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(authz -> authz
-                // Public endpoints - no authentication required
+                
                 .requestMatchers("/api/auth/login").permitAll()
                 .requestMatchers("/api/auth/register").permitAll()
                 .requestMatchers("/api/auth/logout").permitAll()
@@ -132,13 +132,13 @@ public class SecurityConfig {
                 .requestMatchers("/api/vehicles/locations").permitAll()
                 .requestMatchers("/api/vehicles/types").permitAll()
                 
-                // Admin public endpoints - MUST come before the secured admin endpoints
+                
                 .requestMatchers("/api/admin/login").permitAll()
                 .requestMatchers("/api/admin/register").permitAll()
                 .requestMatchers("/api/admin/is-first-admin").permitAll()
-                .requestMatchers("/api/admin/add-admin").permitAll() // Add this if needed
+                .requestMatchers("/api/admin/add-admin").permitAll() 
                 
-                // Admin secured endpoints - comes AFTER the public ones
+                
                 .requestMatchers("/api/admin/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
                 .requestMatchers("/api/auth/admin/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
                 .requestMatchers("/api/auth/users/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
@@ -146,7 +146,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/approve-user/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
                 .requestMatchers("/api/auth/reject-user/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
                 
-                // All other endpoints require authentication
+                
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session

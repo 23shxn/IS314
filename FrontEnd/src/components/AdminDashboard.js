@@ -11,8 +11,8 @@ const AdminDashboard = ({ currentUser, cars, reservations, users, pendingRequest
 
   const handleLogout = () => {
     console.log('Logging out from Admin Dashboard');
-    setCurrentUser(null); // Clear the user state
-    navigate('/login'); // Redirect to admin login page
+    setCurrentUser(null); 
+    navigate('/login'); 
   };
 
   const handleNavigation = (path) => {

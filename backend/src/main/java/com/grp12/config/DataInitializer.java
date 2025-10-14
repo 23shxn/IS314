@@ -18,14 +18,14 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        // Only initialize if no admins exist
+        
         if (adminRepository.count() == 0) {
             initializeDefaultAdmins();
         }
     }
 
     private void initializeDefaultAdmins() {
-        // Super Admin (Manager)
+        
         Admin superAdmin = new Admin();
         superAdmin.setFirstName("Manager");
         superAdmin.setLastName("Super");
@@ -43,7 +43,7 @@ public class DataInitializer implements CommandLineRunner {
         System.out.println("Role: " + savedSuperAdmin.getRole());
         System.out.println("Encoded Password: " + savedSuperAdmin.getPassword());
 
-        // Admin 1
+        
         Admin admin1 = new Admin();
         admin1.setFirstName("Admin");
         admin1.setLastName("One");
@@ -59,9 +59,9 @@ public class DataInitializer implements CommandLineRunner {
         System.out.println("Username: " + savedAdmin1.getUsername());
         System.out.println("Email: " + savedAdmin1.getEmail());
 
-        // Continue with admin2...
         
-        // Verify they were saved
+        
+        
         long totalAdmins = adminRepository.count();
         System.out.println("=== TOTAL ADMINS IN DATABASE: " + totalAdmins + " ===");
     }

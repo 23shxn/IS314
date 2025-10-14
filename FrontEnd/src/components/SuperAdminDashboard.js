@@ -52,28 +52,28 @@ const SuperAdminDashboard = ({ setCurrentUser, currentUser }) => {
     setLoading(true);
     const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8080';
     try {
-      // Fetch pending requests count
+
       const pendingResponse = await fetch(`${apiUrl}/api/vehicles/pending/all`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include'
       });
 
-      // Fetch pending maintenance count
+
       const maintenanceResponse = await fetch(`${apiUrl}/api/maintenance/pending/all`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include'
       });
 
-      // Fetch vehicle stats
+
       const vehicleResponse = await fetch(`${apiUrl}/api/vehicles/all`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include'
       });
 
-      // Fetch user stats
+
       const userResponse = await fetch(`${apiUrl}/api/auth/users/customers`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },

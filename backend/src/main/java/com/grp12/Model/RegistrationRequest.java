@@ -36,7 +36,7 @@ public class RegistrationRequest {
     private String driversLicenseImage;
     
     @Column(name = "status", nullable = false, length = 20)
-    private String status; // PENDING, APPROVED, REJECTED
+    private String status; 
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
@@ -47,13 +47,13 @@ public class RegistrationRequest {
     @Column(name = "approved_at")
     private LocalDateTime approvedAt;
 
-    // Default constructor
+    
     public RegistrationRequest() {
         this.createdAt = LocalDateTime.now();
         this.status = "PENDING";
     }
 
-    // Constructor for easy creation
+    
     public RegistrationRequest(String firstName, String lastName, String phoneNumber, 
                              String email, String password, String driversLicenseNumber, String driversLicenseImage) {
         this();
@@ -71,7 +71,7 @@ public class RegistrationRequest {
         this.updatedAt = LocalDateTime.now();
     }
 
-    // Getters and setters
+    
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     

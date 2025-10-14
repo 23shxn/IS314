@@ -25,7 +25,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @RestController
 @RequestMapping("/api/vehicles/pending")
-@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
+@CrossOrigin(origins = "http:
 public class PendingVehicleController {
 
     @Autowired
@@ -39,7 +39,7 @@ public class PendingVehicleController {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    // Submit pending vehicle add request (ADMIN only)
+    
     @PostMapping("/add")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     public ResponseEntity<?> submitVehicleAddRequest(
@@ -63,7 +63,7 @@ public class PendingVehicleController {
             @RequestParam("vehicleImage3") MultipartFile vehicleImage3) {
 
         try {
-            // Get current admin
+            
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String currentUsername = authentication.getName();
             Admin currentAdmin = adminService.getAdminByEmail(currentUsername);
@@ -76,13 +76,13 @@ public class PendingVehicleController {
                     .body(Map.of("error", "Admin not found"));
             }
 
-            // Check if super admin - allow direct add
+            
             if ("SUPER_ADMIN".equals(currentAdmin.getRole())) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(Map.of("error", "Super admins should use direct add endpoint"));
             }
 
-            // Validate required fields
+            
             if (make == null || make.trim().isEmpty() ||
                 model == null || model.trim().isEmpty() ||
                 vehicleType == null || vehicleType.trim().isEmpty() ||
@@ -96,7 +96,7 @@ public class PendingVehicleController {
                     .body(Map.of("error", "All required fields must be provided"));
             }
 
-            // Validate images
+            
             if (vehicleImage1 == null || vehicleImage1.isEmpty() ||
                 vehicleImage2 == null || vehicleImage2.isEmpty() ||
                 vehicleImage3 == null || vehicleImage3.isEmpty()) {
@@ -104,7 +104,7 @@ public class PendingVehicleController {
                     .body(Map.of("error", "All three vehicle images are required"));
             }
 
-            // Create vehicle data JSON
+            
             Map<String, Object> vehicleData = new HashMap<>();
             vehicleData.put("make", make.trim());
             vehicleData.put("model", model.trim());
@@ -123,12 +123,12 @@ public class PendingVehicleController {
             if (description != null && !description.trim().isEmpty()) vehicleData.put("description", description.trim());
             if (features != null && !features.trim().isEmpty()) vehicleData.put("features", features.trim());
 
-            // Convert images to base64
+            
             vehicleData.put("vehicleImage1", java.util.Base64.getEncoder().encodeToString(vehicleImage1.getBytes()));
             vehicleData.put("vehicleImage2", java.util.Base64.getEncoder().encodeToString(vehicleImage2.getBytes()));
             vehicleData.put("vehicleImage3", java.util.Base64.getEncoder().encodeToString(vehicleImage3.getBytes()));
 
-            // Create pending request
+            
             PendingVehicleChange pendingRequest = new PendingVehicleChange(
                 new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(vehicleData),
                 currentAdmin.getId()
@@ -147,12 +147,12 @@ public class PendingVehicleController {
         }
     }
 
-    // Submit pending vehicle remove request (ADMIN only)
+    
     @PostMapping("/remove/{vehicleId}")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     public ResponseEntity<?> submitVehicleRemoveRequest(@PathVariable Long vehicleId) {
         try {
-            // Get current admin
+            
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String currentUsername = authentication.getName();
             Admin currentAdmin = adminService.getAdminByEmail(currentUsername);
@@ -165,13 +165,13 @@ public class PendingVehicleController {
                     .body(Map.of("error", "Admin not found"));
             }
 
-            // Check if super admin - allow direct remove
+            
             if ("SUPER_ADMIN".equals(currentAdmin.getRole())) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(Map.of("error", "Super admins should use direct remove endpoint"));
             }
 
-            // Create pending request
+            
             PendingVehicleChange pendingRequest = new PendingVehicleChange(vehicleId, currentAdmin.getId());
             PendingVehicleChange savedRequest = pendingVehicleChangeRepository.save(pendingRequest);
 
@@ -186,7 +186,7 @@ public class PendingVehicleController {
         }
     }
 
-    // Get all pending requests (SUPER_ADMIN only)
+    
     @GetMapping("/all")
     @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ResponseEntity<?> getAllPendingRequests() {
@@ -199,7 +199,7 @@ public class PendingVehicleController {
         }
     }
 
-    // Approve pending request (SUPER_ADMIN only)
+    
     @PostMapping("/{requestId}/approve")
     @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ResponseEntity<?> approvePendingRequest(@PathVariable Long requestId) {
@@ -216,7 +216,7 @@ public class PendingVehicleController {
                     .body(Map.of("error", "Request is not in pending status"));
             }
 
-            // Get current super admin
+            
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String currentUsername = authentication.getName();
             Admin currentAdmin = adminService.getAdminByEmail(currentUsername);
@@ -224,12 +224,12 @@ public class PendingVehicleController {
                 currentAdmin = adminService.getAdminByUsername(currentUsername);
             }
 
-            // Update request status
+            
             request.setStatus("APPROVED");
             request.setApprovedBy(currentAdmin.getId());
             request.setApprovedAt(LocalDateTime.now());
 
-            // Perform the actual operation
+            
             if ("ADD".equals(request.getChangeType())) {
                 try {
                     Map<String, Object> vehicleData = objectMapper.readValue(request.getVehicleData(), Map.class);
@@ -280,7 +280,7 @@ public class PendingVehicleController {
         }
     }
 
-    // Reject pending request (SUPER_ADMIN only)
+    
     @PostMapping("/{requestId}/reject")
     @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ResponseEntity<?> rejectPendingRequest(
@@ -302,7 +302,7 @@ public class PendingVehicleController {
 
             String rejectionReason = rejectionData.get("reason");
 
-            // Get current super admin
+            
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String currentUsername = authentication.getName();
             Admin currentAdmin = adminService.getAdminByEmail(currentUsername);
@@ -310,7 +310,7 @@ public class PendingVehicleController {
                 currentAdmin = adminService.getAdminByUsername(currentUsername);
             }
 
-            // Update request status
+            
             request.setStatus("REJECTED");
             request.setApprovedBy(currentAdmin.getId());
             request.setApprovedAt(LocalDateTime.now());

@@ -51,7 +51,7 @@ const BookingModal = ({ vehicle, isOpen, onClose, onConfirm, searchParams, curre
 
   const totalDays = calculateDays();
   const basePrice = (vehicle.pricePerDay || 0) * totalDays;
-  const taxRate = 0.15; // 15% tax
+  const taxRate = 0.15;
   const tax = basePrice * taxRate;
   const totalPrice = basePrice + tax;
 
@@ -69,7 +69,7 @@ const BookingModal = ({ vehicle, isOpen, onClose, onConfirm, searchParams, curre
     if (!bookingDetails.dropoffDate) newErrors.dropoffDate = 'Drop-off date is required';
     if (!bookingDetails.acceptTerms) newErrors.acceptTerms = 'You must accept the terms and conditions';
 
-    // Validate dates
+
     if (bookingDetails.pickupDate && bookingDetails.dropoffDate) {
       const pickup = new Date(bookingDetails.pickupDate);
       const dropoff = new Date(bookingDetails.dropoffDate);
@@ -85,18 +85,18 @@ const BookingModal = ({ vehicle, isOpen, onClose, onConfirm, searchParams, curre
       }
     }
 
-    // Validate email
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (bookingDetails.email && !emailRegex.test(bookingDetails.email)) {
       newErrors.email = 'Please enter a valid email address';
     }
 
-    // Validate phone (basic validation)
+
     if (bookingDetails.phone && bookingDetails.phone.length < 7) {
       newErrors.phone = 'Please enter a valid phone number';
     }
 
-    // Validate date of birth (must be at least 18 years old)
+
     if (bookingDetails.dateOfBirth) {
       const birthDate = new Date(bookingDetails.dateOfBirth);
       const today = new Date();
@@ -141,7 +141,7 @@ const BookingModal = ({ vehicle, isOpen, onClose, onConfirm, searchParams, curre
 
   const handleInputChange = (field, value) => {
     setBookingDetails(prev => ({ ...prev, [field]: value }));
-    // Clear error when user starts typing
+
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
     }
@@ -361,7 +361,7 @@ const BookingModal = ({ vehicle, isOpen, onClose, onConfirm, searchParams, curre
                   value={bookingDetails.dateOfBirth}
                   onChange={(e) => handleInputChange('dateOfBirth', e.target.value)}
                   className={errors.dateOfBirth ? 'error' : ''}
-                  max={new Date(Date.now() - 567648000000).toISOString().split('T')[0]} // 18 years ago
+                  max={new Date(Date.now() - 567648000000).toISOString().split('T')[0]}
                 />
                 {errors.dateOfBirth && <span className="error-message">{errors.dateOfBirth}</span>}
               </div>

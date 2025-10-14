@@ -1,4 +1,4 @@
-// src/components/Contact.js
+
 import React, { useState } from 'react';
 import {
   Phone,
@@ -58,14 +58,14 @@ const Contact = () => {
 
     setIsSubmitting(true);
     try {
-      // TODO: Hook up to your backend/email service:
-      // const res = await fetch('/api/contact', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(form),
-      // });
-      // if (!res.ok) throw new Error('Failed to send');
-      await new Promise((r) => setTimeout(r, 800)); // demo delay
+
+
+
+
+
+
+
+      await new Promise((r) => setTimeout(r, 800));
 
       setStatus({ type: 'success', message: 'Thanks! Your message has been sent.' });
       setForm(INITIAL_FORM);

@@ -70,9 +70,9 @@ const VehicleManagementManager = ({ setCurrentUser }) => {
     return currentAdmin && currentAdmin.role === 'SUPER_ADMIN';
   };
 
-  // Validation functions
+
   const validateLicensePlate = (licensePlate) => {
-    // Format: AB 123 (two letters, space, three numbers)
+
     const licensePlateRegex = /^[A-Za-z]{2}\s\d{3}$/;
     return licensePlateRegex.test(licensePlate.trim());
   };
@@ -230,24 +230,24 @@ const VehicleManagementManager = ({ setCurrentUser }) => {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
 
-    // Real-time validation feedback
+
     if (name === 'licensePlate') {
-      // Format the license plate as user types
+
       let formattedValue = value.toUpperCase().replace(/[^A-Z0-9\s]/g, '');
 
-      // Add space after two letters if not present
+
       if (formattedValue.length === 3 && formattedValue[2] !== ' ') {
         formattedValue = formattedValue.substring(0, 2) + ' ' + formattedValue.substring(2);
       }
 
-      // Limit to AB 123 format
+
       if (formattedValue.length > 6) {
         formattedValue = formattedValue.substring(0, 6);
       }
 
       setNewVehicle({ ...newVehicle, [name]: formattedValue });
     } else if (name === 'seatingCapacity') {
-      // Only allow positive numbers
+
       const numValue = parseInt(value);
       if (value === '' || (!isNaN(numValue) && numValue >= 0)) {
         setNewVehicle({ ...newVehicle, [name]: value });
@@ -264,12 +264,12 @@ const VehicleManagementManager = ({ setCurrentUser }) => {
         setFormError(`Image ${imageNumber} must be a valid image file (JPEG, PNG, GIF, WebP)`);
         return;
       }
-      if (file.size > 10 * 1024 * 1024) { // 10MB limit
+      if (file.size > 10 * 1024 * 1024) {
         setFormError(`Image ${imageNumber} must be smaller than 10MB`);
         return;
       }
       setNewVehicle({ ...newVehicle, [`vehicleImage${imageNumber}`]: file });
-      setFormError(''); // Clear error if file is valid
+      setFormError('');
     }
   };
 
@@ -278,14 +278,14 @@ const VehicleManagementManager = ({ setCurrentUser }) => {
     setFormError('');
     setLoading(true);
 
-    // Validate license plate format
+
     if (!validateLicensePlate(newVehicle.licensePlate)) {
       setFormError('License plate must be in format: AB 123 (2 letters, space, 3 numbers)');
       setLoading(false);
       return;
     }
 
-    // Validate seating capacity
+
     if (!validateSeatingCapacity(newVehicle.seatingCapacity)) {
       setFormError('Seating capacity must be at least 2');
       setLoading(false);
@@ -303,7 +303,7 @@ const VehicleManagementManager = ({ setCurrentUser }) => {
       return;
     }
 
-    // Check that all three images are provided
+
     if (!newVehicle.vehicleImage1 || !newVehicle.vehicleImage2 || !newVehicle.vehicleImage3) {
       setFormError('All three vehicle images are required');
       setLoading(false);
@@ -328,7 +328,7 @@ const VehicleManagementManager = ({ setCurrentUser }) => {
       if (newVehicle.description) formData.append('description', newVehicle.description);
       if (newVehicle.features) formData.append('features', newVehicle.features);
 
-      // Append all three images
+
       formData.append('vehicleImage1', newVehicle.vehicleImage1);
       formData.append('vehicleImage2', newVehicle.vehicleImage2);
       formData.append('vehicleImage3', newVehicle.vehicleImage3);
@@ -344,7 +344,7 @@ const VehicleManagementManager = ({ setCurrentUser }) => {
         if (result.message && result.message.includes('submitted for approval')) {
           alert('Vehicle add request submitted for approval');
         } else {
-          // Direct add successful
+
         }
         setNewVehicle({
           licensePlate: '', make: '', model: '', year: '', vehicleType: '',
@@ -388,7 +388,7 @@ const VehicleManagementManager = ({ setCurrentUser }) => {
       if (response.ok) {
         alert('Request approved successfully');
         fetchPendingRequests();
-        fetchVehicles(); // Refresh vehicles list
+        fetchVehicles();
       } else {
         const error = await response.json();
         alert('Failed to approve request: ' + error.error);
@@ -400,7 +400,7 @@ const VehicleManagementManager = ({ setCurrentUser }) => {
 
   const handleRejectRequest = async (requestId) => {
     const reason = prompt('Enter rejection reason (optional):');
-    if (reason === null) return; // User cancelled
+    if (reason === null) return;
 
     try {
       const response = await fetch(`http://localhost:8080/api/vehicles/pending/${requestId}/reject`, {
@@ -427,14 +427,14 @@ const VehicleManagementManager = ({ setCurrentUser }) => {
     setFormError('');
     setLoading(true);
 
-    // Validate license plate format
+
     if (!validateLicensePlate(editingVehicle.licensePlate)) {
       setFormError('License plate must be in format: AB 123 (2 letters, space, 3 numbers)');
       setLoading(false);
       return;
     }
 
-    // Validate seating capacity
+
     if (!validateSeatingCapacity(editingVehicle.seatingCapacity)) {
       setFormError('Seating capacity must be at least 2');
       setLoading(false);

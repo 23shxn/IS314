@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Car, User, Shield, Mail, Key } from 'lucide-react';
 import '../styles/LoginForm.css';
 
-// Move NewPasswordPage outside of LoginForm component
+
 const NewPasswordPage = ({ 
   error, 
   success, 
@@ -107,19 +107,19 @@ const LoginForm = ({ setCurrentUser }) => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
-  const [imageLoading, setImageLoading] = useState(false); // Add this new state
+  const [imageLoading, setImageLoading] = useState(false);
   
-  // Email verification state
+
   const [showEmailVerification, setShowEmailVerification] = useState(false);
   const [verificationCode, setVerificationCode] = useState('');
   const [registrationEmail, setRegistrationEmail] = useState('');
   const [emailVerified, setEmailVerified] = useState(false);
   
-  // Move these to component level instead of inside modal
+
   const [codes, setCodes] = useState(['', '', '', '', '', '']);
   const inputRefs = useRef([]);
 
-  // Password reset state
+
   const [showPasswordReset, setShowPasswordReset] = useState(false);
   const [showResetCodeVerification, setShowResetCodeVerification] = useState(false);
   const [resetEmail, setResetEmail] = useState('');
@@ -129,10 +129,10 @@ const LoginForm = ({ setCurrentUser }) => {
   const [resetCodes, setResetCodes] = useState(['', '', '', '', '', '']);
   const resetInputRefs = useRef([]);
 
-  // Add new state for the password page
+
   const [showNewPasswordPage, setShowNewPasswordPage] = useState(false);
 
-  // Validation functions
+
   const validateEmail = (email) => {
     const emailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
     return emailRegex.test(email);
@@ -153,7 +153,7 @@ const LoginForm = ({ setCurrentUser }) => {
     return passwordRegex.test(password);
   };
 
-  // New function to send verification code
+
   const handleSendVerification = async (email) => {
     try {
       const response = await fetch('http://localhost:8080/api/email/send-verification', {
@@ -179,7 +179,7 @@ const LoginForm = ({ setCurrentUser }) => {
     }
   };
 
-  // New function to verify email code
+
   const handleVerifyEmail = async (e) => {
     e.preventDefault();
     setError('');
@@ -209,7 +209,7 @@ const LoginForm = ({ setCurrentUser }) => {
       setShowEmailVerification(false);
       setVerificationCode('');
       
-      // Continue with registration after email verification
+
       await proceedWithRegistration();
     } catch (err) {
       setError('Failed to verify email. Please try again.');
@@ -218,10 +218,10 @@ const LoginForm = ({ setCurrentUser }) => {
     setLoading(false);
   };
 
-  // New function to proceed with registration after email verification
+
   const proceedWithRegistration = async () => {
     try {
-      // Send as JSON, not FormData
+
       const registrationData = {
         firstName: credentials.firstName,
         lastName: credentials.lastName,
@@ -230,7 +230,7 @@ const LoginForm = ({ setCurrentUser }) => {
         password: credentials.password,
         confirmPassword: credentials.confirmPassword,
         driversLicenseNumber: credentials.driversLicenseNumber,
-        driversLicenseImage: credentials.driversLicenseImage // This is already base64 string
+        driversLicenseImage: credentials.driversLicenseImage
       };
 
       console.log('Sending registration data:', { ...registrationData, driversLicenseImage: 'base64_string', password: '[HIDDEN]' });
@@ -238,9 +238,9 @@ const LoginForm = ({ setCurrentUser }) => {
       const response = await fetch('http://localhost:8080/api/auth/register', {
         method: 'POST',
         headers: { 
-          'Content-Type': 'application/json' // Send as JSON
+          'Content-Type': 'application/json'
         },
-        body: JSON.stringify(registrationData), // Send as JSON string
+        body: JSON.stringify(registrationData),
         credentials: 'include'
       });
 
@@ -271,7 +271,7 @@ const LoginForm = ({ setCurrentUser }) => {
     }
   };
 
-  // Password reset functions - optimized to prevent re-renders
+
   const handleRequestPasswordReset = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -299,7 +299,7 @@ const LoginForm = ({ setCurrentUser }) => {
       }
 
       setSuccess('Reset code sent to your email!');
-      setError(''); // Clear any previous errors
+      setError('');
       setShowPasswordReset(false);
       setShowResetCodeVerification(true);
     } catch (err) {
@@ -352,7 +352,7 @@ const LoginForm = ({ setCurrentUser }) => {
       }
 
       setSuccess('Password reset successful! You can now login with your new password.');
-      // Clear all reset-related state
+
       setShowResetCodeVerification(false);
       setShowPasswordReset(false);
       setResetEmail('');
@@ -368,7 +368,7 @@ const LoginForm = ({ setCurrentUser }) => {
     setLoading(false);
   };
 
-  // New handler to verify code only
+
   const handleCodeVerification = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -380,7 +380,7 @@ const LoginForm = ({ setCurrentUser }) => {
     }
 
     try {
-      // Verify the reset code with the backend
+
       const response = await fetch('http://localhost:8080/api/auth/verify-reset-code', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -399,15 +399,15 @@ const LoginForm = ({ setCurrentUser }) => {
         return;
       }
 
-      // Code is valid, proceed to password reset page
+
       setSuccess('Code verified! Redirecting to password reset...');
       setError('');
       
-      // Hide modal and show new password page after a short delay
+
       setTimeout(() => {
         setShowResetCodeVerification(false);
         setShowNewPasswordPage(true);
-        setSuccess(''); // Clear success message for new page
+        setSuccess('');
       }, 1500);
 
     } catch (err) {
@@ -418,7 +418,7 @@ const LoginForm = ({ setCurrentUser }) => {
     setLoading(false);
   };
 
-  // Optimized reset code handlers
+
   const handleResetCodeChange = useCallback((index, value) => {
     if (value.length > 1) return;
     
@@ -435,7 +435,7 @@ const LoginForm = ({ setCurrentUser }) => {
       
       return newCodes;
     });
-  }, []); // Empty dependency array
+  }, []);
 
   const handleResetKeyDown = useCallback((index, e) => {
     if (e.key === 'Backspace') {
@@ -448,9 +448,9 @@ const LoginForm = ({ setCurrentUser }) => {
         return prevCodes;
       });
     }
-  }, []); // Empty dependency array
+  }, []);
 
-  // Modified handleAuth function
+
   const handleAuth = async (e) => {
     e.preventDefault();
     setError('');
@@ -458,7 +458,7 @@ const LoginForm = ({ setCurrentUser }) => {
     setLoading(true);
 
     if (isRegister) {
-      // Frontend validation for registration
+
       if (!validateName(credentials.firstName)) {
         setError('First name must contain only letters and spaces');
         setLoading(false);
@@ -501,14 +501,14 @@ const LoginForm = ({ setCurrentUser }) => {
         return;
       }
 
-      // NEW: Send email verification before proceeding with registration
+
       setRegistrationEmail(credentials.email);
       const verificationSent = await handleSendVerification(credentials.email);
       if (verificationSent) {
         setShowEmailVerification(true);
       }
     } else {
-      // Login
+
       if (!validateEmail(credentials.email)) {
         setError('Email must end with @gmail.com');
         setLoading(false);
@@ -524,7 +524,7 @@ const LoginForm = ({ setCurrentUser }) => {
         const response = await fetch('http://localhost:8080/api/auth/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          credentials: 'include', // Ensure session cookie is sent
+          credentials: 'include',
           body: JSON.stringify(loginData)
         });
 
@@ -540,13 +540,13 @@ const LoginForm = ({ setCurrentUser }) => {
           ...user,
           role: 'customer',
           name: `${user.firstName} ${user.lastName}`.trim() || user.email,
-          id: user.id // Ensure id is included
+          id: user.id
         };
 
         console.log('Login successful, user:', userWithDetails);
         setCurrentUser(userWithDetails);
 
-        // Navigate to dashboard or returnTo route if provided
+
         const returnTo = navigate.location?.state?.returnTo || '/dashboard';
         navigate(returnTo, { state: navigate.location?.state });
       } catch (err) {
@@ -557,7 +557,7 @@ const LoginForm = ({ setCurrentUser }) => {
     setLoading(false);
   };
 
-  // Add image compression function
+
   const compressImage = (file, maxWidth = 800, maxHeight = 600, quality = 0.7) => {
     return new Promise((resolve) => {
       const canvas = document.createElement('canvas');
@@ -565,7 +565,7 @@ const LoginForm = ({ setCurrentUser }) => {
       const img = new Image();
       
       img.onload = () => {
-        // Calculate new dimensions
+
         let { width, height } = img;
         
         if (width > maxWidth || height > maxHeight) {
@@ -574,14 +574,14 @@ const LoginForm = ({ setCurrentUser }) => {
           height *= ratio;
         }
         
-        // Set canvas dimensions
+
         canvas.width = width;
         canvas.height = height;
         
-        // Draw and compress
+
         ctx.drawImage(img, 0, 0, width, height);
         
-        // Convert to base64 with compression
+
         const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
         resolve(compressedDataUrl);
       };
@@ -590,7 +590,7 @@ const LoginForm = ({ setCurrentUser }) => {
     });
   };
 
-  // Modify your existing handleFileChange function
+
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -598,10 +598,10 @@ const LoginForm = ({ setCurrentUser }) => {
       try {
         console.log('Original file size:', file.size, 'bytes');
         
-        // Compress the image
+
         const compressedDataUrl = await compressImage(file);
         
-        // Convert to base64 (remove data URL prefix)
+
         const base64String = compressedDataUrl.split(',')[1];
         
         console.log('Compressed image size:', base64String.length * 0.75, 'bytes (approx)');
@@ -638,18 +638,18 @@ const LoginForm = ({ setCurrentUser }) => {
     if (fileInput) fileInput.value = '';
   };
 
-  // Memoized handlers to prevent re-renders
+
   const handleCodeChange = useCallback((index, value) => {
-    if (value.length > 1) return; // Prevent multiple characters
+    if (value.length > 1) return;
     
     setCodes(prevCodes => {
       const newCodes = [...prevCodes];
       newCodes[index] = value;
       
-      // Update the main verification code
+
       setVerificationCode(newCodes.join(''));
       
-      // Auto-focus next input
+
       if (value && index < 5) {
         setTimeout(() => {
           inputRefs.current[index + 1]?.focus();
@@ -661,7 +661,7 @@ const LoginForm = ({ setCurrentUser }) => {
   }, []);
 
   const handleKeyDown = useCallback((index, e) => {
-    // Handle backspace
+
     if (e.key === 'Backspace' && !codes[index] && index > 0) {
       setTimeout(() => {
         inputRefs.current[index - 1]?.focus();
@@ -669,7 +669,7 @@ const LoginForm = ({ setCurrentUser }) => {
     }
   }, [codes]);
 
-  // Memoized EmailVerificationModal component
+
   const EmailVerificationModal = useCallback(() => {
     return (
       <div className="modal-overlay">
@@ -754,7 +754,7 @@ const LoginForm = ({ setCurrentUser }) => {
     );
   }, [codes, registrationEmail, error, success, loading, verificationCode, handleCodeChange, handleKeyDown, handleVerifyEmail, handleSendVerification]);
 
-  // Remove the useCallback wrapper from PasswordResetModal
+
   const PasswordResetModal = () => {
     return (
       <div className="modal-overlay">
@@ -804,7 +804,7 @@ const LoginForm = ({ setCurrentUser }) => {
     );
   };
 
-  // Replace ResetCodeVerificationModal with the new implementation
+
   const ResetCodeVerificationModal = () => {
     return (
       <div className="modal-overlay">

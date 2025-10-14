@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import "../styles/LandingPage.css"; // keep your existing stylesheet
+import "../styles/LandingPage.css";
 
-const SLIDE_INTERVAL_MS = 5000; // auto-advance every 5s
-const TRANSITION_MS = 800;      // fade duration
+const SLIDE_INTERVAL_MS = 5000;
+const TRANSITION_MS = 800;
 
 export default function HeroSlideshow({
   images = [],
@@ -17,7 +17,7 @@ export default function HeroSlideshow({
 
   const safeImages = useMemo(() => images.filter(Boolean), [images]);
 
-  // Auto-advance
+
   useEffect(() => {
     stopTimer();
     timerRef.current = setInterval(() => {

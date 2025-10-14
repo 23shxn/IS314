@@ -20,7 +20,7 @@ const CompleteBooking = ({ reservations, setReservations, currentUser }) => {
       const confirmedReservation = {
         ...reservation,
         status: 'Confirmed',
-        amenities: selectedAmenities, // Store selected amenities with the reservation
+        amenities: selectedAmenities,
       };
       setReservations(prev => [...prev, confirmedReservation]);
       alert(`Booking confirmed for ${reservation.vehicle.make} ${reservation.vehicle.model} from ${reservation.rentalDate} to ${reservation.returnDate} with ${selectedAmenities.join(', ')}`);
@@ -42,7 +42,7 @@ const CompleteBooking = ({ reservations, setReservations, currentUser }) => {
   const totalDays = Math.ceil((new Date(returnDate) - new Date(rentalDate)) / (1000 * 60 * 60 * 24));
   const basePrice = totalDays * vehicle.pricePerDay;
 
-  // SP CODE)
+
   const amenityPrices = {
     'baby-sitter': 35,
     'gps': 25,
@@ -50,7 +50,7 @@ const CompleteBooking = ({ reservations, setReservations, currentUser }) => {
     'none': 0,
   };
 
-  // Calculate total amenity cost
+
   const amenityCost = selectedAmenities.reduce((total, amenity) => total + (amenityPrices[amenity] || 0), 0);
   const totalPrice = basePrice + amenityCost;
 

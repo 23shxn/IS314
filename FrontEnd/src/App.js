@@ -119,7 +119,7 @@ const App = () => {
     }
   };
 
-  // Component to protect admin routes
+
   const AdminRoute = ({ children, setCurrentUser }) => {
     if (!currentUser) {
       return <Navigate to="/admin/login" replace />;
@@ -130,7 +130,7 @@ const App = () => {
     return React.cloneElement(children, { currentUser, setCurrentUser, cars, users, pendingRequests });
   };
 
-  // Component to protect super admin routes
+
   const SuperAdminRoute = ({ children, setCurrentUser }) => {
     if (!currentUser) {
       return <Navigate to="/admin/login" replace />;
@@ -141,7 +141,7 @@ const App = () => {
     return React.cloneElement(children, { currentUser, setCurrentUser, cars, users, pendingRequests });
   };
 
-  // Component to protect customer routes
+
   const CustomerRoute = ({ children }) => {
     if (!currentUser) {
       return <Navigate to="/login" replace />;
@@ -152,7 +152,7 @@ const App = () => {
     return children;
   };
 
-  // Component to redirect logged-in users away from login pages
+
   const PublicRoute = ({ children }) => {
     if (!currentUser) {
       return children;

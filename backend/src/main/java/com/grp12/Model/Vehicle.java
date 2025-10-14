@@ -24,7 +24,7 @@ public class Vehicle {
     private String model;
     
     @Column(name = "vehicle_type", nullable = false, length = 30)
-    private String vehicleType; // Sedan, SUV, Hatchback, Truck, etc.
+    private String vehicleType; 
     
     @Column(name = "year", nullable = false)
     private Integer year;
@@ -36,19 +36,19 @@ public class Vehicle {
     private String licensePlate;
     
     @Column(name = "vin", unique = true, length = 30)
-    private String vin; // Vehicle Identification Number
+    private String vin; 
     
     @Column(name = "fuel_type", length = 20)
-    private String fuelType; // Petrol, Diesel, Electric, Hybrid
+    private String fuelType; 
     
     @Column(name = "transmission", length = 20)
-    private String transmission; // Manual, Automatic
+    private String transmission; 
     
     @Column(name = "seating_capacity")
     private Integer seatingCapacity;
     
     @Column(name = "mileage")
-    private Integer mileage; // in kilometers
+    private Integer mileage; 
     
    @Column(name = "price_per_day", nullable = false, precision = 8, scale = 2)
     private BigDecimal pricePerDay;
@@ -57,12 +57,12 @@ public class Vehicle {
     private String location;
     
     @Column(name = "status", nullable = false, length = 20)
-    private String status; // Available, Rented, Maintenance, Out_of_Service
+    private String status; 
     
     @Column(name = "image_url", length = 500)
     private String imageUrl;
     
-    // Three vehicle images (Base64 encoded)
+    
     @Column(name = "vehicle_image_1", columnDefinition = "TEXT")
     private String vehicleImage1;
     
@@ -76,7 +76,7 @@ public class Vehicle {
     private String description;
     
     @Column(name = "features", columnDefinition = "TEXT")
-    private String features; // JSON string of features like AC, GPS, etc.
+    private String features; 
     
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
@@ -84,13 +84,13 @@ public class Vehicle {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
     
-    // Default constructor
+    
     public Vehicle() {
         this.createdAt = LocalDateTime.now();
         this.status = "Available";
     }
     
-    // Constructor for easy creation
+    
     public Vehicle(String make, String model, String vehicleType, Integer year, String location, BigDecimal pricePerDay) {
         this();
         this.make = make;
@@ -106,7 +106,7 @@ public class Vehicle {
         this.updatedAt = LocalDateTime.now();
     }
     
-    // Getters and setters
+    
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     
@@ -158,7 +158,7 @@ public class Vehicle {
     public String getImageUrl() { return imageUrl; }
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
     
-    // Multiple image getters and setters
+    
     public String getVehicleImage1() { return vehicleImage1; }
     public void setVehicleImage1(String vehicleImage1) { this.vehicleImage1 = vehicleImage1; }
     

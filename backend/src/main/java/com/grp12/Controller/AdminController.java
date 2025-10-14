@@ -1,7 +1,7 @@
 package com.grp12.Controller;
 
 import com.grp12.Model.Admin;
-import com.grp12.Repository.AdminRepository; // Add this import
+import com.grp12.Repository.AdminRepository; 
 import com.grp12.Services.AdminService;
 import com.grp12.Services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,19 +11,19 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder; // Add this import
+import org.springframework.security.crypto.password.PasswordEncoder; 
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpServletRequest;
-import java.time.LocalDateTime; // Add this import
+import java.time.LocalDateTime; 
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 
 @RestController
 @RequestMapping("/api/admin")
-@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
+@CrossOrigin(origins = "http:
 public class AdminController {
     
     @Autowired
@@ -36,16 +36,16 @@ public class AdminController {
     private UserService userService;
     
     @Autowired
-    private AdminRepository adminRepository; // Add this
+    private AdminRepository adminRepository; 
     
     @Autowired
-    private PasswordEncoder passwordEncoder; // Add this
+    private PasswordEncoder passwordEncoder; 
 
     @PostMapping("/register")
     public ResponseEntity<?> registerAdmin(@RequestBody Admin admin) {
         try {
             Admin registeredAdmin = adminService.registerAdmin(admin);
-            // Remove password from response for security
+            
             registeredAdmin.setPassword(null);
             
             Map<String, Object> response = new HashMap<>();
@@ -75,7 +75,7 @@ public class AdminController {
             System.out.println("Email/Username: " + email);
             System.out.println("Password length: " + (password != null ? password.length() : 0));
             
-            // Check if admin exists before authentication
+            
             Admin existingAdmin = adminService.getAdminByEmail(email);
             if (existingAdmin == null) {
                 existingAdmin = adminService.getAdminByUsername(email);
@@ -88,7 +88,7 @@ public class AdminController {
             
             System.out.println("Found admin: " + existingAdmin.getUsername() + " with role: " + existingAdmin.getRole());
             
-            // Try authentication
+            
             Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(email, password)
             );
@@ -97,11 +97,11 @@ public class AdminController {
             
             SecurityContextHolder.getContext().setAuthentication(authentication);
             
-            // Save to session
+            
             HttpSessionSecurityContextRepository repo = new HttpSessionSecurityContextRepository();
             repo.saveContext(SecurityContextHolder.getContext(), request, null);
             
-            existingAdmin.setPassword(null); // Remove password from response
+            existingAdmin.setPassword(null); 
             return ResponseEntity.ok(existingAdmin);
             
         } catch (Exception e) {
@@ -133,7 +133,7 @@ public class AdminController {
     public ResponseEntity<?> getAllAdmins() {
         try {
             List<Admin> admins = adminService.getAllAdmins();
-            // Remove passwords from response
+            
             admins.forEach(admin -> admin.setPassword(null));
             return ResponseEntity.ok(admins);
         } catch (Exception e) {
@@ -148,7 +148,7 @@ public class AdminController {
         try {
             Admin admin = adminService.getAdminById(id);
             if (admin != null) {
-                admin.setPassword(null); // Remove password from response
+                admin.setPassword(null); 
                 return ResponseEntity.ok(admin);
             }
             
@@ -166,7 +166,7 @@ public class AdminController {
     public ResponseEntity<?> updateAdmin(@PathVariable Long id, @RequestBody Admin admin) {
         try {
             Admin updatedAdmin = adminService.updateAdmin(id, admin);
-            updatedAdmin.setPassword(null); // Remove password from response
+            updatedAdmin.setPassword(null); 
             return ResponseEntity.ok(updatedAdmin);
         } catch (IllegalArgumentException e) {
             Map<String, String> errorResponse = new HashMap<>();
@@ -261,7 +261,7 @@ public class AdminController {
     @PostMapping("/add-admin")
     public ResponseEntity<?> addAdmin(@RequestBody Admin admin, HttpServletRequest request) {
         try {
-            // Get current admin from security context
+            
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             if (authentication == null || !authentication.isAuthenticated() || 
                 authentication.getName().equals("anonymousUser")) {
@@ -269,7 +269,7 @@ public class AdminController {
                     .body(Map.of("error", "Not authenticated"));
             }
             
-            // Get current admin by email/username
+            
             String currentUsername = authentication.getName();
             Admin currentAdmin = adminService.getAdminByEmail(currentUsername);
             if (currentAdmin == null) {
@@ -281,7 +281,7 @@ public class AdminController {
                     .body(Map.of("error", "Only super admins can add new admin accounts"));
             }
 
-            // Validate input
+            
             if (admin.getUsername() == null || admin.getUsername().trim().isEmpty()) {
                 return ResponseEntity.badRequest()
                     .body(Map.of("error", "Username is required"));
@@ -297,7 +297,7 @@ public class AdminController {
                     .body(Map.of("error", "Password must be at least 6 characters"));
             }
 
-            // Check if username or email already exists
+            
             if (adminRepository.findByUsername(admin.getUsername()).isPresent()) {
                 return ResponseEntity.badRequest()
                     .body(Map.of("error", "Username already exists"));
@@ -308,14 +308,14 @@ public class AdminController {
                     .body(Map.of("error", "Email already exists"));
             }
 
-            // Set admin properties
+            
             admin.setPassword(passwordEncoder.encode(admin.getPassword()));
-            admin.setRole("ADMIN"); // New admins get regular admin role
+            admin.setRole("ADMIN"); 
             admin.setCreatedAt(LocalDateTime.now());
-            admin.setActive(true); // Make sure new admin is active
+            admin.setActive(true); 
             
             Admin savedAdmin = adminRepository.save(admin);
-            savedAdmin.setPassword(null); // Remove password from response
+            savedAdmin.setPassword(null); 
             
             return ResponseEntity.ok().body(Map.of(
                 "message", "Admin added successfully",

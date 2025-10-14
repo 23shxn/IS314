@@ -35,7 +35,7 @@ const VehicleMaintenanceManager = ({ setCurrentUser, currentUser }) => {
     receipt: null
   });
 
-  // Helper function to open receipt image
+
   const openReceipt = (receipt) => {
     if (!receipt) return;
     const byteCharacters = atob(receipt);
@@ -49,7 +49,7 @@ const VehicleMaintenanceManager = ({ setCurrentUser, currentUser }) => {
     window.open(url, '_blank');
   };
 
-  // Determine user role
+
   const isSuperAdmin = currentUser?.role === 'SUPER_ADMIN';
   const isAdmin = currentUser?.role === 'ADMIN';
 
@@ -147,7 +147,7 @@ const VehicleMaintenanceManager = ({ setCurrentUser, currentUser }) => {
     }
   };
 
-  // Reset form
+
   const resetForm = () => {
     setMaintenanceForm({
       carId: '',
@@ -164,7 +164,7 @@ const VehicleMaintenanceManager = ({ setCurrentUser, currentUser }) => {
     setShowForm(false);
   };
 
-  // Submit add/edit form for admin (creates pending request)
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -219,7 +219,7 @@ const VehicleMaintenanceManager = ({ setCurrentUser, currentUser }) => {
     }
   };
 
-  // Super admin approval actions
+
   const handleApproveRequest = async (requestId) => {
     try {
       const response = await fetch(`http://localhost:8080/api/maintenance/pending/${requestId}/approve`, {
@@ -269,7 +269,7 @@ const VehicleMaintenanceManager = ({ setCurrentUser, currentUser }) => {
     }
   };
 
-  // Filter maintenance records
+
   const filteredRecords = maintenanceRecords.filter(r => {
     const carMatch = !filters.vehicle || r.carId === Number(filters.vehicle);
     const typeMatch = !filters.type || r.type === filters.type;
@@ -279,7 +279,7 @@ const VehicleMaintenanceManager = ({ setCurrentUser, currentUser }) => {
     return carMatch && typeMatch && statusMatch && fromDateMatch && toDateMatch;
   });
 
-  // Compute needs servicing flag
+
   const maintenanceWithPriority = filteredRecords.map(record => {
     const vehicle = vehicles.find(v => Number(v.id) === Number(record.carId));
     const lastMileage = record.mileage || 0;
@@ -288,14 +288,14 @@ const VehicleMaintenanceManager = ({ setCurrentUser, currentUser }) => {
     return {...record, vehicle, needsService};
   });
 
-  // Sort: needs service first, then latest date
+
   const sortedRecords = maintenanceWithPriority.sort((a, b) => {
     if (a.needsService && !b.needsService) return -1;
     if (!a.needsService && b.needsService) return 1;
     return new Date(b.date) - new Date(a.date);
   });
 
-  // Calculate total maintenance cost per vehicle
+
   const totalCosts = vehicles.map(vehicle => {
     const total = maintenanceRecords
       .filter(r => Number(r.carId) === vehicle.id)

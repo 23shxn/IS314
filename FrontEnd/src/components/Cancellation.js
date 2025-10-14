@@ -3,11 +3,10 @@ import { useParams, useNavigate, useLocation } from "react-router-dom";
 import axios from 'axios';
 import "../styles/Cancellation.css";
 
-// --- Input formatters ---
 const formatCardNumber = (value) => {
   return value
-    .replace(/\D/g, "")        // digits only
-    .replace(/(.{4})/g, "$1 ") // space every 4 digits
+    .replace(/\D/g, "")        
+    .replace(/(.{4})/g, "$1 ") 
     .trim();
 };
 
@@ -29,13 +28,11 @@ export default function CancelReservation({ reservations, setReservations, curre
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [cancelled, setCancelled] = useState(false);
 
-  // Payment form states
   const [cardNumber, setCardNumber] = useState("");
   const [expiry, setExpiry] = useState("");
   const [cvv, setCvv] = useState("");
   const [errors, setErrors] = useState({});
 
-  // Refs for auto focus jump
   const expiryRef = useRef(null);
   const cvvRef = useRef(null);
 
@@ -52,11 +49,10 @@ export default function CancelReservation({ reservations, setReservations, curre
     }
   }, [id, reservations]);
 
-  // --- Fee logic ---
   const feePreview = useMemo(() => {
     if (!reservation) return null;
     const pickup = new Date(reservation.pickupAt);
-    const hoursToPickup = (pickup - new Date()) / 36e5; // hours
+    const hoursToPickup = (pickup - new Date()) / 36e5; 
     const total = Number(reservation.totalAmount || 0);
 
     let feePct = 0;
@@ -64,7 +60,7 @@ export default function CancelReservation({ reservations, setReservations, curre
     else if (hoursToPickup < 72) feePct = 0.1;
 
     const cancellationFee = round2(total * feePct);
-    const refundAmount = 0; // Non-refundable
+    const refundAmount = 0; 
 
     return {
       cancellationFee,
@@ -74,7 +70,6 @@ export default function CancelReservation({ reservations, setReservations, curre
     };
   }, [reservation]);
 
-  // --- Validation ---
   const validatePayment = () => {
     const newErrors = {};
     const cardDigits = cardNumber.replace(/\s+/g, "");
@@ -99,7 +94,7 @@ export default function CancelReservation({ reservations, setReservations, curre
     if (feePreview?.cancellationFee > 0 && !validatePayment()) return;
 
     setPaymentLoading(true);
-    const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+    const apiUrl = process.env.REACT_APP_API_URL || 'http:
     try {
       await axios.put(`${apiUrl}/api/reservations/${id}/cancel`, {}, {
         headers: { 'Content-Type': 'application/json' },
@@ -116,7 +111,6 @@ export default function CancelReservation({ reservations, setReservations, curre
     }
   };
 
-  // --- Auto formatting + navigation ---
   const handleCardChange = (e) => {
     const formatted = formatCardNumber(e.target.value);
     setCardNumber(formatted);
@@ -134,7 +128,6 @@ export default function CancelReservation({ reservations, setReservations, curre
     }
   };
 
-  // --- Loading ---
   if (!reservation)
     return (
       <div className="cancel-page container">
@@ -145,7 +138,6 @@ export default function CancelReservation({ reservations, setReservations, curre
       </div>
     );
 
-  // --- Main Page ---
   return (
     <div className="cancel-page container">
       <h2 className="title">Cancel Reservation</h2>
@@ -277,7 +269,6 @@ export default function CancelReservation({ reservations, setReservations, curre
   );
 }
 
-// --- Helpers ---
 function money(n, ccy = "FJD") {
   return `${ccy} ${n.toFixed(2)}`;
 }

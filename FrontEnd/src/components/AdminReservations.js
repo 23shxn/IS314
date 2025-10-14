@@ -14,13 +14,13 @@ const AdminReservations = ({ currentUser }) => {
 
   useEffect(() => {
     fetchReservations();
-    // Set up polling for new reservations every 30 seconds
+
     const interval = setInterval(fetchReservations, 30000);
     return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
-    // Check for new reservations and show notification
+
     if (notificationsEnabled && reservations.length > lastReservationCount && lastReservationCount > 0) {
       const newReservations = reservations.length - lastReservationCount;
       setNotificationMessage(`New reservation${newReservations > 1 ? 's' : ''} received!`);
@@ -64,7 +64,7 @@ const AdminReservations = ({ currentUser }) => {
       }, {
         withCredentials: true
       });
-      fetchReservations(); // Refresh the list
+      fetchReservations();
     } catch (err) {
       console.error('Error updating reservation status:', err);
       setError('Failed to update reservation status');
@@ -77,7 +77,7 @@ const AdminReservations = ({ currentUser }) => {
       await axios.put(`${apiUrl}/api/reservations/${reservationId}/cancel`, {}, {
         withCredentials: true
       });
-      fetchReservations(); // Refresh the list
+      fetchReservations();
     } catch (err) {
       console.error('Error cancelling reservation:', err);
       setError('Failed to cancel reservation');
