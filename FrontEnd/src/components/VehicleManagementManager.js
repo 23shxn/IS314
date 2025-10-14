@@ -53,7 +53,7 @@ const VehicleManagementManager = ({ setCurrentUser }) => {
 
   const fetchCurrentAdmin = async () => {
     try {
-      const response = await fetch('http://localhost:8080/api/admin/current', {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/admin/current`, {
         method: 'GET',
         credentials: 'include'
       });
@@ -84,7 +84,7 @@ const VehicleManagementManager = ({ setCurrentUser }) => {
 
   const handleLogout = async () => {
     try {
-      await fetch('http://localhost:8080/api/auth/logout', {
+      await fetch(`${process.env.REACT_APP_API_URL}/api/auth/logout`, {
         method: 'POST',
         credentials: 'include'
       });
@@ -109,7 +109,7 @@ const VehicleManagementManager = ({ setCurrentUser }) => {
   const fetchVehicles = async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:8080/api/vehicles/all', {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/vehicles/all`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include'
@@ -140,7 +140,7 @@ const VehicleManagementManager = ({ setCurrentUser }) => {
     if (!isSuperAdmin()) return;
 
     try {
-      const response = await fetch('http://localhost:8080/api/vehicles/pending/all', {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/vehicles/pending/all`, {
         method: 'GET',
         credentials: 'include'
       });
@@ -163,7 +163,7 @@ const VehicleManagementManager = ({ setCurrentUser }) => {
     console.log('Deleting vehicle ID:', id);
 
     try {
-      const response = await fetch(`http://localhost:8080/api/vehicles/${id}`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/vehicles/${id}`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include'
@@ -200,7 +200,7 @@ const VehicleManagementManager = ({ setCurrentUser }) => {
     console.log('Updating vehicle status:', id, newStatus);
 
     try {
-      const response = await fetch(`http://localhost:8080/api/vehicles/${id}/status`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/vehicles/${id}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus }),
@@ -333,7 +333,7 @@ const VehicleManagementManager = ({ setCurrentUser }) => {
       formData.append('vehicleImage2', newVehicle.vehicleImage2);
       formData.append('vehicleImage3', newVehicle.vehicleImage3);
 
-      const response = await fetch('http://localhost:8080/api/vehicles/add', {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/vehicles/add`, {
         method: 'POST',
         body: formData,
         credentials: 'include'
@@ -380,7 +380,7 @@ const VehicleManagementManager = ({ setCurrentUser }) => {
     }
 
     try {
-      const response = await fetch(`http://localhost:8080/api/vehicles/pending/${requestId}/approve`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/vehicles/pending/${requestId}/approve`, {
         method: 'POST',
         credentials: 'include'
       });
@@ -403,7 +403,7 @@ const VehicleManagementManager = ({ setCurrentUser }) => {
     if (reason === null) return; // User cancelled
 
     try {
-      const response = await fetch(`http://localhost:8080/api/vehicles/pending/${requestId}/reject`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/vehicles/pending/${requestId}/reject`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ reason }),
@@ -453,7 +453,7 @@ const VehicleManagementManager = ({ setCurrentUser }) => {
     }
 
     try {
-      const response = await fetch(`http://localhost:8080/api/vehicles/${editingVehicle.id}`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/vehicles/${editingVehicle.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(editingVehicle),

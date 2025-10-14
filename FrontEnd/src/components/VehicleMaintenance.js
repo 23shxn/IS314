@@ -65,7 +65,7 @@ const VehicleMaintenance = ({ setCurrentUser, currentUser }) => {
 
   const handleLogout = async () => {
     try {
-      await fetch('http://localhost:8080/api/auth/logout', {
+      await fetch(`${process.env.REACT_APP_API_URL}/api/auth/logout`, {
         method: 'POST',
         credentials: 'include'
       });
@@ -90,7 +90,7 @@ const VehicleMaintenance = ({ setCurrentUser, currentUser }) => {
   const fetchVehicles = async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:8080/api/vehicles/all', {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/vehicles/all`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include'
@@ -113,7 +113,7 @@ const VehicleMaintenance = ({ setCurrentUser, currentUser }) => {
 
   const fetchPendingRequests = async () => {
     try {
-      const response = await fetch('http://localhost:8080/api/maintenance/pending/all', {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/maintenance/pending/all`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include'
@@ -131,7 +131,7 @@ const VehicleMaintenance = ({ setCurrentUser, currentUser }) => {
 
   const fetchMaintenanceRecords = async () => {
     try {
-      const response = await fetch('http://localhost:8080/api/maintenance/all', {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/maintenance/all`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include'
@@ -189,7 +189,7 @@ const VehicleMaintenance = ({ setCurrentUser, currentUser }) => {
         formData.append('receipt', maintenanceForm.receipt);
       }
 
-      const response = await fetch('http://localhost:8080/api/maintenance/pending/add', {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/maintenance/pending/add`, {
         method: 'POST',
         body: formData,
         credentials: 'include'
@@ -222,7 +222,7 @@ const VehicleMaintenance = ({ setCurrentUser, currentUser }) => {
   // Super admin approval actions
   const handleApproveRequest = async (requestId) => {
     try {
-      const response = await fetch(`http://localhost:8080/api/maintenance/pending/${requestId}/approve`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/maintenance/pending/${requestId}/approve`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include'
@@ -247,7 +247,7 @@ const VehicleMaintenance = ({ setCurrentUser, currentUser }) => {
     if (!reason) return;
 
     try {
-      const response = await fetch(`http://localhost:8080/api/maintenance/pending/${requestId}/reject`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/maintenance/pending/${requestId}/reject`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

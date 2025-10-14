@@ -20,7 +20,7 @@ const UserManagement = ({ setCurrentUser, currentUser }) => {
 
   const handleLogout = async () => {
     try {
-      await fetch('http://localhost:8080/api/auth/logout', {
+      await fetch(`${process.env.REACT_APP_API_URL}/api/auth/logout`, {
         method: 'POST',
         credentials: 'include'
       });
@@ -46,8 +46,8 @@ const UserManagement = ({ setCurrentUser, currentUser }) => {
     setLoading(true);
     setError('');
     try {
-      console.log('Fetching users from http://localhost:8080/api/auth/users/customers');
-      const response = await fetch('http://localhost:8080/api/auth/users/customers', {
+      console.log('Fetching users from${process.env.REACT_APP_API_URL}/api/auth/users/customers');
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/users/customers`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include'
@@ -89,7 +89,7 @@ const UserManagement = ({ setCurrentUser, currentUser }) => {
     }
 
     try {
-      const response = await fetch(`http://localhost:8080/api/auth/users/${userId}`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/users/${userId}`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include'

@@ -153,7 +153,7 @@ const VehicleSearch = ({ reservations, setReservations, currentUser }) => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+        const apiUrl = process.env.REACT_APP_API_URL;
         const [vehiclesRes, locationsRes, typesRes] = await Promise.all([
           fetch(`${apiUrl}/api/vehicles/available`),
           fetch(`${apiUrl}/api/vehicles/locations`),
@@ -298,7 +298,7 @@ const VehicleSearch = ({ reservations, setReservations, currentUser }) => {
     // Re-fetch vehicles to get updated availability
     setLoading(true);
     try {
-      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+      const apiUrl = process.env.REACT_APP_API_URL;
       const vehiclesRes = await fetch(`${apiUrl}/api/vehicles/available`);
       
       if (vehiclesRes.ok) {

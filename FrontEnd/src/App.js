@@ -65,17 +65,17 @@ const App = () => {
     if (currentUser?.role === 'admin' || currentUser?.role === 'SUPER_ADMIN') {
       try {
         const [vehiclesRes, usersRes, pendingRes] = await Promise.all([
-          fetch('http://localhost:8080/api/vehicles/all', {
+          fetch(`${process.env.REACT_APP_API_URL}/api/vehicles/all`, {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include'
           }),
-          fetch('http://localhost:8080/api/auth/users/customers', {
+          fetch(`${process.env.REACT_APP_API_URL}/api/auth/users/customers`, {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include'
           }),
-          fetch('http://localhost:8080/api/auth/requests/pending', {
+          fetch(`${process.env.REACT_APP_API_URL}/api/auth/requests/pending`, {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include'
@@ -95,12 +95,12 @@ const App = () => {
     } else if (currentUser?.role === 'customer') {
       try {
         const [vehiclesRes, reservationsRes] = await Promise.all([
-          fetch('http://localhost:8080/api/vehicles/available', {
+          fetch(`${process.env.REACT_APP_API_URL}/api/vehicles/available`, {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include'
           }),
-          fetch(`http://localhost:8080/api/reservations/user/${currentUser.id}`, {
+          fetch(`${process.env.REACT_APP_API_URL}/api/reservations/user/${currentUser.id}`, {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include'

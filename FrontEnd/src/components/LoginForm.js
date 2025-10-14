@@ -156,7 +156,7 @@ const LoginForm = ({ setCurrentUser }) => {
   // New function to send verification code
   const handleSendVerification = async (email) => {
     try {
-      const response = await fetch('http://localhost:8080/api/email/send-verification', {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/email/send-verification`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
@@ -186,7 +186,7 @@ const LoginForm = ({ setCurrentUser }) => {
     setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:8080/api/email/verify-code', {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/email/verify-code `, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
@@ -235,7 +235,7 @@ const LoginForm = ({ setCurrentUser }) => {
 
       console.log('Sending registration data:', { ...registrationData, driversLicenseImage: 'base64_string', password: '[HIDDEN]' });
 
-      const response = await fetch('http://localhost:8080/api/auth/register', {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/register`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json' // Send as JSON
@@ -283,7 +283,7 @@ const LoginForm = ({ setCurrentUser }) => {
     }
 
     try {
-      const response = await fetch('http://localhost:8080/api/auth/request-password-reset', {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/request-password-reset`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: resetEmail }),
@@ -332,7 +332,7 @@ const LoginForm = ({ setCurrentUser }) => {
     }
 
     try {
-      const response = await fetch('http://localhost:8080/api/auth/reset-password', {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/reset-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
@@ -381,7 +381,7 @@ const LoginForm = ({ setCurrentUser }) => {
 
     try {
       // Verify the reset code with the backend
-      const response = await fetch('http://localhost:8080/api/auth/verify-reset-code', {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/verify-reset-code`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
@@ -521,7 +521,7 @@ const LoginForm = ({ setCurrentUser }) => {
           password: credentials.password
         };
 
-        const response = await fetch('http://localhost:8080/api/auth/login', {
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include', // Ensure session cookie is sent

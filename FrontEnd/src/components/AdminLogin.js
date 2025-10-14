@@ -114,7 +114,7 @@ const AdminLogin = ({ setCurrentUser }) => {
           password: credentials.password
         };
         
-        const response = await fetch('http://localhost:8080/api/admin/add-admin', {
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/admin/add-admin`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
@@ -158,7 +158,7 @@ const AdminLogin = ({ setCurrentUser }) => {
           password: credentials.password
         };
         
-        const response = await fetch('http://localhost:8080/api/admin/login', {
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/admin/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(loginData),

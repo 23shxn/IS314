@@ -29,7 +29,7 @@ const SuperAdminDashboardModified = ({ setCurrentUser, currentUser }) => {
 
   const handleLogout = async () => {
     try {
-      await fetch('http://localhost:8080/api/auth/logout', {
+      await fetch(`${process.env.REACT_APP_API_URL}/api/auth/logout`, {
         method: 'POST',
         credentials: 'include'
       });
@@ -51,28 +51,28 @@ const SuperAdminDashboardModified = ({ setCurrentUser, currentUser }) => {
     setLoading(true);
     try {
       // Fetch pending requests count
-      const pendingResponse = await fetch('http://localhost:8080/api/vehicles/pending/all', {
+      const pendingResponse = await fetch(`${process.env.REACT_APP_API_URL}/api/vehicles/pending/all`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include'
       });
 
       // Fetch pending maintenance count
-      const maintenanceResponse = await fetch('http://localhost:8080/api/maintenance/pending/all', {
+      const maintenanceResponse = await fetch(`${process.env.REACT_APP_API_URL}/api/maintenance/pending/all`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include'
       });
 
       // Fetch vehicle stats
-      const vehicleResponse = await fetch('http://localhost:8080/api/vehicles/all', {
+      const vehicleResponse = await fetch(`${process.env.REACT_APP_API_URL}/api/vehicles/all`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include'
       });
 
       // Fetch user stats
-      const userResponse = await fetch('http://localhost:8080/api/auth/users/customers', {
+      const userResponse = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/users/customers`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include'
@@ -103,7 +103,7 @@ const SuperAdminDashboardModified = ({ setCurrentUser, currentUser }) => {
     e.preventDefault();
 
     try {
-      const response = await fetch('http://localhost:8080/api/auth/create-admin', {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/create-admin`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newAdmin),

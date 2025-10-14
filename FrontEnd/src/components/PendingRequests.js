@@ -17,7 +17,7 @@ const PendingRequests = ({ setCurrentUser }) => {
 
   const handleLogout = async () => {
     try {
-      await fetch('http://localhost:8080/api/auth/logout', {
+      await fetch(`${process.env.REACT_APP_API_URL}/api/auth/logout`, {
         method: 'POST',
         credentials: 'include'
       });
@@ -37,7 +37,7 @@ const PendingRequests = ({ setCurrentUser }) => {
     setLoading(true);
     setError('');
     try {
-      const response = await fetch('http://localhost:8080/api/auth/requests/pending', {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/requests/pending`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include'
@@ -61,7 +61,7 @@ const PendingRequests = ({ setCurrentUser }) => {
   const handleApprove = async (requestId) => {
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:8080/api/auth/approve/${requestId}`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/approve/${requestId}`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -96,7 +96,7 @@ const PendingRequests = ({ setCurrentUser }) => {
   const handleReject = async (requestId) => {
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:8080/api/auth/reject/${requestId}`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/reject/${requestId}`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
