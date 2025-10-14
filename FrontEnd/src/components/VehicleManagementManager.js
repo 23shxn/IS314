@@ -1036,7 +1036,6 @@ const VehicleManagementManager = ({ setCurrentUser }) => {
                     <th>Price/Day</th>
                     <th>Location</th>
                     <th>Actions</th>
-                    <th>Edit</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1067,6 +1066,18 @@ const VehicleManagementManager = ({ setCurrentUser }) => {
                             <Eye size={16} />
                           </button>
 
+                          <button
+                            onClick={() => {
+                              setEditingVehicle(vehicle);
+                              setShowEditForm(true);
+                            }}
+                            className="action-btn edit"
+                            disabled={loading}
+                            title="Edit Vehicle Details"
+                          >
+                            <Edit size={16} />
+                          </button>
+
                           <select
                             value={vehicle.status}
                             onChange={(e) => handleStatusUpdate(vehicle.id, e.target.value)}
@@ -1089,20 +1100,6 @@ const VehicleManagementManager = ({ setCurrentUser }) => {
                             <Trash2 size={16} />
                           </button>
                         </div>
-                      </td>
-                      <td data-label="Edit" className="table-edit">
-                        <button
-                          onClick={() => {
-                            setEditingVehicle(vehicle);
-                            setShowEditForm(true);
-                          }}
-                          className="edit-btn-primary"
-                          disabled={loading}
-                          title="Edit Vehicle Details"
-                        >
-                          <Edit size={16} />
-                          Edit Details
-                        </button>
                       </td>
                     </tr>
                   ))}
