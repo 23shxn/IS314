@@ -1,6 +1,4 @@
-# TODO: Remove Unnecessary Comments
+# TODO: Secure GET /
 
-- [x] Remove // comments from all .java files in backend/src/main/java
-- [x] Remove // comments from all .js and .jsx files in FrontEnd/src
-- [ ] Verify removal by reading a sample file
-- [ ] Test backend build to ensure no syntax errors
+- [x] Remove permitAll for "/" in SecurityConfig.java to require authentication for GET /
+- [x] Remove permitAll for "/favicon.ico" in SecurityConfig.java to require authentication for GET /favicon.ico

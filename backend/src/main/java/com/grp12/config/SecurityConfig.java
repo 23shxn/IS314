@@ -22,7 +22,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import jakarta.servlet.http.HttpServletResponse;
 import java.util.Arrays;
 import java.util.Optional;
 
@@ -33,7 +32,7 @@ public class SecurityConfig {
 
     @Autowired
     private AdminRepository adminRepository;
-    
+
     @Autowired
     private UserRepository userRepository;
 
@@ -51,49 +50,31 @@ public class SecurityConfig {
     public UserDetailsService userDetailsService() {
         return username -> {
             System.out.println("=== LOADING USER: " + username + " ===");
-            
-            try {
-                // First try to find admin user by email or username
-                Optional<Admin> adminOptional = adminRepository.findByEmail(username);
-                if (!adminOptional.isPresent()) {
-                    // If not found by email, try by username
-                    adminOptional = adminRepository.findByUsername(username);
-                }
-                
-                if (adminOptional.isPresent()) {
-                    Admin admin = adminOptional.get();
-                    System.out.println("Found admin user: " + admin.getEmail());
-                    String authority = "SUPER_ADMIN".equals(admin.getRole()) ? "ROLE_SUPER_ADMIN" : "ROLE_ADMIN";
-                    return org.springframework.security.core.userdetails.User.builder()
+            Optional<Admin> adminOptional = adminRepository.findByEmail(username);
+            if (adminOptional.isEmpty()) adminOptional = adminRepository.findByUsername(username);
+
+            if (adminOptional.isPresent()) {
+                Admin admin = adminOptional.get();
+                String authority = "SUPER_ADMIN".equals(admin.getRole()) ? "ROLE_SUPER_ADMIN" : "ROLE_ADMIN";
+                return org.springframework.security.core.userdetails.User.builder()
                         .username(admin.getEmail())
                         .password(admin.getPassword())
                         .authorities(authority)
                         .build();
-                }
-                
-                // Then try to find regular user - use auth-specific query that avoids BLOB
-                Optional<User> userOptional = userRepository.findByEmailForAuth(username);
-                if (userOptional.isPresent()) {
-                    User user = userOptional.get();
-                    System.out.println("Found regular user: " + user.getEmail());
-                    
-                    // Create UserDetails without accessing BLOB fields
-                    return org.springframework.security.core.userdetails.User.builder()
+            }
+
+            Optional<User> userOptional = userRepository.findByEmailForAuth(username);
+            if (userOptional.isPresent()) {
+                User user = userOptional.get();
+                return org.springframework.security.core.userdetails.User.builder()
                         .username(user.getEmail())
                         .password(user.getPassword())
                         .authorities("ROLE_USER")
-                        .disabled(!user.getApproved()) // Use getApproved() method
+                        .disabled(!user.getApproved())
                         .build();
-                }
-                
-                System.out.println("User not found: " + username);
-                throw new UsernameNotFoundException("User not found: " + username);
-                
-            } catch (Exception e) {
-                System.err.println("Error in UserDetailsService: " + e.getMessage());
-                e.printStackTrace();
-                throw new UsernameNotFoundException("Error loading user: " + username, e);
             }
+
+            throw new UsernameNotFoundException("User not found: " + username);
         };
     }
 
@@ -105,7 +86,7 @@ public class SecurityConfig {
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
-        
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
@@ -118,35 +99,28 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(authz -> authz
                 // Public endpoints - no authentication required
-                .requestMatchers("/api/auth/login").permitAll()
-                .requestMatchers("/api/auth/register").permitAll()
-                .requestMatchers("/api/auth/logout").permitAll()
-                .requestMatchers("/api/email/send-verification").permitAll()
-                .requestMatchers("/api/email/verify-code").permitAll()
-                .requestMatchers("/api/auth/request-password-reset").permitAll()
-                .requestMatchers("/api/auth/verify-reset-code").permitAll()
-                .requestMatchers("/api/auth/reset-password").permitAll()
-                .requestMatchers("/api/auth/send-verification").permitAll()
-                .requestMatchers("/api/auth/verify-email").permitAll()
+                .requestMatchers("/", "/favicon.ico").permitAll() // ✅ FIXED HERE
+                .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/api/email/**").permitAll()
                 .requestMatchers("/api/vehicles/available").permitAll()
                 .requestMatchers("/api/vehicles/locations").permitAll()
                 .requestMatchers("/api/vehicles/types").permitAll()
-                
-                // Admin public endpoints - MUST come before the secured admin endpoints
+
+                // Admin public endpoints
                 .requestMatchers("/api/admin/login").permitAll()
                 .requestMatchers("/api/admin/register").permitAll()
                 .requestMatchers("/api/admin/is-first-admin").permitAll()
-                .requestMatchers("/api/admin/add-admin").permitAll() // Add this if needed
-                
-                // Admin secured endpoints - comes AFTER the public ones
+                .requestMatchers("/api/admin/add-admin").permitAll()
+
+                // Admin secured endpoints
                 .requestMatchers("/api/admin/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
                 .requestMatchers("/api/auth/admin/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
                 .requestMatchers("/api/auth/users/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
                 .requestMatchers("/api/auth/pending-requests").hasAnyRole("ADMIN", "SUPER_ADMIN")
                 .requestMatchers("/api/auth/approve-user/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
                 .requestMatchers("/api/auth/reject-user/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
-                
-                // All other endpoints require authentication
+
+                // Everything else requires authentication
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session
