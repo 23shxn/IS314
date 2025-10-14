@@ -175,6 +175,17 @@ public class ReservationController {
                 .body(Map.of("error", "Failed to get reservations: " + e.getMessage()));
         }
     }
+
+    @GetMapping("/admin/all")
+    public ResponseEntity<?> getAllReservations() {
+        try {
+            List<Reservation> reservations = reservationRepository.findAll();
+            return ResponseEntity.ok(reservations);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("error", "Failed to get all reservations: " + e.getMessage()));
+        }
+    }
 }
 
 class ErrorResponse {
