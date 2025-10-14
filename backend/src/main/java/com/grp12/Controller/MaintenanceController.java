@@ -20,7 +20,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/maintenance")
-@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
+
 public class MaintenanceController {
 
     @Autowired

@@ -25,7 +25,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @RestController
 @RequestMapping("/api/vehicles/pending")
-@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
+
 public class PendingVehicleController {
 
     @Autowired
