@@ -10,7 +10,14 @@ From examining the repository, I can see:
 3. The database configuration has been updated to use port 5434 instead of 5433
 4. There's a new AdminReservations component that was added
 
+## Completed Tasks
+- [x] Created comprehensive README.md file with project documentation
+- [x] Removed comments from all Java files in backend/src/main/java
+- [x] Removed comments from all JavaScript files in FrontEnd/src
+- [x] Pushed changes to fix-comments-and-readme branch
+- [x] Created pull request for the changes
+
 ## Next Steps
-1. Determine which tasks from TODO_updated.md still need to be completed
-2. Identify any issues with the current implementation
-3. Create a proper README.md file with project documentation
+1. Review the TODO_updated.md file to identify remaining tasks
+2. Test the current implementation to ensure no functionality was broken by comment removal
+3. Address any remaining items in the TODO files
