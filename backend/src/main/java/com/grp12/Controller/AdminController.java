@@ -1,7 +1,7 @@
 package com.grp12.Controller;
 
 import com.grp12.Model.Admin;
-import com.grp12.Repository.AdminRepository; 
+import com.grp12.Repository.AdminRepository; // Add this import
 import com.grp12.Services.AdminService;
 import com.grp12.Services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,12 +11,12 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder; 
+import org.springframework.security.crypto.password.PasswordEncoder; // Add this import
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpServletRequest;
-import java.time.LocalDateTime; 
+import java.time.LocalDateTime; // Add this import
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
@@ -36,10 +36,10 @@ public class AdminController {
     private UserService userService;
     
     @Autowired
-    private AdminRepository adminRepository; 
+    private AdminRepository adminRepository; // Add this
     
     @Autowired
-    private PasswordEncoder passwordEncoder; 
+    private PasswordEncoder passwordEncoder; // Add this
 
     @PostMapping("/register")
     public ResponseEntity<?> registerAdmin(@RequestBody Admin admin) {
@@ -88,7 +88,7 @@ public class AdminController {
             
             System.out.println("Found admin: " + existingAdmin.getUsername() + " with role: " + existingAdmin.getRole());
             
-          
+            // Try authentication
             Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(email, password)
             );

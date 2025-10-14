@@ -39,7 +39,7 @@ public class PendingVehicleController {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-   
+    // Submit pending vehicle add request (ADMIN only)
     @PostMapping("/add")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     public ResponseEntity<?> submitVehicleAddRequest(

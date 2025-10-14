@@ -46,7 +46,7 @@ public class Admin {
     // Default constructor
     public Admin() {
         this.createdAt = LocalDateTime.now();
-        this.role = "ADMIN"; 
+        this.role = "ADMIN"; // Fixed: was "ROLE_ADMIN", now consistent with field default
         this.status = "ACTIVE";
         this.active = true;
     }

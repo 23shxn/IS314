@@ -22,13 +22,13 @@ public class ImageCompressionService {
                 return null;
             }
             
-            
+            // Remove data URL prefix if present
             String imageData = base64Image;
             if (base64Image.startsWith("data:")) {
                 imageData = base64Image.substring(base64Image.indexOf(",") + 1);
             }
             
-           
+            // Decode base64 to bytes
             byte[] imageBytes = Base64.getDecoder().decode(imageData);
             
             // Check original size

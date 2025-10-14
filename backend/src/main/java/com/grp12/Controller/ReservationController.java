@@ -33,7 +33,7 @@ public class ReservationController {
     @Autowired
     private EmailService emailService;
 
-   
+    // Add these missing repository dependencies
     @Autowired
     private ReservationRepository reservationRepository;
 
@@ -82,7 +82,7 @@ public class ReservationController {
             Reservation savedReservation = reservationService.createReservation(reservation);
 
             // Mark vehicle as rented after successful reservation
-            vehicle.setStatus("Rented"); 
+            vehicle.setStatus("Rented"); // Use status instead of availability
             vehicleRepository.save(vehicle);
 
             // Send reservation confirmation email
@@ -102,6 +102,7 @@ public class ReservationController {
                 );
             }
 
+            // Create a lightweight response to avoid sending large vehicle data (e.g., base64 images)
             ReservationResponse response = new ReservationResponse();
             response.setId(savedReservation.getId());
             response.setVehicleId(savedReservation.getVehicle().getId());
@@ -141,7 +142,7 @@ public class ReservationController {
             // Update vehicle status - make it available again
             Vehicle vehicle = reservation.getVehicle();
             if (vehicle != null) {
-                vehicle.setStatus("Available"); 
+                vehicle.setStatus("Available"); // Use status instead of availability
                 vehicleRepository.save(vehicle);
             }
 
@@ -164,7 +165,7 @@ public class ReservationController {
         }
     }
 
-  
+    // Add endpoint to get user reservations
     @GetMapping("/user/{userId}")
     public ResponseEntity<?> getUserReservations(@PathVariable Long userId) {
         try {

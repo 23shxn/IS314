@@ -59,7 +59,9 @@ public class DataInitializer implements CommandLineRunner {
         System.out.println("Username: " + savedAdmin1.getUsername());
         System.out.println("Email: " + savedAdmin1.getEmail());
 
-      
+        // Continue with admin2...
+        
+        // Verify they were saved
         long totalAdmins = adminRepository.count();
         System.out.println("=== TOTAL ADMINS IN DATABASE: " + totalAdmins + " ===");
     }

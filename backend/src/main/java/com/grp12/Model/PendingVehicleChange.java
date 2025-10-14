@@ -11,16 +11,16 @@ public class PendingVehicleChange {
     private Long id;
 
     @Column(name = "change_type", nullable = false)
-    private String changeType; 
+    private String changeType; // "ADD" or "REMOVE"
 
     @Column(name = "vehicle_data", columnDefinition = "TEXT")
-    private String vehicleData; 
+    private String vehicleData; // JSON string of vehicle data for ADD
 
     @Column(name = "vehicle_id")
-    private Long vehicleId; 
+    private Long vehicleId; // For REMOVE operations
 
     @Column(name = "requested_by", nullable = false)
-    private Long requestedBy; 
+    private Long requestedBy; // Admin ID who made the request
 
     @Column(name = "requested_at", nullable = false)
     private LocalDateTime requestedAt;
