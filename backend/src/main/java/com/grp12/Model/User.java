@@ -13,7 +13,7 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    // Match database column order
+    
     @Lob
     @Column(name = "drivers_license_image", columnDefinition = "TEXT")
     private String driversLicenseImage;
@@ -40,7 +40,7 @@ public class User {
     private String role = "ROLE_CUSTOMER";
     
     @Column(name = "status", nullable = false, length = 20)
-    private String status = "PENDING"; // PENDING, APPROVED, REJECTED
+    private String status = "PENDING"; 
 
     @Column(name = "approved")
     private Boolean approved = false;
@@ -58,12 +58,12 @@ public class User {
         }
     }
 
-    // Default constructor
+    
     public User() {
         this.createdAt = LocalDateTime.now();
     }
 
-    // Constructor for easy creation
+    
     public User(String firstName, String lastName, String phoneNumber, String email, 
                 String driversLicenseNumber, String driversLicenseImage) {
         this.firstName = firstName;
@@ -78,7 +78,7 @@ public class User {
         this.createdAt = LocalDateTime.now();
     }
 
-    // Updated constructor
+    
     public User(Long id, String email, String password, String firstName, String lastName, Boolean emailVerified, Boolean approved) {
         this.id = id;
         this.email = email;
@@ -90,7 +90,7 @@ public class User {
         this.createdAt = LocalDateTime.now();
     }
 
-    // Getters and setters
+    
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     

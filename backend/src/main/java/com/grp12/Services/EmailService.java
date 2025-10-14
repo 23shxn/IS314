@@ -17,17 +17,17 @@ public class EmailService {
     @Autowired
     private JavaMailSender mailSender;
 
-    // In-memory storage for verification codes
+    
     private final Map<String, VerificationData> verificationCodes = new ConcurrentHashMap<>();
 
     public void sendVerificationCode(String email) throws MessagingException {
-        // Generate 6-digit verification code
+        
         String code = String.format("%06d", new Random().nextInt(999999));
         
-        // Store code with 10-minute expiration
+        
         verificationCodes.put(email, new VerificationData(code, System.currentTimeMillis() + 600000));
         
-        // Create and send email
+        
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
         
@@ -47,22 +47,22 @@ public class EmailService {
             return false;
         }
         
-        // Check if expired
+        
         if (System.currentTimeMillis() > data.expirationTime) {
             verificationCodes.remove(email);
             return false;
         }
         
-        // Check if code matches
+        
         if (data.code.equals(code)) {
-            verificationCodes.remove(email); // Remove after successful verification
+            verificationCodes.remove(email); 
             return true;
         }
         
         return false;
     }
 
-    // Send approval notification
+    
     public void sendApprovalNotification(String email, String firstName, String lastName, boolean isApproved) throws MessagingException {
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
@@ -82,7 +82,7 @@ public class EmailService {
         System.out.println("Approval notification sent to: " + email + " (approved: " + isApproved + ")");
     }
 
-    // Password reset email method - make sure this is properly defined
+    
     public void sendPasswordResetEmail(String email, String resetToken) throws MessagingException {
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
@@ -96,7 +96,7 @@ public class EmailService {
         System.out.println("Password reset email sent to: " + email);
     }
 
-    // Send cancellation notification
+    
     public void sendCancellationEmail(String email, String firstName, String lastName, Long reservationId, String vehicleName) throws MessagingException {
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
@@ -110,7 +110,7 @@ public class EmailService {
         System.out.println("Cancellation email sent to: " + email);
     }
 
-    // Send reservation confirmation notification
+    
     public void sendReservationConfirmationEmail(String email, String firstName, String lastName, Long reservationId, String vehicleName, String rentalDate, String returnDate, String totalPrice) throws MessagingException {
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
@@ -168,7 +168,7 @@ public class EmailService {
                 "</html>";
     }
 
-    // Build password reset email HTML
+    
     private String buildPasswordResetEmailHtml(String resetToken) {
         return "<!DOCTYPE html>" +
                 "<html>" +
@@ -245,9 +245,9 @@ public class EmailService {
                 "</ul>" +
                 "<p>Ready to get started? Click the button below to access your dashboard:</p>" +
                 "<div style='text-align: center;'>" +
-                "<a href='http://localhost:3000/dashboard' class='cta-button'>Access Your Dashboard</a>" +
+                "<a href='http:
                 "</div>" +
-                "<p>You can also visit our website directly at: <a href='http://localhost:3000'>http://localhost:3000</a></p>" +
+                "<p>You can also visit our website directly at: <a href='http:
                 "<p>If you have any questions or need assistance, please don't hesitate to contact our support team.</p>" +
                 "<p>Welcome to the Ronaldo's Rentals family!</p>" +
                 "</div>" +
@@ -297,7 +297,7 @@ public class EmailService {
                 "</ul>" +
                 "<p>You're welcome to submit a new application if you believe this decision was made in error or if your circumstances have changed.</p>" +
                 "<div style='text-align: center;'>" +
-                "<a href='http://localhost:3000/login' class='cta-button'>Visit Our Website</a>" +
+                "<a href='http:
                 "</div>" +
                 "<p>If you have questions about this decision, please contact our support team.</p>" +
                 "</div>" +
@@ -391,7 +391,7 @@ public class EmailService {
                 "</html>";
     }
 
-    // Inner class to store verification data
+    
     private static class VerificationData {
         final String code;
         final long expirationTime;

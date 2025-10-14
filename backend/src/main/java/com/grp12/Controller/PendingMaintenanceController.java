@@ -27,7 +27,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/maintenance/pending")
-@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
+@CrossOrigin(origins = "http:
 public class PendingMaintenanceController {
 
     @Autowired
@@ -42,7 +42,7 @@ public class PendingMaintenanceController {
     @Autowired
     private ImageCompressionService imageCompressionService;
 
-    // Submit pending maintenance record request (ADMIN only)
+    
     @PostMapping("/add")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     public ResponseEntity<?> submitMaintenanceRequest(
@@ -59,7 +59,7 @@ public class PendingMaintenanceController {
             @RequestParam(value = "receipt", required = false) MultipartFile receipt) {
 
         try {
-            // Get current admin
+            
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String currentUsername = authentication.getName();
             Admin currentAdmin = adminService.getAdminByEmail(currentUsername);
@@ -72,19 +72,19 @@ public class PendingMaintenanceController {
                     .body(Map.of("error", "Admin not found"));
             }
 
-            // Check if super admin - allow direct add
+            
             if ("SUPER_ADMIN".equals(currentAdmin.getRole())) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(Map.of("error", "Super admins should use direct add endpoint"));
             }
 
-            // Validate required fields
+            
             if (carId == null || type == null || type.trim().isEmpty() || date == null || date.trim().isEmpty()) {
                 return ResponseEntity.badRequest()
                     .body(Map.of("error", "Car ID, type, and date are required"));
             }
 
-            // Create pending maintenance record
+            
             PendingMaintenanceRecord pendingRecord = new PendingMaintenanceRecord();
             pendingRecord.setApprovalStatus("PENDING");
             pendingRecord.setCarId(carId);
@@ -95,7 +95,7 @@ public class PendingMaintenanceController {
             if (nextDate != null && !nextDate.trim().isEmpty()) {
                 pendingRecord.setNextDate(LocalDate.parse(nextDate).atStartOfDay());
             } else {
-                // Auto-calculate nextDate as current date + 3 months
+                
                 pendingRecord.setNextDate(pendingRecord.getDate().toLocalDate().plusMonths(3).atStartOfDay());
             }
             if (mechanic != null && !mechanic.trim().isEmpty()) pendingRecord.setMechanic(mechanic.trim());
@@ -129,7 +129,7 @@ public class PendingMaintenanceController {
         }
     }
 
-    // Get all pending maintenance requests (SUPER_ADMIN only)
+    
     @GetMapping("/all")
     @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ResponseEntity<?> getAllPendingMaintenanceRequests() {
@@ -142,7 +142,7 @@ public class PendingMaintenanceController {
         }
     }
 
-    // Approve pending maintenance request (SUPER_ADMIN only)
+    
     @PostMapping("/{requestId}/approve")
     @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ResponseEntity<?> approvePendingMaintenanceRequest(@PathVariable Long requestId) {
@@ -159,7 +159,7 @@ public class PendingMaintenanceController {
                     .body(Map.of("error", "Request is not in pending status"));
             }
 
-            // Get current super admin
+            
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String currentUsername = authentication.getName();
             Admin currentAdmin = adminService.getAdminByEmail(currentUsername);
@@ -167,13 +167,13 @@ public class PendingMaintenanceController {
                 currentAdmin = adminService.getAdminByUsername(currentUsername);
             }
 
-            // Update request status
+            
             request.setApprovalStatus("APPROVED");
             request.setApprovedBy(currentAdmin.getId());
             request.setApprovedAt(LocalDateTime.now());
             pendingMaintenanceRecordRepository.save(request);
 
-            // Create actual maintenance record from approved request
+            
             MaintenanceRecord maintenanceRecord = new MaintenanceRecord(request);
             maintenanceRecordRepository.save(maintenanceRecord);
 
@@ -189,7 +189,7 @@ public class PendingMaintenanceController {
         }
     }
 
-    // Reject pending maintenance request (SUPER_ADMIN only)
+    
     @PostMapping("/{requestId}/reject")
     @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ResponseEntity<?> rejectPendingMaintenanceRequest(
@@ -211,7 +211,7 @@ public class PendingMaintenanceController {
 
             String rejectionReason = rejectionData.get("reason");
 
-            // Get current super admin
+            
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String currentUsername = authentication.getName();
             Admin currentAdmin = adminService.getAdminByEmail(currentUsername);
@@ -219,7 +219,7 @@ public class PendingMaintenanceController {
                 currentAdmin = adminService.getAdminByUsername(currentUsername);
             }
 
-            // Update request status
+            
             request.setApprovalStatus("REJECTED");
             request.setApprovedBy(currentAdmin.getId());
             request.setApprovedAt(LocalDateTime.now());

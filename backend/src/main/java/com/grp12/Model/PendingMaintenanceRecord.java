@@ -15,7 +15,7 @@ public class PendingMaintenanceRecord {
     private Long carId;
 
     @Column(name = "type", nullable = false, length = 50)
-    private String type; // Routine Service, Repair, Inspection, Emergency Repair
+    private String type; 
 
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
@@ -33,7 +33,7 @@ public class PendingMaintenanceRecord {
     private String mechanic;
 
     @Column(name = "status", nullable = false, length = 20)
-    private String status; // Pending, In Progress, Completed, Overdue
+    private String status; 
 
     @Column(name = "notes", columnDefinition = "TEXT")
     private String notes;
@@ -42,19 +42,19 @@ public class PendingMaintenanceRecord {
     private Integer mileage;
 
     @Column(name = "receipt", columnDefinition = "TEXT")
-    private String receipt; // Base64 encoded receipt image
+    private String receipt; 
 
     @Column(name = "requested_by", nullable = false)
-    private Long requestedBy; // Admin ID who submitted
+    private Long requestedBy; 
 
     @Column(name = "requested_at", nullable = false)
     private LocalDateTime requestedAt;
 
     @Column(name = "approval_status", nullable = false)
-    private String approvalStatus; // "PENDING", "APPROVED", "REJECTED"
+    private String approvalStatus; 
 
     @Column(name = "approved_by")
-    private Long approvedBy; // SuperAdmin ID
+    private Long approvedBy; 
 
     @Column(name = "approved_at")
     private LocalDateTime approvedAt;
@@ -62,13 +62,13 @@ public class PendingMaintenanceRecord {
     @Column(name = "rejection_reason", columnDefinition = "TEXT")
     private String rejectionReason;
 
-    // Default constructor
+    
     public PendingMaintenanceRecord() {
         this.requestedAt = LocalDateTime.now();
         this.approvalStatus = "PENDING";
     }
 
-    // Getters and setters
+    
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

@@ -30,19 +30,19 @@ const LandingPage = ({ currentUser, setCurrentView }) => {
     title: '1. Search',
     text: 'Find the right car for your trip.',
     icon: <Search className="feature-icon" />,
-    img: 'https://images.unsplash.com/photo-1517677208171-0bc6725a3e60?q=80&w=1200&auto=format&fit=crop'
+    img: 'https:
   },
   {
     title: '2. Book',
     text: 'Reserve instantly with transparent pricing.',
     icon: <CalendarCheck className="feature-icon" />,
-    img: 'https://images.unsplash.com/photo-1556742043-953d8f0fd1d2?q=80&w=1200&auto=format&fit=crop'
+    img: 'https:
   },
   {
     title: '3. Drive',
     text: 'Pick up your keys and enjoy the journey.',
     icon: <Car className="feature-icon" />,
-    img: 'https://images.unsplash.com/photo-1494972308805-463bc619d34e?q=80&w=1200&auto=format&fit=crop'
+    img: 'https:
   }
   ];
 

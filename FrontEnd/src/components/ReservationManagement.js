@@ -85,7 +85,7 @@ const ReservationManagement = ({ reservations, setReservations, currentUser }) =
                 gap: '1.5rem',
                 alignItems: 'center'
               }}>
-                {/* Vehicle Info */}
+                {}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                   <div style={{
                     width: '60px',
@@ -109,7 +109,7 @@ const ReservationManagement = ({ reservations, setReservations, currentUser }) =
                   </div>
                 </div>
 
-                {/* Reservation Details */}
+                {}
                 <div>
                   <div style={{ marginBottom: '0.5rem' }}>
                     <span style={{ 
@@ -149,7 +149,7 @@ const ReservationManagement = ({ reservations, setReservations, currentUser }) =
                   </div>
                 </div>
 
-                {/* Actions */}
+                {}
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
                   <button
                     onClick={() => setSelectedReservation(reservation)}
@@ -195,7 +195,7 @@ const ReservationManagement = ({ reservations, setReservations, currentUser }) =
         </div>
       )}
 
-      {/* Reservation Detail Modal */}
+      {}
       {selectedReservation && (
         <div style={{
           position: 'fixed',

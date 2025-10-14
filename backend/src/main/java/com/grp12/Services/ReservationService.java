@@ -41,7 +41,7 @@ public class ReservationService {
         System.out.println("Amenities: " + reservation.getAmenities());
         
         try {
-            // Validate inputs
+            
             if (reservation.getVehicle() == null) {
                 System.out.println("ERROR: Vehicle is null");
                 throw new IllegalArgumentException("Vehicle is required");
@@ -72,7 +72,7 @@ public class ReservationService {
             }
             System.out.println("✓ Price validation passed");
 
-            // Validate amenities
+            
             if (reservation.getAmenities() == null || reservation.getAmenities().isEmpty()) {
                 System.out.println("ERROR: No amenities provided");
                 throw new IllegalArgumentException("At least one amenity or 'none' is required");
@@ -93,7 +93,7 @@ public class ReservationService {
             }
             System.out.println("✓ Amenities 'none' validation passed");
 
-            // Verify vehicle exists and is available
+            
             System.out.println("Looking up vehicle with ID: " + reservation.getVehicle().getId());
             Vehicle vehicle = vehicleRepository.findById(reservation.getVehicle().getId())
                     .orElseThrow(() -> new IllegalArgumentException("Vehicle not found"));
@@ -105,7 +105,7 @@ public class ReservationService {
             }
             System.out.println("✓ Vehicle availability validation passed");
 
-            // Validate total price with tolerance
+            
             long totalDays = reservation.getReturnDate().toEpochDay() - reservation.getRentalDate().toEpochDay() + 1;
             BigDecimal basePrice = vehicle.getPricePerDay().multiply(new BigDecimal(totalDays));
             BigDecimal amenityCost = calculateAmenityCost(reservation.getAmenities());
@@ -126,12 +126,12 @@ public class ReservationService {
             }
             System.out.println("✓ Price calculation validation passed");
 
-            // Update vehicle status to Rented
+            
             vehicle.setStatus("Rented");
             vehicleRepository.save(vehicle);
             System.out.println("✓ Vehicle status updated to Rented");
 
-            // Save reservation
+            
             Reservation savedReservation = reservationRepository.save(reservation);
             System.out.println("✓ Reservation saved with ID: " + savedReservation.getId());
             System.out.println("=== RESERVATION DEBUG END ===");

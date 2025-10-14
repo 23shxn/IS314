@@ -129,7 +129,7 @@ const VehicleSearch = ({ reservations, setReservations, currentUser }) => {
   const [viewingVehicle, setViewingVehicle] = useState(null);
   const navigate = useNavigate();
 
-  // Updated search params with separate pickup and dropoff locations
+  
   const [searchParams, setSearchParams] = useState({
     pickupLocation: '',
     dropoffLocation: '',
@@ -139,7 +139,7 @@ const VehicleSearch = ({ reservations, setReservations, currentUser }) => {
     endDate: ''
   });
 
-  // Predefined price ranges for dropdown
+  
   const priceRanges = [
     { value: '', label: 'Any Price' },
     { value: '0-50', label: 'Under $50' },
@@ -153,7 +153,7 @@ const VehicleSearch = ({ reservations, setReservations, currentUser }) => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+        const apiUrl = process.env.REACT_APP_API_URL || 'http:
         const [vehiclesRes, locationsRes, typesRes] = await Promise.all([
           fetch(`${apiUrl}/api/vehicles/available`),
           fetch(`${apiUrl}/api/vehicles/locations`),
@@ -190,17 +190,17 @@ const VehicleSearch = ({ reservations, setReservations, currentUser }) => {
   useEffect(() => {
     let results = [...vehicles];
 
-    // Filter by pickup location (where vehicles are available)
+    
     if (searchParams.pickupLocation) {
       results = results.filter(v => v.location.toLowerCase().includes(searchParams.pickupLocation.toLowerCase()));
     }
 
-    // Filter by vehicle type
+    
     if (searchParams.vehicleType) {
       results = results.filter(v => v.vehicleType.toLowerCase().includes(searchParams.vehicleType.toLowerCase()));
     }
 
-    // Filter by price range
+    
     if (searchParams.minPrice) {
       const priceRange = searchParams.minPrice;
       if (priceRange === '0-50') {
@@ -225,19 +225,19 @@ const VehicleSearch = ({ reservations, setReservations, currentUser }) => {
   };
 
   const handleReservation = (vehicle) => {
-    // Validate required fields
+    
     if (!currentUser) {
       setError('Please log in to make a reservation');
       return;
     }
 
-    // Validate dates
+    
     if (!searchParams.startDate || !searchParams.endDate) {
       setError('Please select both start and end dates to reserve a vehicle');
       return;
     }
 
-    // Validate pickup location (required)
+    
     if (!searchParams.pickupLocation) {
       setError('Please select a pickup location');
       return;
@@ -260,7 +260,7 @@ const VehicleSearch = ({ reservations, setReservations, currentUser }) => {
 
     setError('');
     
-    // Create reservation object that matches CarDetail expectations
+    
     const reservationData = {
       reservation: {
         vehicle: vehicle,
@@ -276,7 +276,7 @@ const VehicleSearch = ({ reservations, setReservations, currentUser }) => {
 
     console.log('Navigating to car-detail with reservation data:', reservationData);
     
-    // Navigate to car detail page with state
+    
     navigate('/car-detail', { 
       state: reservationData
     });
@@ -288,17 +288,17 @@ const VehicleSearch = ({ reservations, setReservations, currentUser }) => {
       dropoffLocation: '',
       vehicleType: '',
       minPrice: '',
-      startDate: searchParams.startDate, // Keep dates
+      startDate: searchParams.startDate, 
       endDate: searchParams.endDate
     });
     setError('');
   };
 
   const refreshVehicles = async () => {
-    // Re-fetch vehicles to get updated availability
+    
     setLoading(true);
     try {
-      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+      const apiUrl = process.env.REACT_APP_API_URL || 'http:
       const vehiclesRes = await fetch(`${apiUrl}/api/vehicles/available`);
       
       if (vehiclesRes.ok) {
@@ -320,7 +320,7 @@ const VehicleSearch = ({ reservations, setReservations, currentUser }) => {
   };
 
   useEffect(() => {
-    // Listen for reservation changes and refresh
+    
     if (reservations) {
       refreshVehicles();
     }
@@ -459,7 +459,7 @@ const VehicleSearch = ({ reservations, setReservations, currentUser }) => {
                     vehicleInfo={vehicle} 
                   />
                   
-                  {/* View details button */}
+                  {}
                   <button
                     onClick={() => handleViewDetails(vehicle)}
                     className="action-btn view"

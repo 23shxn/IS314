@@ -35,7 +35,7 @@ const VehicleMaintenance = ({ setCurrentUser, currentUser }) => {
     receipt: null
   });
 
-  // Helper function to open receipt image
+  
   const openReceipt = (receipt) => {
     if (!receipt) return;
     const byteCharacters = atob(receipt);
@@ -49,7 +49,7 @@ const VehicleMaintenance = ({ setCurrentUser, currentUser }) => {
     window.open(url, '_blank');
   };
 
-  // Determine user role
+  
   const isSuperAdmin = currentUser?.role === 'SUPER_ADMIN';
   const isAdmin = currentUser?.role === 'ADMIN';
 
@@ -65,7 +65,7 @@ const VehicleMaintenance = ({ setCurrentUser, currentUser }) => {
 
   const handleLogout = async () => {
     try {
-      await fetch('http://localhost:8080/api/auth/logout', {
+      await fetch('http:
         method: 'POST',
         credentials: 'include'
       });
@@ -90,7 +90,7 @@ const VehicleMaintenance = ({ setCurrentUser, currentUser }) => {
   const fetchVehicles = async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:8080/api/vehicles/all', {
+      const response = await fetch('http:
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include'
@@ -113,7 +113,7 @@ const VehicleMaintenance = ({ setCurrentUser, currentUser }) => {
 
   const fetchPendingRequests = async () => {
     try {
-      const response = await fetch('http://localhost:8080/api/maintenance/pending/all', {
+      const response = await fetch('http:
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include'
@@ -131,7 +131,7 @@ const VehicleMaintenance = ({ setCurrentUser, currentUser }) => {
 
   const fetchMaintenanceRecords = async () => {
     try {
-      const response = await fetch('http://localhost:8080/api/maintenance/all', {
+      const response = await fetch('http:
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include'
@@ -147,7 +147,7 @@ const VehicleMaintenance = ({ setCurrentUser, currentUser }) => {
     }
   };
 
-  // Reset form
+  
   const resetForm = () => {
     setMaintenanceForm({
       carId: '',
@@ -164,7 +164,7 @@ const VehicleMaintenance = ({ setCurrentUser, currentUser }) => {
     setShowForm(false);
   };
 
-  // Submit add/edit form for admin (creates pending request)
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -189,7 +189,7 @@ const VehicleMaintenance = ({ setCurrentUser, currentUser }) => {
         formData.append('receipt', maintenanceForm.receipt);
       }
 
-      const response = await fetch('http://localhost:8080/api/maintenance/pending/add', {
+      const response = await fetch('http:
         method: 'POST',
         body: formData,
         credentials: 'include'
@@ -219,10 +219,10 @@ const VehicleMaintenance = ({ setCurrentUser, currentUser }) => {
     }
   };
 
-  // Super admin approval actions
+  
   const handleApproveRequest = async (requestId) => {
     try {
-      const response = await fetch(`http://localhost:8080/api/maintenance/pending/${requestId}/approve`, {
+      const response = await fetch(`http:
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include'
@@ -247,7 +247,7 @@ const VehicleMaintenance = ({ setCurrentUser, currentUser }) => {
     if (!reason) return;
 
     try {
-      const response = await fetch(`http://localhost:8080/api/maintenance/pending/${requestId}/reject`, {
+      const response = await fetch(`http:
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -269,7 +269,7 @@ const VehicleMaintenance = ({ setCurrentUser, currentUser }) => {
     }
   };
 
-  // Filter maintenance records
+  
   const filteredRecords = maintenanceRecords.filter(r => {
     const carMatch = !filters.vehicle || r.carId === Number(filters.vehicle);
     const typeMatch = !filters.type || r.type === filters.type;
@@ -279,7 +279,7 @@ const VehicleMaintenance = ({ setCurrentUser, currentUser }) => {
     return carMatch && typeMatch && statusMatch && fromDateMatch && toDateMatch;
   });
 
-  // Compute needs servicing flag
+  
   const maintenanceWithPriority = filteredRecords.map(record => {
     const vehicle = vehicles.find(v => Number(v.id) === Number(record.carId));
     const lastMileage = record.mileage || 0;
@@ -288,14 +288,14 @@ const VehicleMaintenance = ({ setCurrentUser, currentUser }) => {
     return {...record, vehicle, needsService};
   });
 
-  // Sort: needs service first, then latest date
+  
   const sortedRecords = maintenanceWithPriority.sort((a, b) => {
     if (a.needsService && !b.needsService) return -1;
     if (!a.needsService && b.needsService) return 1;
     return new Date(b.date) - new Date(a.date);
   });
 
-  // Calculate total maintenance cost per vehicle
+  
   const totalCosts = vehicles.map(vehicle => {
     const total = maintenanceRecords
       .filter(r => Number(r.carId) === vehicle.id)
@@ -368,7 +368,7 @@ const VehicleMaintenance = ({ setCurrentUser, currentUser }) => {
             )}
           </div>
 
-          {/* Pending Requests Section for Super Admin */}
+          {}
           {isSuperAdmin && (
             <div className="card">
               <h3>Pending Maintenance Requests</h3>
@@ -447,7 +447,7 @@ const VehicleMaintenance = ({ setCurrentUser, currentUser }) => {
             </div>
           )}
 
-          {/* Maintenance Form for Admin */}
+          {}
           {isAdmin && showForm && (
             <div className="card maintenance-form-card">
               <h3>Submit Maintenance Request</h3>
@@ -583,29 +583,10 @@ const VehicleMaintenance = ({ setCurrentUser, currentUser }) => {
                     <input
                       type="file"
                       id="receipt"
-                      accept="image/*,application/pdf"
-                      onChange={e => setMaintenanceForm({...maintenanceForm, receipt: e.target.files[0]})}
-                      className="form-input"
-                    />
-                  </div>
-                </div>
-
-                <div className="form-actions">
-                  <button type="submit" className="btn-primary">
-                    Submit for Approval
-                  </button>
-                  <button type="button" className="btn-secondary" onClick={resetForm}>
-                    Cancel
-                  </button>
-                </div>
-              </form>
-            </div>
-          )}
-
-          {/* Existing maintenance records section - only for super admin or if records exist */}
+                      accept="image}
           {(isSuperAdmin || maintenanceRecords.length > 0) && (
             <>
-              {/* Filters */}
+              {}
               <div className="card filters-card">
                 <h3>Filters</h3>
                 <div className="filters-grid">
@@ -682,20 +663,20 @@ const VehicleMaintenance = ({ setCurrentUser, currentUser }) => {
                 </div>
               </div>
 
-              {/* Error Display */}
+              {}
               {error && <div className="error-message">{error}</div>}
 
-              {/* Loading Display */}
+              {}
               {loading && <div className="loading-message">Loading...</div>}
 
-              {/* Maintenance Records Table */}
+              {}
               <div className="card">
                 <h3>Maintenance Records</h3>
                 {sortedRecords.length === 0 ? (
                   <p>No maintenance records found.</p>
                 ) : (
                   <>
-                    {/* Desktop Table */}
+                    {}
                     <div className="table-container">
                       <table className="maintenance-table">
                         <thead>
@@ -765,7 +746,7 @@ const VehicleMaintenance = ({ setCurrentUser, currentUser }) => {
                       </table>
                     </div>
 
-                    {/* Mobile Cards */}
+                    {}
                     <div className="maintenance-cards">
                       {sortedRecords.map(record => (
                         <div
@@ -846,7 +827,7 @@ const VehicleMaintenance = ({ setCurrentUser, currentUser }) => {
                 )}
               </div>
 
-              {/* Cost Summary */}
+              {}
               <div className="card analytics-summary">
                 <h3>Maintenance Cost Summary</h3>
                 {totalCosts.length === 0 ? (

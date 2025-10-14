@@ -4,7 +4,7 @@ import com.grp12.Model.User;
 import com.grp12.Model.RegistrationRequest;
 import com.grp12.Services.UserService;
 import com.grp12.Services.EmailService;
-import com.grp12.Services.ImageCompressionService; // Add this
+import com.grp12.Services.ImageCompressionService; 
 import com.grp12.Repository.RegistrationRequestRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -28,19 +28,19 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
+@CrossOrigin(origins = "http:
 public class UserController {
 
     @Autowired
     private UserService userService;
 
     @Autowired
-    private ImageCompressionService imageCompressionService; // Make sure this is added
+    private ImageCompressionService imageCompressionService; 
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody User user) {
         try {
-            // Compress the drivers license image if it exists
+            
             if (user.getDriversLicenseImage() != null && !user.getDriversLicenseImage().trim().isEmpty()) {
                 System.out.println("Compressing drivers license image...");
                 String compressedImage = imageCompressionService.compressBase64Image(user.getDriversLicenseImage());
@@ -54,14 +54,14 @@ public class UserController {
                 System.out.println("Image compression completed successfully");
             }
 
-            // Modified validation - check for approved users only
+            
             User existingUser = userService.getUserByEmail(user.getEmail());
             if (existingUser != null && existingUser.getApproved()) {
                 return ResponseEntity.badRequest()
                     .body(Map.of("error", "Email already registered and approved"));
             }
 
-            // Also check for pending registration requests
+            
             Optional<RegistrationRequest> existingRequest = registrationRequestRepository.findByEmailAndStatus(
                 user.getEmail(), "PENDING");
             if (existingRequest.isPresent()) {
@@ -69,13 +69,13 @@ public class UserController {
                     .body(Map.of("error", "Registration request already pending for this email"));
             }
 
-            // If there's a rejected user/request, allow re-registration by cleaning up old data
+            
             if (existingUser != null && !existingUser.getApproved()) {
-                // Remove the old rejected user record
+                
                 userService.deleteUser(existingUser.getId());
             }
 
-            // Remove any old rejected registration requests
+            
             registrationRequestRepository.findByEmail(user.getEmail())
                 .ifPresent(oldRequest -> {
                     if ("REJECTED".equals(oldRequest.getStatus())) {
@@ -83,7 +83,7 @@ public class UserController {
                     }
                 });
 
-            // Register user - this now returns RegistrationRequest
+            
             RegistrationRequest registrationRequest = userService.registerUser(user);
 
             return ResponseEntity.ok().body(Map.of(
@@ -115,21 +115,21 @@ public class UserController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody User user, HttpServletRequest request) {
         try {
-            // Authenticate using Spring Security
+            
             UsernamePasswordAuthenticationToken authToken =
                 new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword());
 
             Authentication authentication = authenticationManager.authenticate(authToken);
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            // Store authentication in session
+            
             request.getSession().setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
                 SecurityContextHolder.getContext());
 
-            // Get user details for response
+            
             User authenticatedUser = userService.loginUser(user.getEmail(), user.getPassword());
             if (authenticatedUser != null) {
-                // Create response with role information
+                
                 Map<String, Object> response = new HashMap<>();
                 response.put("id", authenticatedUser.getId());
                 response.put("email", authenticatedUser.getEmail());
@@ -137,7 +137,7 @@ public class UserController {
                 response.put("lastName", authenticatedUser.getLastName());
                 response.put("phoneNumber", authenticatedUser.getPhoneNumber());
                 response.put("status", authenticatedUser.getStatus());
-                response.put("role", "customer"); // Explicitly set the role
+                response.put("role", "customer"); 
 
                 return ResponseEntity.ok(response);
             }
@@ -152,7 +152,7 @@ public class UserController {
         }
     }
 
-    // Add this new endpoint for checking authentication status
+    
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentUserAuth() {
         try {
@@ -173,7 +173,7 @@ public class UserController {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
             }
 
-            // Create response with role information
+            
             Map<String, Object> response = new HashMap<>();
             response.put("id", user.getId());
             response.put("email", user.getEmail());
@@ -181,7 +181,7 @@ public class UserController {
             response.put("lastName", user.getLastName());
             response.put("phoneNumber", user.getPhoneNumber());
             response.put("status", user.getStatus());
-            response.put("role", "customer"); // Explicitly set the role
+            response.put("role", "customer"); 
             response.put("authenticated", true);
 
             return ResponseEntity.ok(response);
@@ -225,10 +225,10 @@ public class UserController {
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     public ResponseEntity<?> approveRegistration(@PathVariable Long requestId) {
         try {
-            // Use approveUser instead of approveRegistration
+            
             User user = userService.approveUser(requestId);
 
-            // Email notification is already handled in approveUser method
+            
             return ResponseEntity.ok(Map.of(
                 "message", "User approved successfully! Notification email sent.",
                 "user", user
@@ -248,10 +248,10 @@ public class UserController {
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     public ResponseEntity<?> rejectRegistration(@PathVariable Long requestId) {
         try {
-            // Use rejectUser instead of rejectRegistration
+            
             userService.rejectUser(requestId);
 
-            // Email notification is already handled in rejectUser method
+            
             Map<String, String> response = new HashMap<>();
             response.put("message", "Registration rejected successfully! Notification email sent.");
             return ResponseEntity.ok(response);
@@ -279,7 +279,7 @@ public class UserController {
         }
     }
 
-    // NEW: Delete user endpoint for SUPER_ADMIN only
+    
     @DeleteMapping("/users/{userId}")
     @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ResponseEntity<?> deleteUser(@PathVariable Long userId) {
@@ -332,7 +332,7 @@ public class UserController {
                     .body(Map.of("error", "Email is required"));
             }
 
-            // Validate email format
+            
             if (!email.matches("^[a-zA-Z0-9._%+-]+@gmail\\.com$")) {
                 return ResponseEntity.badRequest()
                     .body(Map.of("error", "Please enter a valid Gmail address"));
@@ -386,7 +386,7 @@ public class UserController {
             String email = request.get("email");
             String resetToken = request.get("resetToken");
 
-            // Verify the token without resetting the password
+            
             boolean isValid = userService.verifyResetToken(email, resetToken);
 
             if (isValid) {

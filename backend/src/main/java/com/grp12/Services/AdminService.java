@@ -20,20 +20,20 @@ public class AdminService {
 
     public Admin registerAdmin(Admin admin) {
         try {
-            // Check if email already exists
+            
             if (adminRepository.existsByEmail(admin.getEmail())) {
                 throw new IllegalArgumentException("Email already exists");
             }
             
-            // Check if username already exists
+            
             if (adminRepository.existsByUsername(admin.getUsername())) {
                 throw new IllegalArgumentException("Username already exists");
             }
             
-            // Encode password
+            
             admin.setPassword(passwordEncoder.encode(admin.getPassword()));
             
-            // Set default values
+            
             admin.setRole("ROLE_ADMIN");
             admin.setStatus("ACTIVE");
             
@@ -96,13 +96,13 @@ public class AdminService {
             Admin existingAdmin = adminRepository.findById(id)
                     .orElseThrow(() -> new RuntimeException("Admin not found"));
 
-            // Check if email is being changed and already exists
+            
             if (!existingAdmin.getEmail().equals(updatedAdmin.getEmail()) && 
                 adminRepository.existsByEmail(updatedAdmin.getEmail())) {
                 throw new IllegalArgumentException("Email already exists");
             }
 
-            // Check if username is being changed and already exists
+            
             if (!existingAdmin.getUsername().equals(updatedAdmin.getUsername()) && 
                 adminRepository.existsByUsername(updatedAdmin.getUsername())) {
                 throw new IllegalArgumentException("Username already exists");
@@ -113,7 +113,7 @@ public class AdminService {
             existingAdmin.setUsername(updatedAdmin.getUsername());
             existingAdmin.setEmail(updatedAdmin.getEmail());
             
-            // Only update password if provided
+            
             if (updatedAdmin.getPassword() != null && !updatedAdmin.getPassword().isEmpty()) {
                 existingAdmin.setPassword(passwordEncoder.encode(updatedAdmin.getPassword()));
             }
@@ -133,7 +133,7 @@ public class AdminService {
             Admin admin = adminRepository.findById(id)
                     .orElseThrow(() -> new RuntimeException("Admin not found"));
             
-            // Prevent deactivating the last admin
+            
             long activeAdminCount = adminRepository.countActiveAdmins();
             if (activeAdminCount <= 1) {
                 throw new RuntimeException("Cannot deactivate the last admin account");

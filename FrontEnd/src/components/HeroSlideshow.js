@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import "../styles/LandingPage.css"; // keep your existing stylesheet
+import "../styles/LandingPage.css"; 
 
-const SLIDE_INTERVAL_MS = 5000; // auto-advance every 5s
-const TRANSITION_MS = 800;      // fade duration
+const SLIDE_INTERVAL_MS = 5000; 
+const TRANSITION_MS = 800;      
 
 export default function HeroSlideshow({
   images = [],
@@ -17,7 +17,7 @@ export default function HeroSlideshow({
 
   const safeImages = useMemo(() => images.filter(Boolean), [images]);
 
-  // Auto-advance
+  
   useEffect(() => {
     stopTimer();
     timerRef.current = setInterval(() => {
@@ -45,7 +45,7 @@ export default function HeroSlideshow({
 
   return (
     <section className="hero">
-      {/* Slides */}
+      {}
       <div className="hero__slides" aria-live="polite">
         {safeImages.map((src, i) => (
           <img
@@ -60,7 +60,7 @@ export default function HeroSlideshow({
         {overlay && <div className="hero__overlay" />}
       </div>
 
-      {/* Content */}
+      {}
       {(heading || subheading || ctaText) && (
         <div className="hero__content">
           {heading && <h1 className="hero__title">{heading}</h1>}
@@ -73,11 +73,11 @@ export default function HeroSlideshow({
         </div>
       )}
 
-      {/* Controls */}
+      {}
       <button className="hero__nav hero__nav--prev" onClick={prev} aria-label="Previous slide">‹</button>
       <button className="hero__nav hero__nav--next" onClick={next} aria-label="Next slide">›</button>
 
-      {/* Dots */}
+      {}
       <div className="hero__dots" role="tablist" aria-label="Slide dots">
         {safeImages.map((_, i) => (
           <button

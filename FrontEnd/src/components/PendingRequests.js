@@ -17,7 +17,7 @@ const PendingRequests = ({ setCurrentUser }) => {
 
   const handleLogout = async () => {
     try {
-      await fetch('http://localhost:8080/api/auth/logout', {
+      await fetch('http:
         method: 'POST',
         credentials: 'include'
       });
@@ -37,7 +37,7 @@ const PendingRequests = ({ setCurrentUser }) => {
     setLoading(true);
     setError('');
     try {
-      const response = await fetch('http://localhost:8080/api/auth/requests/pending', {
+      const response = await fetch('http:
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include'
@@ -61,7 +61,7 @@ const PendingRequests = ({ setCurrentUser }) => {
   const handleApprove = async (requestId) => {
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:8080/api/auth/approve/${requestId}`, {
+      const response = await fetch(`http:
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -96,7 +96,7 @@ const PendingRequests = ({ setCurrentUser }) => {
   const handleReject = async (requestId) => {
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:8080/api/auth/reject/${requestId}`, {
+      const response = await fetch(`http:
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -227,7 +227,7 @@ const PendingRequests = ({ setCurrentUser }) => {
                                 display: 'inline-block'
                               }}
                               onClick={(e) => {
-                                // Force open in new tab if default doesn't work
+                                
                                 e.preventDefault();
                                 const newWindow = window.open();
                                 newWindow.document.write(`

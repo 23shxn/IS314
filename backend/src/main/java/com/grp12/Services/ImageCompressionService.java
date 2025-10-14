@@ -22,19 +22,19 @@ public class ImageCompressionService {
                 return null;
             }
             
-            // Remove data URL prefix if present
+            
             String imageData = base64Image;
             if (base64Image.startsWith("data:")) {
                 imageData = base64Image.substring(base64Image.indexOf(",") + 1);
             }
             
-            // Decode base64 to bytes
+            
             byte[] imageBytes = Base64.getDecoder().decode(imageData);
             
-            // Check original size
+            
             System.out.println("Original image size: " + imageBytes.length + " bytes");
             
-            // If image is larger than 500KB, compress it
+            
             if (imageBytes.length > 500 * 1024) {
                 byte[] compressedBytes = compressImage(imageBytes);
                 String compressedBase64 = Base64.getEncoder().encodeToString(compressedBytes);
@@ -46,12 +46,12 @@ public class ImageCompressionService {
             
         } catch (Exception e) {
             System.err.println("Error compressing image: " + e.getMessage());
-            return null; // Return null if compression fails
+            return null; 
         }
     }
     
     private byte[] compressImage(byte[] originalImageBytes) throws IOException {
-        // Convert bytes to BufferedImage
+        
         ByteArrayInputStream bis = new ByteArrayInputStream(originalImageBytes);
         BufferedImage originalImage = ImageIO.read(bis);
         
@@ -59,7 +59,7 @@ public class ImageCompressionService {
             throw new IOException("Unable to read image data");
         }
         
-        // Calculate new dimensions while maintaining aspect ratio
+        
         int originalWidth = originalImage.getWidth();
         int originalHeight = originalImage.getHeight();
         
@@ -75,20 +75,20 @@ public class ImageCompressionService {
             newHeight = (int) (originalHeight * ratio);
         }
         
-        // Create compressed image
+        
         BufferedImage compressedImage = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_RGB);
         Graphics2D g2d = compressedImage.createGraphics();
         
-        // Set rendering hints for better quality
+        
         g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
         g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         
-        // Draw the scaled image
+        
         g2d.drawImage(originalImage, 0, 0, newWidth, newHeight, null);
         g2d.dispose();
         
-        // Convert back to bytes with compression
+        
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ImageIO.write(compressedImage, "jpg", baos);
         

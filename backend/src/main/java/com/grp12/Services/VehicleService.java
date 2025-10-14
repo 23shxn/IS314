@@ -18,10 +18,10 @@ public class VehicleService {
     @Autowired
     private VehicleRepository vehicleRepository;
     
-    // License plate pattern: AB 123 (2 letters, space, 3 numbers)
+    
     private static final Pattern LICENSE_PLATE_PATTERN = Pattern.compile("^[A-Za-z]{2}\\s\\d{3}$");
     
-    // Validate license plate format
+    
     private void validateLicensePlate(String licensePlate) {
         if (licensePlate == null || licensePlate.trim().isEmpty()) {
             throw new IllegalArgumentException("License plate is required");
@@ -33,7 +33,7 @@ public class VehicleService {
         }
     }
     
-    // Validate seating capacity
+    
     private void validateSeatingCapacity(Integer seatingCapacity) {
         if (seatingCapacity == null) {
             throw new IllegalArgumentException("Seating capacity is required");
@@ -43,15 +43,15 @@ public class VehicleService {
             throw new IllegalArgumentException("Seating capacity must be at least 2");
         }
         
-        if (seatingCapacity > 50) { // Reasonable upper limit
+        if (seatingCapacity > 50) { 
             throw new IllegalArgumentException("Seating capacity cannot exceed 50");
         }
     }
     
-    // Create or update vehicle
+    
     public Vehicle saveVehicle(Vehicle vehicle) {
         try {
-            // Validate required fields
+            
             if (vehicle.getMake() == null || vehicle.getMake().trim().isEmpty()) {
                 throw new IllegalArgumentException("Vehicle make is required");
             }
@@ -71,14 +71,14 @@ public class VehicleService {
                 throw new IllegalArgumentException("Valid price per day greater than 0 is required");
             }
             
-            // Validate license plate format
+            
             validateLicensePlate(vehicle.getLicensePlate());
             
-            // Validate seating capacity
+            
             validateSeatingCapacity(vehicle.getSeatingCapacity());
             
-            // Validate that all 3 images are provided for new vehicles
-            if (vehicle.getId() == null) { // New vehicle
+            
+            if (vehicle.getId() == null) { 
                 if (vehicle.getVehicleImage1() == null || vehicle.getVehicleImage1().trim().isEmpty()) {
                     throw new IllegalArgumentException("Vehicle Image 1 is required");
                 }
@@ -90,7 +90,7 @@ public class VehicleService {
                 }
             }
             
-            // Check for duplicate license plate (if provided)
+            
             if (vehicle.getLicensePlate() != null && !vehicle.getLicensePlate().trim().isEmpty()) {
                 Optional<Vehicle> existingByPlate = vehicleRepository.findByLicensePlate(vehicle.getLicensePlate().trim());
                 if (existingByPlate.isPresent() && !existingByPlate.get().getId().equals(vehicle.getId())) {
@@ -98,7 +98,7 @@ public class VehicleService {
                 }
             }
             
-            // Check for duplicate VIN (if provided)
+            
             if (vehicle.getVin() != null && !vehicle.getVin().trim().isEmpty()) {
                 Optional<Vehicle> existingByVin = vehicleRepository.findByVin(vehicle.getVin().trim());
                 if (existingByVin.isPresent() && !existingByVin.get().getId().equals(vehicle.getId())) {
@@ -106,7 +106,7 @@ public class VehicleService {
                 }
             }
             
-            // Validate fuel type
+            
             if (vehicle.getFuelType() != null && !vehicle.getFuelType().trim().isEmpty()) {
                 String fuelType = vehicle.getFuelType().trim();
                 if (!fuelType.equals("Petrol") && !fuelType.equals("Diesel") && 
@@ -115,7 +115,7 @@ public class VehicleService {
                 }
             }
             
-            // Validate transmission
+            
             if (vehicle.getTransmission() != null && !vehicle.getTransmission().trim().isEmpty()) {
                 String transmission = vehicle.getTransmission().trim();
                 if (!transmission.equals("Automatic") && !transmission.equals("Manual")) {
@@ -123,7 +123,7 @@ public class VehicleService {
                 }
             }
             
-            // Validate vehicle type
+            
             if (vehicle.getVehicleType() != null && !vehicle.getVehicleType().trim().isEmpty()) {
                 String vehicleType = vehicle.getVehicleType().trim();
                 if (!vehicleType.equals("Sedan") && !vehicleType.equals("SUV") && 
@@ -132,7 +132,7 @@ public class VehicleService {
                 }
             }
             
-            // Validate location
+            
             if (vehicle.getLocation() != null && !vehicle.getLocation().trim().isEmpty()) {
                 String location = vehicle.getLocation().trim();
                 if (!location.equals("Suva") && !location.equals("Nadi") && !location.equals("Lautoka")) {
@@ -140,12 +140,12 @@ public class VehicleService {
                 }
             }
             
-            // Validate mileage if provided
+            
             if (vehicle.getMileage() != null && vehicle.getMileage() < 0) {
                 throw new IllegalArgumentException("Mileage cannot be negative");
             }
             
-            // Normalize license plate format (ensure consistent format)
+            
             vehicle.setLicensePlate(vehicle.getLicensePlate().trim().toUpperCase());
             
             Vehicle savedVehicle = vehicleRepository.save(vehicle);
@@ -161,7 +161,7 @@ public class VehicleService {
         }
     }
     
-    // Get all vehicles
+    
     public List<Vehicle> getAllVehicles() {
         try {
             return vehicleRepository.findAll();
@@ -171,7 +171,7 @@ public class VehicleService {
         }
     }
     
-    // Get available vehicles
+    
     public List<Vehicle> getAvailableVehicles() {
         try {
             return vehicleRepository.findByStatus("Available");
@@ -181,7 +181,7 @@ public class VehicleService {
         }
     }
     
-    // Get vehicle by ID
+    
     public Vehicle getVehicleById(Long id) {
         try {
             return vehicleRepository.findById(id).orElse(null);
@@ -191,10 +191,10 @@ public class VehicleService {
         }
     }
     
-    // Search vehicles with filters
+    
     public List<Vehicle> searchVehicles(String location, String vehicleType, Double minPrice, Double maxPrice, String status) {
         try {
-            // If no status specified, default to Available for customer searches
+            
             String searchStatus = (status != null && !status.trim().isEmpty()) ? status : "Available";
             
             return vehicleRepository.findVehiclesWithFilters(
@@ -210,13 +210,13 @@ public class VehicleService {
         }
     }
     
-    // Update vehicle status
+    
     public Vehicle updateVehicleStatus(Long vehicleId, String status) {
         try {
             Vehicle vehicle = vehicleRepository.findById(vehicleId)
                 .orElseThrow(() -> new RuntimeException("Vehicle not found"));
             
-            // Validate status
+            
             if (status == null || status.trim().isEmpty()) {
                 throw new IllegalArgumentException("Status is required");
             }
@@ -238,7 +238,7 @@ public class VehicleService {
         }
     }
     
-    // Delete vehicle
+    
     public void deleteVehicle(Long vehicleId) {
         try {
             Vehicle vehicle = vehicleRepository.findById(vehicleId)
@@ -255,7 +255,7 @@ public class VehicleService {
         }
     }
     
-    // Get distinct locations
+    
     public List<String> getDistinctLocations() {
         try {
             return vehicleRepository.findDistinctLocations();
@@ -265,7 +265,7 @@ public class VehicleService {
         }
     }
     
-    // Get distinct vehicle types
+    
     public List<String> getDistinctVehicleTypes() {
         try {
             return vehicleRepository.findDistinctVehicleTypes();
@@ -275,7 +275,7 @@ public class VehicleService {
         }
     }
     
-    // Get vehicle statistics
+    
     public VehicleStatistics getVehicleStatistics() {
         try {
             Long total = vehicleRepository.count();
@@ -291,7 +291,7 @@ public class VehicleService {
         }
     }
     
-    // Inner class for vehicle statistics
+    
     public static class VehicleStatistics {
         private Long total;
         private Long available;
@@ -307,7 +307,7 @@ public class VehicleService {
             this.outOfService = outOfService;
         }
         
-        // Getters
+        
         public Long getTotal() { return total; }
         public Long getAvailable() { return available; }
         public Long getRented() { return rented; }

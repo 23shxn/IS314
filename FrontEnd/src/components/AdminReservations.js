@@ -14,13 +14,13 @@ const AdminReservations = ({ currentUser }) => {
 
   useEffect(() => {
     fetchReservations();
-    // Set up polling for new reservations every 30 seconds
+    
     const interval = setInterval(fetchReservations, 30000);
     return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
-    // Check for new reservations and show notification
+    
     if (notificationsEnabled && reservations.length > lastReservationCount && lastReservationCount > 0) {
       const newReservations = reservations.length - lastReservationCount;
       setNotificationMessage(`New reservation${newReservations > 1 ? 's' : ''} received!`);
@@ -31,7 +31,7 @@ const AdminReservations = ({ currentUser }) => {
   }, [reservations, lastReservationCount, notificationsEnabled]);
 
   const fetchReservations = async () => {
-    const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+    const apiUrl = process.env.REACT_APP_API_URL || 'http:
     try {
       const response = await axios.get(`${apiUrl}/api/reservations/admin/all`, {
         withCredentials: true
@@ -57,14 +57,14 @@ const AdminReservations = ({ currentUser }) => {
   };
 
   const updateReservationStatus = async (reservationId, newStatus) => {
-    const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+    const apiUrl = process.env.REACT_APP_API_URL || 'http:
     try {
       await axios.put(`${apiUrl}/api/reservations/${reservationId}/status`, {
         status: newStatus
       }, {
         withCredentials: true
       });
-      fetchReservations(); // Refresh the list
+      fetchReservations(); 
     } catch (err) {
       console.error('Error updating reservation status:', err);
       setError('Failed to update reservation status');
@@ -72,12 +72,12 @@ const AdminReservations = ({ currentUser }) => {
   };
 
   const cancelReservation = async (reservationId) => {
-    const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+    const apiUrl = process.env.REACT_APP_API_URL || 'http:
     try {
       await axios.put(`${apiUrl}/api/reservations/${reservationId}/cancel`, {}, {
         withCredentials: true
       });
-      fetchReservations(); // Refresh the list
+      fetchReservations(); 
     } catch (err) {
       console.error('Error cancelling reservation:', err);
       setError('Failed to cancel reservation');
@@ -94,7 +94,7 @@ const AdminReservations = ({ currentUser }) => {
 
   return (
     <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '2rem' }}>
-      {/* Header with Notification Toggle */}
+      {}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
         <div>
           <h2 style={{ color: '#2c3e50', marginBottom: '0.5rem' }}>All Reservations</h2>
@@ -119,7 +119,7 @@ const AdminReservations = ({ currentUser }) => {
         </button>
       </div>
 
-      {/* Notification Popup */}
+      {}
       {showNotification && (
         <div style={{
           position: 'fixed',
@@ -182,7 +182,7 @@ const AdminReservations = ({ currentUser }) => {
                 gap: '1.5rem',
                 alignItems: 'center'
               }}>
-                {/* Vehicle Info */}
+                {}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                   <div style={{
                     width: '60px',
@@ -206,7 +206,7 @@ const AdminReservations = ({ currentUser }) => {
                   </div>
                 </div>
 
-                {/* Reservation Details */}
+                {}
                 <div>
                   <div style={{ marginBottom: '0.5rem' }}>
                     <span style={{
@@ -246,7 +246,7 @@ const AdminReservations = ({ currentUser }) => {
                   </div>
                 </div>
 
-                {/* Actions */}
+                {}
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
                   <button
                     onClick={() => setSelectedReservation(reservation)}
@@ -311,7 +311,7 @@ const AdminReservations = ({ currentUser }) => {
         </div>
       )}
 
-      {/* Reservation Detail Modal */}
+      {}
       {selectedReservation && (
         <div style={{
           position: 'fixed',

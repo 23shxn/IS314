@@ -66,17 +66,17 @@ const App = () => {
     if (currentUser?.role === 'admin' || currentUser?.role === 'SUPER_ADMIN') {
       try {
         const [vehiclesRes, usersRes, pendingRes] = await Promise.all([
-          fetch('http://localhost:8080/api/vehicles/all', {
+          fetch('http:
             method: 'GET',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include'
           }),
-          fetch('http://localhost:8080/api/auth/users/customers', {
+          fetch('http:
             method: 'GET',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include'
           }),
-          fetch('http://localhost:8080/api/auth/requests/pending', {
+          fetch('http:
             method: 'GET',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include'
@@ -96,12 +96,12 @@ const App = () => {
     } else if (currentUser?.role === 'customer') {
       try {
         const [vehiclesRes, reservationsRes] = await Promise.all([
-          fetch('http://localhost:8080/api/vehicles/available', {
+          fetch('http:
             method: 'GET',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include'
           }),
-          fetch(`http://localhost:8080/api/reservations/user/${currentUser.id}`, {
+          fetch(`http:
             method: 'GET',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include'
@@ -119,7 +119,7 @@ const App = () => {
     }
   };
 
-  // Component to protect admin routes
+  
   const AdminRoute = ({ children, setCurrentUser }) => {
     if (!currentUser) {
       return <Navigate to="/admin/login" replace />;
@@ -130,7 +130,7 @@ const App = () => {
     return React.cloneElement(children, { currentUser, setCurrentUser, cars, users, pendingRequests });
   };
 
-  // Component to protect super admin routes
+  
   const SuperAdminRoute = ({ children, setCurrentUser }) => {
     if (!currentUser) {
       return <Navigate to="/admin/login" replace />;
@@ -141,7 +141,7 @@ const App = () => {
     return React.cloneElement(children, { currentUser, setCurrentUser, cars, users, pendingRequests });
   };
 
-  // Component to protect customer routes
+  
   const CustomerRoute = ({ children }) => {
     if (!currentUser) {
       return <Navigate to="/login" replace />;
@@ -152,7 +152,7 @@ const App = () => {
     return children;
   };
 
-  // Component to redirect logged-in users away from login pages
+  
   const PublicRoute = ({ children }) => {
     if (!currentUser) {
       return children;
@@ -178,14 +178,14 @@ const App = () => {
         />
         
         <Routes>
-          {/* Public Routes - Available to everyone */}
+          {}
           <Route path="/" element={<LandingPage currentUser={currentUser} />} />
           <Route path="/home" element={<LandingPage currentUser={currentUser} />} />
           <Route path="/about" element={<AboutUs />} />
           <Route path="/faqs" element={<FAQs />} />
           <Route path="/contact" element={<Contact />} />
           
-          {/* Login Routes - redirect if already logged in */}
+          {}
           <Route 
             path="/login" 
             element={
@@ -203,7 +203,7 @@ const App = () => {
             } 
           />
 
-          {/* Vehicle Search - Available to both logged in and non-logged in users */}
+          {}
           <Route 
             path="/search" 
             element={
@@ -218,7 +218,7 @@ const App = () => {
             } 
           />
 
-          {/* Customer Protected Routes */}
+          {}
           <Route 
             path="/dashboard" 
             element={
@@ -298,7 +298,7 @@ const App = () => {
             } 
           />
 
-          {/* Manager (Super Admin) Protected Routes */}
+          {}
           <Route
             path="/manager/dashboard"
             element={
@@ -358,7 +358,7 @@ const App = () => {
             }
           />
 
-          {/* Admin Protected Routes */}
+          {}
           <Route 
             path="/admin/dashboard" 
             element={
@@ -418,7 +418,7 @@ const App = () => {
             }
           />
 
-          {/* Catch-all route - redirect to appropriate default page */}
+          {}
           <Route
             path="*"
             element={

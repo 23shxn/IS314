@@ -6,7 +6,7 @@ const AboutUs = () => {
   return (
     <main className="about">
 
-      {/* Story */}
+      {}
       <section className="about-section container">
         <div className="about-grid">
           <div className="about-card about-card--text">
@@ -28,7 +28,7 @@ const AboutUs = () => {
         </div>
       </section>
 
-      {/* Stats */}
+      {}
       <section className="about-stats">
         <div className="container stats-grid">
           <div className="stat">
@@ -50,7 +50,7 @@ const AboutUs = () => {
         </div>
       </section>
 
-      {/* Values */}
+      {}
       <section className="about-section container">
         <h2 className="section-title">What We Value</h2>
         <div className="values-grid">

@@ -42,21 +42,21 @@ const Checkout = ({ reservations, setReservations, currentUser }) => {
   const formatDateForBackend = (date) => new Date(date).toISOString().split('T')[0];
 
   const formatCardNumber = (value) => {
-    // Remove all non-digits
+    
     const digits = value.replace(/\D/g, '');
-    // Add spaces every 4 digits
+    
     return digits.replace(/(\d{4})(?=\d)/g, '$1 ');
   };
 
   const validateForm = () => {
     const newErrors = {};
     
-    // Personal Information
+    
     if (!formData.fullName.trim()) newErrors.fullName = 'Full name is required';
     if (!formData.email || !/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Valid email is required';
     if (!formData.phone || !/^\d{7,15}$/.test(formData.phone.replace(/\D/g, ''))) newErrors.phone = 'Valid phone number is required';
     
-    // Credit Card Information
+    
     if (!formData.cardNumber || formData.cardNumber.replace(/\D/g, '').length < 13) {
       newErrors.cardNumber = 'Valid card number is required (13-19 digits)';
     }
@@ -88,34 +88,34 @@ const Checkout = ({ reservations, setReservations, currentUser }) => {
   const handleChange = (e) => {
     let { name, value } = e.target;
     
-    // Format card number with spaces
+    
     if (name === 'cardNumber') {
       value = formatCardNumber(value);
-      if (value.replace(/\D/g, '').length > 19) return; // Limit to 19 digits
+      if (value.replace(/\D/g, '').length > 19) return; 
     }
     
-    // Format phone number
+    
     if (name === 'phone' || name === 'altPhone') {
-      value = value.replace(/\D/g, ''); // Only digits
-      if (value.length > 15) return; // Limit phone number length
+      value = value.replace(/\D/g, ''); 
+      if (value.length > 15) return; 
     }
     
-    // Format CVV
+    
     if (name === 'cvv') {
-      value = value.replace(/\D/g, ''); // Only digits
-      if (value.length > 4) return; // Limit to 4 digits
+      value = value.replace(/\D/g, ''); 
+      if (value.length > 4) return; 
     }
     
-    // Format expiry month/year
+    
     if (name === 'expiryMonth') {
-      value = value.replace(/\D/g, ''); // Only digits
-      if (parseInt(value) > 12) return; // Max 12 months
-      if (value.length > 2) return; // Max 2 digits
+      value = value.replace(/\D/g, ''); 
+      if (parseInt(value) > 12) return; 
+      if (value.length > 2) return; 
     }
     
     if (name === 'expiryYear') {
-      value = value.replace(/\D/g, ''); // Only digits
-      if (value.length > 4) return; // Max 4 digits
+      value = value.replace(/\D/g, ''); 
+      if (value.length > 4) return; 
     }
     
     setFormData({ ...formData, [name]: value });
@@ -142,7 +142,7 @@ const Checkout = ({ reservations, setReservations, currentUser }) => {
         email: formData.email,
         phone: formData.phone,
         altPhone: formData.altPhone || null,
-        // Payment info (in real app, this would be processed by payment gateway)
+        
         paymentMethod: 'Credit Card',
         lastFourDigits: formData.cardNumber.slice(-4),
         billingAddress: formData.billingAddress,
@@ -151,7 +151,7 @@ const Checkout = ({ reservations, setReservations, currentUser }) => {
       };
 
       console.log('Checkout - Booking request data:', data);
-      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+      const apiUrl = process.env.REACT_APP_API_URL || 'http:
 
       const response = await axios.post(`${apiUrl}/api/reservations`, data, {
         headers: { 'Content-Type': 'application/json' },
@@ -201,7 +201,7 @@ const Checkout = ({ reservations, setReservations, currentUser }) => {
       <div className="detail-content">
         <div className="detail-main">
           <form onSubmit={handleSubmit}>
-            {/* Customer Information Section */}
+            {}
             <div className="form-section">
               <h2>Customer Information</h2>
               {error && (
@@ -267,7 +267,7 @@ const Checkout = ({ reservations, setReservations, currentUser }) => {
               </div>
             </div>
 
-            {/* Payment Information Section */}
+            {}
             <div className="form-section">
               <h2><CreditCard size={20} /> Payment Information</h2>
               
@@ -353,7 +353,7 @@ const Checkout = ({ reservations, setReservations, currentUser }) => {
               </div>
             </div>
 
-            {/* Billing Information Section */}
+            {}
             <div className="form-section">
               <h2>Billing Address</h2>
               
@@ -447,7 +447,7 @@ const Checkout = ({ reservations, setReservations, currentUser }) => {
             </button>
             <button
               type="button"
-              onClick={() => navigate(-1)} // Go back to previous page
+              onClick={() => navigate(-1)} 
               className="btn secondary"
             >
               Back to Previous

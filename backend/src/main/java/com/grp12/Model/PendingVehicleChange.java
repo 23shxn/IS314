@@ -11,25 +11,25 @@ public class PendingVehicleChange {
     private Long id;
 
     @Column(name = "change_type", nullable = false)
-    private String changeType; // "ADD" or "REMOVE"
+    private String changeType; 
 
     @Column(name = "vehicle_data", columnDefinition = "TEXT")
-    private String vehicleData; // JSON string of vehicle data for ADD
+    private String vehicleData; 
 
     @Column(name = "vehicle_id")
-    private Long vehicleId; // For REMOVE operations
+    private Long vehicleId; 
 
     @Column(name = "requested_by", nullable = false)
-    private Long requestedBy; // Admin ID who made the request
+    private Long requestedBy; 
 
     @Column(name = "requested_at", nullable = false)
     private LocalDateTime requestedAt;
 
     @Column(name = "status", nullable = false)
-    private String status; // "PENDING", "APPROVED", "REJECTED"
+    private String status; 
 
     @Column(name = "approved_by")
-    private Long approvedBy; // SuperAdmin ID who approved/rejected
+    private Long approvedBy; 
 
     @Column(name = "approved_at")
     private LocalDateTime approvedAt;
@@ -37,13 +37,13 @@ public class PendingVehicleChange {
     @Column(name = "rejection_reason", columnDefinition = "TEXT")
     private String rejectionReason;
 
-    // Default constructor
+    
     public PendingVehicleChange() {
         this.requestedAt = LocalDateTime.now();
         this.status = "PENDING";
     }
 
-    // Constructor for ADD request
+    
     public PendingVehicleChange(String vehicleData, Long requestedBy) {
         this();
         this.changeType = "ADD";
@@ -51,7 +51,7 @@ public class PendingVehicleChange {
         this.requestedBy = requestedBy;
     }
 
-    // Constructor for REMOVE request
+    
     public PendingVehicleChange(Long vehicleId, Long requestedBy) {
         this();
         this.changeType = "REMOVE";
@@ -59,7 +59,7 @@ public class PendingVehicleChange {
         this.requestedBy = requestedBy;
     }
 
-    // Getters and setters
+    
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

@@ -39,24 +39,24 @@ public class UserService {
 
     public RegistrationRequest registerUser(User user) {
         try {
-            // Validate input
+            
             if (user.getEmail() == null || user.getPassword() == null) {
                 throw new IllegalArgumentException("Email and password are required");
             }
             
-            // Check if email already exists for APPROVED users only
+            
             Optional<User> existingUser = userRepository.findByEmail(user.getEmail());
             if (existingUser.isPresent() && "APPROVED".equals(existingUser.get().getStatus())) {
                 throw new IllegalArgumentException("Email already registered and approved");
             }
             
-            // Check for pending registration requests
+            
             Optional<RegistrationRequest> existingRequest = registrationRequestRepository.findByEmail(user.getEmail());
             if (existingRequest.isPresent() && "PENDING".equals(existingRequest.get().getStatus())) {
                 throw new IllegalArgumentException("Registration request already pending for this email");
             }
             
-            // Clean up old rejected/non-approved records
+            
             if (existingUser.isPresent() && !"APPROVED".equals(existingUser.get().getStatus())) {
                 userRepository.delete(existingUser.get());
                 System.out.println("Deleted old non-approved user record for: " + user.getEmail());
@@ -67,7 +67,7 @@ public class UserService {
                 System.out.println("Deleted old rejected registration request for: " + user.getEmail());
             }
             
-            // Create RegistrationRequest
+            
             RegistrationRequest request = new RegistrationRequest();
             request.setFirstName(user.getFirstName());
             request.setLastName(user.getLastName());
@@ -166,7 +166,7 @@ public class UserService {
             throw new RuntimeException("Registration request is not pending");
         }
         
-        // Create new user from registration request
+        
         User user = new User();
         user.setFirstName(request.getFirstName());
         user.setLastName(request.getLastName());
@@ -181,19 +181,19 @@ public class UserService {
         
         User savedUser = userRepository.save(user);
         
-        // Update request status
+        
         request.setStatus("APPROVED");
         request.setApprovedAt(java.time.LocalDateTime.now());
         registrationRequestRepository.save(request);
         
-        // Send approval email
+        
         try {
             emailService.sendApprovalNotification(request.getEmail(), request.getFirstName(), request.getLastName(), true);
         } catch (Exception e) {
             System.err.println("Failed to send approval email: " + e.getMessage());
         }
         
-        return savedUser; // Return User, not RegistrationRequest
+        return savedUser; 
     }
 
     public void rejectUser(Long userId) {
@@ -205,7 +205,7 @@ public class UserService {
                 throw new RuntimeException("Request already processed");
             }
             
-            // Send rejection email before marking as rejected
+            
             try {
                 emailService.sendApprovalNotification(
                     request.getEmail(), 
@@ -218,7 +218,7 @@ public class UserService {
                 System.err.println("Failed to send rejection email: " + e.getMessage());
             }
             
-            // Update request status to rejected
+            
             request.setStatus("REJECTED");
             registrationRequestRepository.save(request);
             
@@ -290,10 +290,10 @@ public class UserService {
         }
     }
 
-    // Password Reset Methods
+    
     public void requestPasswordReset(String email) {
         try {
-            // Check if user exists
+            
             User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("No account found with this email address"));
             
@@ -301,10 +301,10 @@ public class UserService {
                 throw new RuntimeException("Account is not approved. Please contact admin.");
             }
             
-            // Generate 6-digit reset code
+            
             String resetToken = String.format("%06d", new Random().nextInt(1000000));
             
-            // Store token with expiry (15 minutes)
+            
             passwordResetTokens.put(email.toLowerCase(), resetToken);
             tokenExpiryTimes.put(email.toLowerCase(), LocalDateTime.now().plusMinutes(15));
             
@@ -312,12 +312,12 @@ public class UserService {
             System.out.println("Password reset email sent to: " + email);
             
         } catch (MessagingException e) {
-            // Clean up tokens if email fails
+            
             passwordResetTokens.remove(email.toLowerCase());
             tokenExpiryTimes.remove(email.toLowerCase());
             throw new RuntimeException("Failed to send password reset email: " + e.getMessage());
         } catch (RuntimeException e) {
-            throw e; // Re-throw runtime exceptions as-is
+            throw e; 
         } catch (Exception e) {
             System.err.println("Unexpected error in requestPasswordReset: " + e.getMessage());
             throw new RuntimeException("Failed to process password reset request: " + e.getMessage());
@@ -328,47 +328,47 @@ public class UserService {
         try {
             String emailKey = email.toLowerCase();
             
-            // Validate token exists
+            
             String storedToken = passwordResetTokens.get(emailKey);
             if (storedToken == null) {
                 throw new RuntimeException("Invalid or expired reset token");
             }
             
-            // Check if token has expired
+            
             LocalDateTime expiryTime = tokenExpiryTimes.get(emailKey);
             if (expiryTime == null || LocalDateTime.now().isAfter(expiryTime)) {
-                // Clean up expired tokens
+                
                 passwordResetTokens.remove(emailKey);
                 tokenExpiryTimes.remove(emailKey);
                 throw new RuntimeException("Reset token has expired. Please request a new one.");
             }
             
-            // Validate token matches
+            
             if (!storedToken.equals(resetToken)) {
                 throw new RuntimeException("Invalid reset token");
             }
             
-            // Find user
+            
             User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
             
-            // Validate new password
+            
             if (!isValidPassword(newPassword)) {
                 throw new RuntimeException("Password must be at least 8 characters, including uppercase, lowercase, number, and special character");
             }
             
-            // Update password with proper encoding
+            
             user.setPassword(passwordEncoder.encode(newPassword));
             userRepository.save(user);
             
-            // Clean up tokens
+            
             passwordResetTokens.remove(emailKey);
             tokenExpiryTimes.remove(emailKey);
             
             System.out.println("Password reset successful for: " + email);
             
         } catch (RuntimeException e) {
-            throw e; // Re-throw runtime exceptions as-is
+            throw e; 
         } catch (Exception e) {
             System.err.println("Unexpected error in resetPassword: " + e.getMessage());
             throw new RuntimeException("Failed to reset password: " + e.getMessage());
@@ -390,7 +390,7 @@ public class UserService {
             String storedToken = passwordResetTokens.get(emailKey);
             LocalDateTime expiryTime = tokenExpiryTimes.get(emailKey);
             
-            // Check if token exists, matches, and is still valid
+            
             return resetToken != null && storedToken != null 
                    && resetToken.equals(storedToken)
                    && expiryTime != null 

@@ -28,7 +28,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @RestController
 @RequestMapping("/api/vehicles")
-@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true", allowedHeaders = "*")
+@CrossOrigin(origins = "http:
 public class VehicleController {
     
     @Autowired
@@ -45,12 +45,12 @@ public class VehicleController {
     
     private final ObjectMapper objectMapper = new ObjectMapper();
     
-    // License plate pattern: AB 123 (2 letters, space, 3 numbers)
+    
     private static final Pattern LICENSE_PLATE_PATTERN = Pattern.compile("^[A-Za-z]{2}\\s\\d{3}$");
 
-    // PUBLIC ENDPOINTS
+    
 
-    // Get available vehicles
+    
     @GetMapping("/available")
     public ResponseEntity<?> getAvailableVehicles() {
         try {
@@ -63,7 +63,7 @@ public class VehicleController {
         }
     }
 
-    // Get distinct locations
+    
     @GetMapping("/locations")
     public ResponseEntity<?> getLocations() {
         try {
@@ -76,7 +76,7 @@ public class VehicleController {
         }
     }
 
-    // Get distinct vehicle types
+    
     @GetMapping("/types")
     public ResponseEntity<?> getVehicleTypes() {
         try {
@@ -89,9 +89,9 @@ public class VehicleController {
         }
     }
 
-    // ADMIN ONLY ENDPOINTS BELOW
     
-    // Get all vehicles (admin only)
+    
+    
     @GetMapping("/all")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     public ResponseEntity<?> getAllVehicles() {
@@ -105,7 +105,7 @@ public class VehicleController {
         }
     }
     
-    // Helper method to get current admin
+    
     private Admin getCurrentAdmin() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
@@ -120,7 +120,7 @@ public class VehicleController {
         return admin;
     }
     
-    // Add new vehicle (admin only) - with role-based logic
+    
     @PostMapping("/add")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     public ResponseEntity<?> addVehicle(
@@ -150,14 +150,14 @@ public class VehicleController {
                     .body(Map.of("error", "Admin not authenticated"));
             }
             
-            // If super admin, add directly
+            
             if ("SUPER_ADMIN".equals(currentAdmin.getRole())) {
                 return addVehicleDirect(make, model, vehicleType, year, color, licensePlate, vin,
                                       fuelType, transmission, seatingCapacity, mileage, pricePerDay,
                                       location, description, features, vehicleImage1, vehicleImage2, vehicleImage3);
             }
             
-            // For regular admins, create pending request
+            
             return createPendingVehicleAddRequest(make, model, vehicleType, year, color, licensePlate, vin,
                                                 fuelType, transmission, seatingCapacity, mileage, pricePerDay,
                                                 location, description, features, vehicleImage1, vehicleImage2, vehicleImage3, currentAdmin);
@@ -169,7 +169,7 @@ public class VehicleController {
         }
     }
     
-    // Direct vehicle add (for super admins)
+    
     private ResponseEntity<?> addVehicleDirect(String make, String model, String vehicleType, Integer year, String color,
                                              String licensePlate, String vin, String fuelType, String transmission,
                                              Integer seatingCapacity, Integer mileage, BigDecimal pricePerDay, String location,
@@ -177,10 +177,10 @@ public class VehicleController {
                                              MultipartFile vehicleImage2, MultipartFile vehicleImage3) {
         
         try {
-            // Validate input parameters first
+            
             validateVehicleParameters(licensePlate, seatingCapacity, vehicleType, fuelType, transmission, location);
             
-            // Validate that all 3 images are provided
+            
             if (vehicleImage1 == null || vehicleImage1.isEmpty()) {
                 Map<String, String> errorResponse = new HashMap<>();
                 errorResponse.put("error", "Vehicle Image 1 is required");
@@ -197,22 +197,22 @@ public class VehicleController {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
             }
             
-            // Validate image types and sizes
+            
             if (!isValidImageType(vehicleImage1) || !isValidImageType(vehicleImage2) || !isValidImageType(vehicleImage3)) {
                 Map<String, String> errorResponse = new HashMap<>();
                 errorResponse.put("error", "All images must be valid image files (JPEG, PNG, GIF, WebP)");
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
             }
             
-            // Check image sizes (10MB limit each)
-            long maxSize = 10 * 1024 * 1024; // 10MB
+            
+            long maxSize = 10 * 1024 * 1024; 
             if (vehicleImage1.getSize() > maxSize || vehicleImage2.getSize() > maxSize || vehicleImage3.getSize() > maxSize) {
                 Map<String, String> errorResponse = new HashMap<>();
                 errorResponse.put("error", "Each image must be smaller than 10MB");
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
             }
             
-            // Validate required string fields
+            
             if (make == null || make.trim().isEmpty()) {
                 throw new IllegalArgumentException("Make is required");
             }
@@ -226,7 +226,7 @@ public class VehicleController {
                 throw new IllegalArgumentException("License plate is required");
             }
             
-            // Validate numeric fields
+            
             if (year == null || year < 1900 || year > 2030) {
                 throw new IllegalArgumentException("Valid year between 1900 and 2030 is required");
             }
@@ -263,7 +263,7 @@ public class VehicleController {
             }
             vehicle.setStatus("Available");
             
-            // Handle image uploads
+            
             vehicle.setVehicleImage1(Base64.getEncoder().encodeToString(vehicleImage1.getBytes()));
             vehicle.setVehicleImage2(Base64.getEncoder().encodeToString(vehicleImage2.getBytes()));
             vehicle.setVehicleImage3(Base64.getEncoder().encodeToString(vehicleImage3.getBytes()));
@@ -286,7 +286,7 @@ public class VehicleController {
         }
     }
     
-    // Create pending vehicle add request (for regular admins)
+    
     private ResponseEntity<?> createPendingVehicleAddRequest(String make, String model, String vehicleType, Integer year, String color,
                                                            String licensePlate, String vin, String fuelType, String transmission,
                                                            Integer seatingCapacity, Integer mileage, BigDecimal pricePerDay, String location,
@@ -294,7 +294,7 @@ public class VehicleController {
                                                            MultipartFile vehicleImage2, MultipartFile vehicleImage3, Admin currentAdmin) {
         
         try {
-            // Validate required fields
+            
             if (make == null || make.trim().isEmpty() ||
                 model == null || model.trim().isEmpty() ||
                 vehicleType == null || vehicleType.trim().isEmpty() ||
@@ -308,7 +308,7 @@ public class VehicleController {
                     .body(Map.of("error", "All required fields must be provided"));
             }
             
-            // Validate images
+            
             if (vehicleImage1 == null || vehicleImage1.isEmpty() ||
                 vehicleImage2 == null || vehicleImage2.isEmpty() ||
                 vehicleImage3 == null || vehicleImage3.isEmpty()) {
@@ -316,7 +316,7 @@ public class VehicleController {
                     .body(Map.of("error", "All three vehicle images are required"));
             }
             
-            // Create vehicle data JSON
+            
             Map<String, Object> vehicleData = new HashMap<>();
             vehicleData.put("make", make.trim());
             vehicleData.put("model", model.trim());
@@ -335,12 +335,12 @@ public class VehicleController {
             if (description != null && !description.trim().isEmpty()) vehicleData.put("description", description.trim());
             if (features != null && !features.trim().isEmpty()) vehicleData.put("features", features.trim());
             
-            // Convert images to base64
+            
             vehicleData.put("vehicleImage1", Base64.getEncoder().encodeToString(vehicleImage1.getBytes()));
             vehicleData.put("vehicleImage2", Base64.getEncoder().encodeToString(vehicleImage2.getBytes()));
             vehicleData.put("vehicleImage3", Base64.getEncoder().encodeToString(vehicleImage3.getBytes()));
             
-            // Create pending request
+            
             PendingVehicleChange pendingRequest = new PendingVehicleChange(
                 objectMapper.writeValueAsString(vehicleData),
                 currentAdmin.getId()
@@ -359,7 +359,7 @@ public class VehicleController {
         }
     }
     
-    // Update vehicle (admin only) - with role-based logic
+    
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     public ResponseEntity<?> updateVehicle(@PathVariable Long id, @RequestBody Map<String, Object> updates) {
@@ -370,7 +370,7 @@ public class VehicleController {
                     .body(Map.of("error", "Admin not authenticated"));
             }
 
-            // If super admin, update directly
+            
             if ("SUPER_ADMIN".equals(currentAdmin.getRole())) {
                 Vehicle existingVehicle = vehicleService.getVehicleById(id);
                 if (existingVehicle == null) {
@@ -378,7 +378,7 @@ public class VehicleController {
                         .body(Map.of("error", "Vehicle not found"));
                 }
 
-                // Extract values from the map
+                
                 String make = updates.containsKey("make") ? (String) updates.get("make") : null;
                 String model = updates.containsKey("model") ? (String) updates.get("model") : null;
                 String vehicleType = updates.containsKey("vehicleType") ? (String) updates.get("vehicleType") : null;
@@ -395,14 +395,14 @@ public class VehicleController {
                 String description = updates.containsKey("description") ? (String) updates.get("description") : null;
                 String features = updates.containsKey("features") ? (String) updates.get("features") : null;
 
-                // Validate provided parameters
+                
                 if (licensePlate != null && !licensePlate.trim().isEmpty()) {
                     validateVehicleParameters(licensePlate.trim(), seatingCapacity, vehicleType, fuelType, transmission, location);
                 } else if (seatingCapacity != null || vehicleType != null || fuelType != null || transmission != null || location != null) {
                     validateVehicleParameters(null, seatingCapacity, vehicleType, fuelType, transmission, location);
                 }
 
-                // Update only provided fields
+                
                 if (make != null && !make.trim().isEmpty()) {
                     existingVehicle.setMake(make.trim());
                 }
@@ -465,7 +465,7 @@ public class VehicleController {
                 return ResponseEntity.ok(savedVehicle);
             }
 
-            // For regular admins, this should not be allowed - they should use pending requests
+            
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body(Map.of("error", "Regular admins cannot update vehicles directly. Use pending requests."));
 
@@ -480,7 +480,7 @@ public class VehicleController {
         }
     }
 
-    // Delete vehicle (admin only) - with role-based logic
+    
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     public ResponseEntity<?> deleteVehicle(@PathVariable Long id) {
@@ -491,7 +491,7 @@ public class VehicleController {
                     .body(Map.of("error", "Admin not authenticated"));
             }
 
-            // If super admin, delete directly
+            
             if ("SUPER_ADMIN".equals(currentAdmin.getRole())) {
                 vehicleService.deleteVehicle(id);
                 Map<String, String> response = new HashMap<>();
@@ -499,7 +499,7 @@ public class VehicleController {
                 return ResponseEntity.ok(response);
             }
 
-            // For regular admins, create pending delete request
+            
             PendingVehicleChange pendingRequest = new PendingVehicleChange(id, currentAdmin.getId());
             PendingVehicleChange savedRequest = pendingVehicleChangeRepository.save(pendingRequest);
 
@@ -519,12 +519,12 @@ public class VehicleController {
         }
     }
     
-    // ... rest of the existing methods remain the same ...
     
-    // Helper method to validate input parameters
+    
+    
     private void validateVehicleParameters(String licensePlate, Integer seatingCapacity, String vehicleType, 
                                          String fuelType, String transmission, String location) {
-        // Validate license plate format
+        
         if (licensePlate != null && !licensePlate.trim().isEmpty()) {
             String trimmedPlate = licensePlate.trim();
             if (!LICENSE_PLATE_PATTERN.matcher(trimmedPlate).matches()) {
@@ -532,7 +532,7 @@ public class VehicleController {
             }
         }
         
-        // Validate seating capacity
+        
         if (seatingCapacity != null) {
             if (seatingCapacity < 2) {
                 throw new IllegalArgumentException("Seating capacity must be at least 2");
@@ -542,7 +542,7 @@ public class VehicleController {
             }
         }
         
-        // Validate vehicle type
+        
         if (vehicleType != null && !vehicleType.trim().isEmpty()) {
             String type = vehicleType.trim();
             if (!type.equals("Sedan") && !type.equals("SUV") && 
@@ -551,7 +551,7 @@ public class VehicleController {
             }
         }
         
-        // Validate fuel type
+        
         if (fuelType != null && !fuelType.trim().isEmpty()) {
             String fuel = fuelType.trim();
             if (!fuel.equals("Petrol") && !fuel.equals("Diesel") && 
@@ -560,7 +560,7 @@ public class VehicleController {
             }
         }
         
-        // Validate transmission
+        
         if (transmission != null && !transmission.trim().isEmpty()) {
             String trans = transmission.trim();
             if (!trans.equals("Automatic") && !trans.equals("Manual")) {
@@ -568,7 +568,7 @@ public class VehicleController {
             }
         }
         
-        // Validate location
+        
         if (location != null && !location.trim().isEmpty()) {
             String loc = location.trim();
             if (!loc.equals("Suva") && !loc.equals("Nadi") && !loc.equals("Lautoka")) {

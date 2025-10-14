@@ -21,7 +21,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/reservations")
-@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true", allowedHeaders = "*")
+@CrossOrigin(origins = "http:
 public class ReservationController {
 
     @Autowired
@@ -33,7 +33,7 @@ public class ReservationController {
     @Autowired
     private EmailService emailService;
 
-    // Add these missing repository dependencies
+    
     @Autowired
     private ReservationRepository reservationRepository;
 
@@ -46,7 +46,7 @@ public class ReservationController {
     @PostMapping
     public ResponseEntity<?> createReservation(@RequestBody Reservation reservation) {
         try {
-            // Validate required fields
+            
             if (reservation.getVehicle() == null || reservation.getVehicle().getId() == null) {
                 return ResponseEntity.status(400).body(new ErrorResponse("Vehicle ID is required"));
             }
@@ -66,26 +66,26 @@ public class ReservationController {
                 reservation.setCreatedAt(java.time.LocalDateTime.now());
             }
 
-            // Fetch vehicle from database
+            
             Vehicle vehicle = vehicleService.getVehicleById(reservation.getVehicle().getId());
             if (vehicle == null) {
                 return ResponseEntity.status(404).body(new ErrorResponse("Vehicle not found"));
             }
             reservation.setVehicle(vehicle);
 
-            // Ensure status is set
+            
             if (reservation.getStatus() == null || reservation.getStatus().isEmpty()) {
                 reservation.setStatus("Confirmed");
             }
 
-            // Save reservation via service
+            
             Reservation savedReservation = reservationService.createReservation(reservation);
 
-            // Mark vehicle as rented after successful reservation
-            vehicle.setStatus("Rented"); // Use status instead of availability
+            
+            vehicle.setStatus("Rented"); 
             vehicleRepository.save(vehicle);
 
-            // Send reservation confirmation email
+            
             Optional<User> userOpt = userRepository.findById(savedReservation.getUserId());
             if (userOpt.isPresent()) {
                 User user = userOpt.get();
@@ -102,7 +102,7 @@ public class ReservationController {
                 );
             }
 
-            // Create a lightweight response to avoid sending large vehicle data (e.g., base64 images)
+            
             ReservationResponse response = new ReservationResponse();
             response.setId(savedReservation.getId());
             response.setVehicleId(savedReservation.getVehicle().getId());
@@ -135,18 +135,18 @@ public class ReservationController {
 
             Reservation reservation = reservationOpt.get();
 
-            // Update reservation status
+            
             reservation.setStatus("Cancelled");
             reservationRepository.save(reservation);
 
-            // Update vehicle status - make it available again
+            
             Vehicle vehicle = reservation.getVehicle();
             if (vehicle != null) {
-                vehicle.setStatus("Available"); // Use status instead of availability
+                vehicle.setStatus("Available"); 
                 vehicleRepository.save(vehicle);
             }
 
-            // Send cancellation email to user
+            
             Optional<User> userOpt = userRepository.findById(reservation.getUserId());
             if (userOpt.isPresent()) {
                 User user = userOpt.get();
@@ -165,7 +165,7 @@ public class ReservationController {
         }
     }
 
-    // Add endpoint to get user reservations
+    
     @GetMapping("/user/{userId}")
     public ResponseEntity<?> getUserReservations(@PathVariable Long userId) {
         try {
@@ -217,7 +217,7 @@ class ReservationResponse {
     private java.time.LocalDateTime createdAt;
     private java.time.LocalDateTime updatedAt;
 
-    // Getters and setters
+    
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public Long getVehicleId() { return vehicleId; }

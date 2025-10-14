@@ -22,13 +22,13 @@ const AdminLogin = ({ setCurrentUser }) => {
   const [keySequence, setKeySequence] = useState([]);
 
   useEffect(() => {
-    // Secret key combination listener for super admin registration
+    
     const handleKeyDown = (event) => {
       if (!superAdminMode) {
         const newSequence = [...keySequence, event.key.toLowerCase()];
         setKeySequence(newSequence);
         
-        // Check for secret combination: "superadmin"
+        
         const secretCode = ['s', 'u', 'p', 'e', 'r', 'a', 'd', 'm', 'i', 'n'];
         const lastTenKeys = newSequence.slice(-10);
         
@@ -38,7 +38,7 @@ const AdminLogin = ({ setCurrentUser }) => {
           setKeySequence([]);
         }
         
-        // Reset sequence if it gets too long
+        
         if (newSequence.length > 15) {
           setKeySequence([]);
         }
@@ -104,7 +104,7 @@ const AdminLogin = ({ setCurrentUser }) => {
     setLoading(true);
 
     if (superAdminMode) {
-      // Admin Registration (for super admin mode)
+      
       try {
         const registrationData = {
           firstName: credentials.firstName,
@@ -114,7 +114,7 @@ const AdminLogin = ({ setCurrentUser }) => {
           password: credentials.password
         };
         
-        const response = await fetch('http://localhost:8080/api/admin/add-admin', {
+        const response = await fetch('http:
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
@@ -140,7 +140,7 @@ const AdminLogin = ({ setCurrentUser }) => {
           confirmPassword: ''
         });
         
-        // Reset modes after successful registration
+        
         setTimeout(() => {
           setSuccess('');
           setSuperAdminMode(false);
@@ -151,14 +151,14 @@ const AdminLogin = ({ setCurrentUser }) => {
         setError('Failed to connect to the server.');
       }
     } else {
-      // Admin Login
+      
       try {
         const loginData = {
           email: credentials.email,
           password: credentials.password
         };
         
-        const response = await fetch('http://localhost:8080/api/admin/login', {
+        const response = await fetch('http:
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(loginData),
@@ -174,10 +174,10 @@ const AdminLogin = ({ setCurrentUser }) => {
 
         const admin = await response.json();
 
-        // Use the actual role from backend response
+        
         const adminWithRole = {
           ...admin,
-          role: admin.role || 'ADMIN', // Default to ADMIN if not set
+          role: admin.role || 'ADMIN', 
           name: `${admin.firstName || ''} ${admin.lastName || ''}`.trim() || admin.username || admin.email
         };
 

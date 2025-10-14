@@ -29,7 +29,7 @@ const SuperAdminDashboardModified = ({ setCurrentUser, currentUser }) => {
 
   const handleLogout = async () => {
     try {
-      await fetch('http://localhost:8080/api/auth/logout', {
+      await fetch('http:
         method: 'POST',
         credentials: 'include'
       });
@@ -50,29 +50,29 @@ const SuperAdminDashboardModified = ({ setCurrentUser, currentUser }) => {
   const fetchStats = async () => {
     setLoading(true);
     try {
-      // Fetch pending requests count
-      const pendingResponse = await fetch('http://localhost:8080/api/vehicles/pending/all', {
+      
+      const pendingResponse = await fetch('http:
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include'
       });
 
-      // Fetch pending maintenance count
-      const maintenanceResponse = await fetch('http://localhost:8080/api/maintenance/pending/all', {
+      
+      const maintenanceResponse = await fetch('http:
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include'
       });
 
-      // Fetch vehicle stats
-      const vehicleResponse = await fetch('http://localhost:8080/api/vehicles/all', {
+      
+      const vehicleResponse = await fetch('http:
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include'
       });
 
-      // Fetch user stats
-      const userResponse = await fetch('http://localhost:8080/api/auth/users/customers', {
+      
+      const userResponse = await fetch('http:
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include'
@@ -103,7 +103,7 @@ const SuperAdminDashboardModified = ({ setCurrentUser, currentUser }) => {
     e.preventDefault();
 
     try {
-      const response = await fetch('http://localhost:8080/api/auth/create-admin', {
+      const response = await fetch('http:
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newAdmin),
@@ -188,7 +188,7 @@ const SuperAdminDashboardModified = ({ setCurrentUser, currentUser }) => {
             </button>
           </div>
 
-          {/* Stats Cards */}
+          {}
           <div className="stats-grid">
             <div className="stat-card">
               <div className="stat-icon">
@@ -231,7 +231,7 @@ const SuperAdminDashboardModified = ({ setCurrentUser, currentUser }) => {
             </div>
           </div>
 
-          {/* Create Admin Modal */}
+          {}
           {showCreateAdmin && (
             <div className="modal-overlay">
               <div className="modal-content">

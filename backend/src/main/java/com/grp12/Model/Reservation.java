@@ -31,7 +31,7 @@ public class Reservation {
     private LocalDate returnDate;
 
     @Column(name = "status", nullable = false, length = 20)
-    private String status = "Confirmed"; // Default value
+    private String status = "Confirmed"; 
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "reservation_amenities", joinColumns = @JoinColumn(name = "reservation_id"))
@@ -49,14 +49,14 @@ public class Reservation {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updatedAt;
 
-    // Default constructor
+    
     public Reservation() {
         this.createdAt = LocalDateTime.now();
         this.status = "Confirmed";
         this.amenities = new ArrayList<>();
     }
 
-    // Constructor with parameters for easier testing
+    
     public Reservation(Vehicle vehicle, Long userId, LocalDate rentalDate, LocalDate returnDate, 
                       List<String> amenities, BigDecimal totalPrice) {
         this();
@@ -68,7 +68,7 @@ public class Reservation {
         this.totalPrice = totalPrice;
     }
 
-    // Getters and setters
+    
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
