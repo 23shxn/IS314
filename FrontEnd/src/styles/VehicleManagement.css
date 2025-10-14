@@ -11,6 +11,35 @@
   margin-bottom: 20px;
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.search-container {
+  position: relative;
+}
+
+.search-input {
+  padding: 10px 15px;
+  border: 2px solid #ddd;
+  border-radius: 25px;
+  font-size: 14px;
+  width: 300px;
+  transition: border-color 0.3s, box-shadow 0.3s;
+  outline: none;
+}
+
+.search-input:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.search-input::placeholder {
+  color: #999;
+}
+
 .management-header h2 {
   margin: 0;
   color: #333;
@@ -371,11 +400,21 @@
   .vehicle-management-container {
     padding: 10px;
   }
-  
+
   .management-header {
     flex-direction: column;
     gap: 15px;
     align-items: stretch;
+  }
+
+  .header-actions {
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .search-input {
+    width: 100%;
   }
   
   .form-grid {

@@ -59,6 +59,15 @@ public class PendingVehicleChange {
         this.requestedBy = requestedBy;
     }
 
+    // Constructor for UPDATE request
+    public PendingVehicleChange(String vehicleData, Long vehicleId, Long requestedBy) {
+        this();
+        this.changeType = "UPDATE";
+        this.vehicleData = vehicleData;
+        this.vehicleId = vehicleId;
+        this.requestedBy = requestedBy;
+    }
+
     // Getters and setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }

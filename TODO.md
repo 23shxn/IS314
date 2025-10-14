@@ -1,4 +1,8 @@
-# TODO: Secure GET /
+# TODO: Add PUT Endpoint for Vehicle Updates
 
-- [x] Remove permitAll for "/" in SecurityConfig.java to require authentication for GET /
-- [x] Remove permitAll for "/favicon.ico" in SecurityConfig.java to require authentication for GET /favicon.ico
+## Steps to Complete
+- [x] Add UPDATE changeType support in PendingVehicleChange.java
+- [x] Add updateVehicle method in VehicleService.java
+- [x] Add @PutMapping("/{id}") in VehicleController.java with role-based logic (superadmin direct update, regular admin pending request)
+- [x] Handle multipart file uploads for image updates in the PUT endpoint
+- [x] Test the implementation

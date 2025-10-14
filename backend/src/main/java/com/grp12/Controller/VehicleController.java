@@ -360,6 +360,92 @@ public class VehicleController {
     }
     
     // Delete vehicle (admin only) - with role-based logic
+    // Update vehicle (super admin only)
+@PutMapping("/{id}")
+@PreAuthorize("hasRole('SUPER_ADMIN')")
+public ResponseEntity<?> updateVehicle(@PathVariable Long id, @RequestBody Vehicle updatedVehicle) {
+    try {
+        Admin currentAdmin = getCurrentAdmin();
+        if (currentAdmin == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(Map.of("error", "Admin not authenticated"));
+        }
+
+        // Validate vehicle exists
+        Optional<Vehicle> existingVehicleOpt = vehicleRepository.findById(id);
+        if (!existingVehicleOpt.isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Map.of("error", "Vehicle not found"));
+        }
+
+        Vehicle existingVehicle = existingVehicleOpt.get();
+
+        // Validate input parameters
+        validateVehicleParameters(
+            updatedVehicle.getLicensePlate(),
+            updatedVehicle.getSeatingCapacity(),
+            updatedVehicle.getVehicleType(),
+            updatedVehicle.getFuelType(),
+            updatedVehicle.getTransmission(),
+            updatedVehicle.getLocation()
+        );
+
+        // Validate required string fields
+        if (updatedVehicle.getMake() == null || updatedVehicle.getMake().trim().isEmpty()) {
+            throw new IllegalArgumentException("Make is required");
+        }
+        if (updatedVehicle.getModel() == null || updatedVehicle.getModel().trim().isEmpty()) {
+            throw new IllegalArgumentException("Model is required");
+        }
+        if (updatedVehicle.getColor() == null || updatedVehicle.getColor().trim().isEmpty()) {
+            throw new IllegalArgumentException("Color is required");
+        }
+        if (updatedVehicle.getLicensePlate() == null || updatedVehicle.getLicensePlate().trim().isEmpty()) {
+            throw new IllegalArgumentException("License plate is required");
+        }
+
+        // Validate numeric fields
+        if (updatedVehicle.getYear() == null || updatedVehicle.getYear() < 1900 || updatedVehicle.getYear() > 2030) {
+            throw new IllegalArgumentException("Valid year between 1900 and 2030 is required");
+        }
+        if (updatedVehicle.getPricePerDay() == null || updatedVehicle.getPricePerDay().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Price per day must be greater than 0");
+        }
+        if (updatedVehicle.getMileage() != null && updatedVehicle.getMileage() < 0) {
+            throw new IllegalArgumentException("Mileage cannot be negative");
+        }
+
+        // Update fields
+        existingVehicle.setMake(updatedVehicle.getMake().trim());
+        existingVehicle.setModel(updatedVehicle.getModel().trim());
+        existingVehicle.setVehicleType(updatedVehicle.getVehicleType().trim());
+        existingVehicle.setYear(updatedVehicle.getYear());
+        existingVehicle.setColor(updatedVehicle.getColor().trim());
+        existingVehicle.setLicensePlate(updatedVehicle.getLicensePlate().trim().toUpperCase());
+        existingVehicle.setVin(updatedVehicle.getVin() != null ? updatedVehicle.getVin().trim() : null);
+        existingVehicle.setFuelType(updatedVehicle.getFuelType().trim());
+        existingVehicle.setTransmission(updatedVehicle.getTransmission().trim());
+        existingVehicle.setSeatingCapacity(updatedVehicle.getSeatingCapacity());
+        existingVehicle.setMileage(updatedVehicle.getMileage());
+        existingVehicle.setPricePerDay(updatedVehicle.getPricePerDay());
+        existingVehicle.setLocation(updatedVehicle.getLocation().trim());
+        existingVehicle.setDescription(updatedVehicle.getDescription() != null ? updatedVehicle.getDescription().trim() : null);
+        existingVehicle.setFeatures(updatedVehicle.getFeatures() != null ? updatedVehicle.getFeatures().trim() : null);
+        // Note: Images are not updated in this endpoint; handle separately if needed
+
+        Vehicle savedVehicle = vehicleService.saveVehicle(existingVehicle);
+        return ResponseEntity.ok(savedVehicle);
+
+    } catch (IllegalArgumentException e) {
+        Map<String, String> errorResponse = new HashMap<>();
+        errorResponse.put("error", e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    } catch (Exception e) {
+        Map<String, String> errorResponse = new HashMap<>();
+        errorResponse.put("error", "Failed to update vehicle: " + e.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+    }
+}
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     public ResponseEntity<?> deleteVehicle(@PathVariable Long id) {
