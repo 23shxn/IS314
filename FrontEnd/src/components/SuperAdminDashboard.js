@@ -137,7 +137,7 @@ const SuperAdminDashboard = ({ setCurrentUser, currentUser }) => {
     <div className="admin-dashboard">
       <nav className="sidebar">
         <div className="sidebar-header">
-          <h2>Ronaldo's Rentals Super Admin Dashboard</h2>
+          <h2>Ronaldo's Rentals Sper Admin Dashboard</h2>
         </div>
         <div className="sidebar-menu">
           <button
@@ -168,6 +168,13 @@ const SuperAdminDashboard = ({ setCurrentUser, currentUser }) => {
           >
             <ToolCase className="btn-icon" />
             <span>Maintenance</span>
+          </button>
+          <button
+            onClick={() => handleNavigation('reservations')}
+            className={`sidebar-btn ${location.pathname === '/manager/reservations' ? 'active' : ''}`}
+          >
+            <ClipboardList className="btn-icon" />
+            <span>Reservations</span>
           </button>
         </div>
         <div className="sidebar-footer">

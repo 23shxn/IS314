@@ -41,6 +41,7 @@ import CompleteBooking from './components/CompleteBooking';
 import CarDetail from './components/CarDetail';
 import Checkout from './components/Checkout';
 import Cancellation from './components/Cancellation';
+import AdminReservations from './components/AdminReservations';
 
 const App = () => {
   const [currentUser, setCurrentUser] = useState(null);
@@ -348,6 +349,14 @@ const App = () => {
               </SuperAdminRoute>
             }
           />
+          <Route
+            path="/manager/reservations"
+            element={
+              <SuperAdminRoute setCurrentUser={setCurrentUser}>
+                <AdminReservations currentUser={currentUser} />
+              </SuperAdminRoute>
+            }
+          />
 
           {/* Admin Protected Routes */}
           <Route 
@@ -392,13 +401,21 @@ const App = () => {
               </AdminRoute>
             } 
           />
-          <Route 
-            path="/admin/users" 
+          <Route
+            path="/admin/users"
             element={
               <AdminRoute setCurrentUser={setCurrentUser}>
                 <UserManagement />
               </AdminRoute>
-            } 
+            }
+          />
+          <Route
+            path="/admin/reservations"
+            element={
+              <AdminRoute setCurrentUser={setCurrentUser}>
+                <AdminReservations currentUser={currentUser} />
+              </AdminRoute>
+            }
           />
 
           {/* Catch-all route - redirect to appropriate default page */}

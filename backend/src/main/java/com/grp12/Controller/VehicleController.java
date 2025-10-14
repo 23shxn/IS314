@@ -359,6 +359,127 @@ public class VehicleController {
         }
     }
     
+    // Update vehicle (admin only) - with role-based logic
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
+    public ResponseEntity<?> updateVehicle(@PathVariable Long id, @RequestBody Map<String, Object> updates) {
+        try {
+            Admin currentAdmin = getCurrentAdmin();
+            if (currentAdmin == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Admin not authenticated"));
+            }
+
+            // If super admin, update directly
+            if ("SUPER_ADMIN".equals(currentAdmin.getRole())) {
+                Vehicle existingVehicle = vehicleService.getVehicleById(id);
+                if (existingVehicle == null) {
+                    return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("error", "Vehicle not found"));
+                }
+
+                // Extract values from the map
+                String make = updates.containsKey("make") ? (String) updates.get("make") : null;
+                String model = updates.containsKey("model") ? (String) updates.get("model") : null;
+                String vehicleType = updates.containsKey("vehicleType") ? (String) updates.get("vehicleType") : null;
+                Integer year = updates.containsKey("year") ? ((Number) updates.get("year")).intValue() : null;
+                String color = updates.containsKey("color") ? (String) updates.get("color") : null;
+                String licensePlate = updates.containsKey("licensePlate") ? (String) updates.get("licensePlate") : null;
+                String vin = updates.containsKey("vin") ? (String) updates.get("vin") : null;
+                String fuelType = updates.containsKey("fuelType") ? (String) updates.get("fuelType") : null;
+                String transmission = updates.containsKey("transmission") ? (String) updates.get("transmission") : null;
+                Integer seatingCapacity = updates.containsKey("seatingCapacity") ? ((Number) updates.get("seatingCapacity")).intValue() : null;
+                Integer mileage = updates.containsKey("mileage") ? ((Number) updates.get("mileage")).intValue() : null;
+                BigDecimal pricePerDay = updates.containsKey("pricePerDay") ? new BigDecimal(updates.get("pricePerDay").toString()) : null;
+                String location = updates.containsKey("location") ? (String) updates.get("location") : null;
+                String description = updates.containsKey("description") ? (String) updates.get("description") : null;
+                String features = updates.containsKey("features") ? (String) updates.get("features") : null;
+
+                // Validate provided parameters
+                if (licensePlate != null && !licensePlate.trim().isEmpty()) {
+                    validateVehicleParameters(licensePlate.trim(), seatingCapacity, vehicleType, fuelType, transmission, location);
+                } else if (seatingCapacity != null || vehicleType != null || fuelType != null || transmission != null || location != null) {
+                    validateVehicleParameters(null, seatingCapacity, vehicleType, fuelType, transmission, location);
+                }
+
+                // Update only provided fields
+                if (make != null && !make.trim().isEmpty()) {
+                    existingVehicle.setMake(make.trim());
+                }
+                if (model != null && !model.trim().isEmpty()) {
+                    existingVehicle.setModel(model.trim());
+                }
+                if (vehicleType != null && !vehicleType.trim().isEmpty()) {
+                    existingVehicle.setVehicleType(vehicleType.trim());
+                }
+                if (year != null) {
+                    existingVehicle.setYear(year);
+                }
+                if (color != null && !color.trim().isEmpty()) {
+                    existingVehicle.setColor(color.trim());
+                }
+                if (licensePlate != null && !licensePlate.trim().isEmpty()) {
+                    existingVehicle.setLicensePlate(licensePlate.trim().toUpperCase());
+                }
+                if (vin != null) {
+                    if (vin.trim().isEmpty()) {
+                        existingVehicle.setVin(null);
+                    } else {
+                        existingVehicle.setVin(vin.trim());
+                    }
+                }
+                if (fuelType != null && !fuelType.trim().isEmpty()) {
+                    existingVehicle.setFuelType(fuelType.trim());
+                }
+                if (transmission != null && !transmission.trim().isEmpty()) {
+                    existingVehicle.setTransmission(transmission.trim());
+                }
+                if (seatingCapacity != null) {
+                    existingVehicle.setSeatingCapacity(seatingCapacity);
+                }
+                if (mileage != null) {
+                    existingVehicle.setMileage(mileage);
+                }
+                if (pricePerDay != null) {
+                    existingVehicle.setPricePerDay(pricePerDay);
+                }
+                if (location != null && !location.trim().isEmpty()) {
+                    existingVehicle.setLocation(location.trim());
+                }
+                if (description != null) {
+                    if (description.trim().isEmpty()) {
+                        existingVehicle.setDescription(null);
+                    } else {
+                        existingVehicle.setDescription(description.trim());
+                    }
+                }
+                if (features != null) {
+                    if (features.trim().isEmpty()) {
+                        existingVehicle.setFeatures(null);
+                    } else {
+                        existingVehicle.setFeatures(features.trim());
+                    }
+                }
+
+                Vehicle savedVehicle = vehicleService.saveVehicle(existingVehicle);
+                return ResponseEntity.ok(savedVehicle);
+            }
+
+            // For regular admins, this should not be allowed - they should use pending requests
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(Map.of("error", "Regular admins cannot update vehicles directly. Use pending requests."));
+
+        } catch (IllegalArgumentException e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        } catch (Exception e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Failed to update vehicle: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
     // Delete vehicle (admin only) - with role-based logic
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
@@ -369,7 +490,7 @@ public class VehicleController {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of("error", "Admin not authenticated"));
             }
-            
+
             // If super admin, delete directly
             if ("SUPER_ADMIN".equals(currentAdmin.getRole())) {
                 vehicleService.deleteVehicle(id);
@@ -377,16 +498,16 @@ public class VehicleController {
                 response.put("message", "Vehicle deleted successfully");
                 return ResponseEntity.ok(response);
             }
-            
+
             // For regular admins, create pending delete request
             PendingVehicleChange pendingRequest = new PendingVehicleChange(id, currentAdmin.getId());
             PendingVehicleChange savedRequest = pendingVehicleChangeRepository.save(pendingRequest);
-            
+
             return ResponseEntity.ok().body(Map.of(
                 "message", "Vehicle delete request submitted for approval",
                 "requestId", savedRequest.getId()
             ));
-            
+
         } catch (IllegalArgumentException e) {
             Map<String, String> errorResponse = new HashMap<>();
             errorResponse.put("error", e.getMessage());

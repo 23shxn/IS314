@@ -55,12 +55,19 @@ const AdminDashboard = ({ currentUser, cars, reservations, users, pendingRequest
             <Users className="btn-icon" />
             <span>Customer Infofrmation</span>
           </button>
-          <button 
-            onClick={() => handleNavigation('maintenance')} 
+          <button
+            onClick={() => handleNavigation('maintenance')}
             className={`sidebar-btn ${location.pathname === '/admin/maintenance' ? 'active' : ''}`}
           >
             <ToolCase className="btn-icon" />
             <span>Maintenance</span>
+          </button>
+          <button
+            onClick={() => handleNavigation('reservations')}
+            className={`sidebar-btn ${location.pathname === '/admin/reservations' ? 'active' : ''}`}
+          >
+            <ClipboardList className="btn-icon" />
+            <span>Reservations</span>
           </button>
         </div>
         <div className="sidebar-footer">
