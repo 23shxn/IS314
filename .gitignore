@@ -1,7 +1,7 @@
 # React frontend
 FrontEnd/node_modules/
 FrontEnd/build/
-FrontEnd/.env
+
 
 # Spring Boot backend
 BackEnd/target/
