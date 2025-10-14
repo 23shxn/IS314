@@ -361,6 +361,51 @@ public class VehicleController {
     
     // Delete vehicle (admin only) - with role-based logic
     // Update vehicle (super admin only)
+    @PatchMapping("/{id}/status")
+@PreAuthorize("hasRole('SUPER_ADMIN')")
+public ResponseEntity<?> updateVehicleStatus(@PathVariable Long id, @RequestBody Map<String, String> statusUpdate) {
+    try {
+        Admin currentAdmin = getCurrentAdmin();
+        if (currentAdmin == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Admin not authenticated"));
+        }
+
+        // Validate vehicle exists
+        Optional<Vehicle> vehicleOpt = vehicleRepository.findById(id);
+        if (!vehicleOpt.isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", "Vehicle not found"));
+        }
+
+        String newStatus = statusUpdate.get("status");
+        if (newStatus == null || newStatus.trim().isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", "Status is required"));
+        }
+
+        // Validate status
+        if (!List.of("Available", "Rented", "Maintenance", "Out_of_Service").contains(newStatus)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", "Invalid status. Must be one of: Available, Rented, Maintenance, Out_of_Service"));
+        }
+
+        // Update vehicle status
+        Vehicle vehicle = vehicleOpt.get();
+        vehicle.setStatus(newStatus);
+        Vehicle updatedVehicle = vehicleService.saveVehicle(vehicle);
+        return ResponseEntity.ok(updatedVehicle);
+
+    } catch (IllegalArgumentException e) {
+        Map<String, String> errorResponse = new HashMap<>();
+        errorResponse.put("error", e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    } catch (Exception e) {
+        Map<String, String> errorResponse = new HashMap<>();
+        errorResponse.put("error", "Failed to update vehicle status: " + e.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+    }
+}
 @PutMapping("/{id}")
 @PreAuthorize("hasRole('SUPER_ADMIN')")
 public ResponseEntity<?> updateVehicle(@PathVariable Long id, @RequestBody Vehicle updatedVehicle) {
