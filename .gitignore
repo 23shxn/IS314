@@ -3,8 +3,7 @@ FrontEnd/node_modules/
 FrontEnd/build/
 
 
-# Spring Boot backend
-BackEnd/target/
+# Spring Boot backend 
 BackEnd/.classpath
 BackEnd/.project
 BackEnd/.settings/
