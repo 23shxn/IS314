@@ -1,0 +1,11 @@
+services:
+  - name: is314-backend
+    run_command: java -jar target/backend.jar
+    build_command: mvn clean package -DskipTests
+    environment_slug: java
+    source_dir: backend
+  - name: is314-front-end
+    environment_slug: node-js
+    build_command: npm install && npm run build
+    run_command: serve -s build
+    source_dir: FrontEnd
