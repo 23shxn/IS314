@@ -210,10 +210,7 @@ const AdminLogin = ({ setCurrentUser }) => {
           <div className="info-message">
             <p>Please login with your admin credentials.</p>
             <div style={{ fontSize: '12px', color: '#666', marginTop: '10px', padding: '10px', backgroundColor: '#f8f9fa', borderRadius: '4px' }}>
-              <strong>Default Admin Accounts:</strong><br/>
-              <strong>Manager:</strong> manager / Manager123!<br/>
-              <strong>Admin 1:</strong> admin1 / Admin123!<br/>
-              <strong>Admin 2:</strong> admin2 / Admin123!
+              
             </div>
           </div>
         )}
