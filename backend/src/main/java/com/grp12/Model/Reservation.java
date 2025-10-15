@@ -22,6 +22,15 @@ public class Reservation {
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
+    @Column(name = "title", length = 10)
+    private String title;
+
+    @Column(name = "first_name", length = 100)
+    private String firstName;
+
+    @Column(name = "last_name", length = 100)
+    private String lastName;
+
     @Column(name = "rental_date", nullable = false)
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate rentalDate;
@@ -57,7 +66,7 @@ public class Reservation {
     }
 
     // Constructor with parameters for easier testing
-    public Reservation(Vehicle vehicle, Long userId, LocalDate rentalDate, LocalDate returnDate, 
+    public Reservation(Vehicle vehicle, Long userId, LocalDate rentalDate, LocalDate returnDate,
                       List<String> amenities, BigDecimal totalPrice) {
         this();
         this.vehicle = vehicle;
@@ -66,6 +75,15 @@ public class Reservation {
         this.returnDate = returnDate;
         this.amenities = amenities != null ? new ArrayList<>(amenities) : new ArrayList<>();
         this.totalPrice = totalPrice;
+    }
+
+    // Constructor with user details
+    public Reservation(Vehicle vehicle, Long userId, String title, String firstName, String lastName,
+                      LocalDate rentalDate, LocalDate returnDate, List<String> amenities, BigDecimal totalPrice) {
+        this(vehicle, userId, rentalDate, returnDate, amenities, totalPrice);
+        this.title = title;
+        this.firstName = firstName;
+        this.lastName = lastName;
     }
 
     // Getters and setters
@@ -77,6 +95,15 @@ public class Reservation {
 
     public Long getUserId() { return userId; }
     public void setUserId(Long userId) { this.userId = userId; }
+
+    public String getTitle() { return title; }
+    public void setTitle(String title) { this.title = title; }
+
+    public String getFirstName() { return firstName; }
+    public void setFirstName(String firstName) { this.firstName = firstName; }
+
+    public String getLastName() { return lastName; }
+    public void setLastName(String lastName) { this.lastName = lastName; }
 
     public LocalDate getRentalDate() { return rentalDate; }
     public void setRentalDate(LocalDate rentalDate) { this.rentalDate = rentalDate; }

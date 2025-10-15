@@ -73,6 +73,15 @@ public class ReservationController {
             }
             reservation.setVehicle(vehicle);
 
+            // Fetch user details and populate reservation
+            Optional<User> userOpt = userRepository.findById(reservation.getUserId());
+            if (userOpt.isPresent()) {
+                User user = userOpt.get();
+                reservation.setTitle(user.getTitle());
+                reservation.setFirstName(user.getFirstName());
+                reservation.setLastName(user.getLastName());
+            }
+
             // Ensure status is set
             if (reservation.getStatus() == null || reservation.getStatus().isEmpty()) {
                 reservation.setStatus("Confirmed");
@@ -86,7 +95,6 @@ public class ReservationController {
             vehicleRepository.save(vehicle);
 
             // Send reservation confirmation email
-            Optional<User> userOpt = userRepository.findById(savedReservation.getUserId());
             if (userOpt.isPresent()) {
                 User user = userOpt.get();
                 String vehicleName = vehicle.getMake() + " " + vehicle.getModel();
@@ -173,6 +181,17 @@ public class ReservationController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(Map.of("error", "Failed to get reservations: " + e.getMessage()));
+        }
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<?> getAllReservations() {
+        try {
+            List<Reservation> reservations = reservationRepository.findAll();
+            return ResponseEntity.ok(reservations);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("error", "Failed to get all reservations: " + e.getMessage()));
         }
     }
 }

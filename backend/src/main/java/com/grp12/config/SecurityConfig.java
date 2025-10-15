@@ -120,6 +120,9 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/approve-user/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
                 .requestMatchers("/api/auth/reject-user/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
 
+                // Reservation endpoints - allow admin and super admin
+                .requestMatchers("/api/reservations/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
+
                 // Everything else requires authentication
                 .anyRequest().authenticated()
             )

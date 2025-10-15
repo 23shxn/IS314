@@ -41,6 +41,7 @@ import CompleteBooking from './components/CompleteBooking';
 import CarDetail from './components/CarDetail';
 import Checkout from './components/Checkout';
 import Cancellation from './components/Cancellation';
+import AllReservations from './components/AllReservations';
 
 const App = () => {
   const [currentUser, setCurrentUser] = useState(null);
@@ -62,37 +63,46 @@ const App = () => {
   }, [currentUser]);
 
   const fetchInitialData = async () => {
-    if (currentUser?.role === 'admin' || currentUser?.role === 'SUPER_ADMIN') {
-      try {
-        const [vehiclesRes, usersRes, pendingRes] = await Promise.all([
-          fetch(`${process.env.REACT_APP_API_URL}/api/vehicles/all`, {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include'
-          }),
-          fetch(`${process.env.REACT_APP_API_URL}/api/auth/users/customers`, {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include'
-          }),
-          fetch(`${process.env.REACT_APP_API_URL}/api/auth/requests/pending`, {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include'
-          })
-        ]);
+        if (currentUser?.role === 'ADMIN' || currentUser?.role === 'SUPER_ADMIN') {
+          try {
+            const fetchPromises = [
+              fetch(`${process.env.REACT_APP_API_URL}/api/vehicles/all`, {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include'
+              }),
+              fetch(`${process.env.REACT_APP_API_URL}/api/auth/users/customers`, {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include'
+              }),
+              fetch(`${process.env.REACT_APP_API_URL}/api/auth/requests/pending`, {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include'
+              }),
+              fetch(`${process.env.REACT_APP_API_URL}/api/reservations/all`, {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include'
+              })
+            ];
 
-        const vehiclesData = await vehiclesRes.json();
-        const usersData = await usersRes.json();
-        const pendingData = await pendingRes.json();
+            const [vehiclesRes, usersRes, pendingRes, reservationsRes] = await Promise.all(fetchPromises);
 
-        if (vehiclesRes.ok) setCars(Array.isArray(vehiclesData) ? vehiclesData : []);
-        if (usersRes.ok) setUsers(Array.isArray(usersData) ? usersData : []);
-        if (pendingRes.ok) setPendingRequests(Array.isArray(pendingData) ? pendingData : []);
-      } catch (error) {
-        console.error('Failed to fetch initial data:', error);
-      }
-    } else if (currentUser?.role === 'customer') {
+            const vehiclesData = await vehiclesRes.json();
+            const usersData = await usersRes.json();
+            const pendingData = await pendingRes.json();
+            const reservationsData = await reservationsRes.json();
+
+            if (vehiclesRes.ok) setCars(Array.isArray(vehiclesData) ? vehiclesData : []);
+            if (usersRes.ok) setUsers(Array.isArray(usersData) ? usersData : []);
+            if (pendingRes.ok) setPendingRequests(Array.isArray(pendingData) ? pendingData : []);
+            if (reservationsRes.ok) setReservations(Array.isArray(reservationsData) ? reservationsData : []);
+          } catch (error) {
+            console.error('Failed to fetch initial data:', error);
+          }
+        } else if (currentUser?.role === 'customer') {
       try {
         const [vehiclesRes, reservationsRes] = await Promise.all([
           fetch(`${process.env.REACT_APP_API_URL}/api/vehicles/available`, {
@@ -348,6 +358,22 @@ const App = () => {
               </SuperAdminRoute>
             }
           />
+          <Route
+            path="/manager/reservations"
+            element={
+              <SuperAdminRoute setCurrentUser={setCurrentUser}>
+                <AllReservations
+                  reservations={reservations}
+                  setReservations={setReservations}
+                  currentUser={currentUser}
+                  setCurrentUser={setCurrentUser}
+                  role="SUPER_ADMIN"
+                  cars={cars}
+                />
+              </SuperAdminRoute>
+            }
+          />
+
 
           {/* Admin Protected Routes */}
           <Route 
@@ -392,13 +418,28 @@ const App = () => {
               </AdminRoute>
             } 
           />
-          <Route 
-            path="/admin/users" 
+          <Route
+            path="/admin/reservations"
+            element={
+              <AdminRoute setCurrentUser={setCurrentUser}>
+                <AllReservations
+                  reservations={reservations}
+                  setReservations={setReservations}
+                  currentUser={currentUser}
+                  setCurrentUser={setCurrentUser}
+                  role="ADMIN"
+                  cars={cars}
+                />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/users"
             element={
               <AdminRoute setCurrentUser={setCurrentUser}>
                 <UserManagement />
               </AdminRoute>
-            } 
+            }
           />
 
           {/* Catch-all route - redirect to appropriate default page */}

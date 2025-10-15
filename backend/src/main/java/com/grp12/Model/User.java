@@ -24,6 +24,9 @@ public class User {
     @Column(name = "email", nullable = false, unique = true, length = 255)
     private String email;
     
+    @Column(name = "title", length = 10)
+    private String title;
+
     @Column(name = "first_name", nullable = false, length = 100)
     private String firstName;
     
@@ -64,7 +67,7 @@ public class User {
     }
 
     // Constructor for easy creation
-    public User(String firstName, String lastName, String phoneNumber, String email, 
+    public User(String firstName, String lastName, String phoneNumber, String email,
                 String driversLicenseNumber, String driversLicenseImage) {
         this.firstName = firstName;
         this.lastName = lastName;
@@ -76,6 +79,13 @@ public class User {
         this.approved = false;
         this.emailVerified = false;
         this.createdAt = LocalDateTime.now();
+    }
+
+    // Constructor with title
+    public User(String title, String firstName, String lastName, String phoneNumber, String email,
+                String driversLicenseNumber, String driversLicenseImage) {
+        this(firstName, lastName, phoneNumber, email, driversLicenseNumber, driversLicenseImage);
+        this.title = title;
     }
 
   
@@ -94,6 +104,9 @@ public class User {
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     
+    public String getTitle() { return title; }
+    public void setTitle(String title) { this.title = title; }
+
     public String getFirstName() { return firstName; }
     public void setFirstName(String firstName) { this.firstName = firstName; }
     

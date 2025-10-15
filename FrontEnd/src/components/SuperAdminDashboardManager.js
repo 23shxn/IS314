@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { LogOut, Layout, Users, Car, ClipboardList, ToolCase, UserPlus, Check, X } from 'lucide-react';
+import { LogOut, Layout, Users, Car, ClipboardList, ToolCase, UserPlus, Check, X, Calendar } from 'lucide-react';
 import '../styles/SuperAdminDashboard.css';
 
 const SuperAdminDashboardModified = ({ setCurrentUser, currentUser }) => {
@@ -160,11 +160,25 @@ const SuperAdminDashboardModified = ({ setCurrentUser, currentUser }) => {
             <span>User Management</span>
           </button>
           <button
+            onClick={() => handleNavigation('pending-requests')}
+            className={`sidebar-btn ${location.pathname === '/manager/pending-requests' ? 'active' : ''}`}
+          >
+            <ClipboardList className="btn-icon" />
+            <span>Pending Requests</span>
+          </button>
+          <button
             onClick={() => handleNavigation('maintenance')}
             className={`sidebar-btn ${location.pathname === '/manager/maintenance' ? 'active' : ''}`}
           >
             <ToolCase className="btn-icon" />
             <span>Maintenance</span>
+          </button>
+          <button
+            onClick={() => handleNavigation('reservations')}
+            className={`sidebar-btn ${location.pathname === '/manager/reservations' ? 'active' : ''}`}
+          >
+            <Calendar className="btn-icon" />
+            <span>Reservations</span>
           </button>
         </div>
         <div className="sidebar-footer">
