@@ -18,6 +18,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.http.HttpMethod;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -120,8 +121,10 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/approve-user/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
                 .requestMatchers("/api/auth/reject-user/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
 
-                // Reservation endpoints - allow admin and super admin
-                .requestMatchers("/api/reservations/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
+                // Reservation endpoints
+                .requestMatchers(HttpMethod.POST, "/api/reservations").authenticated() // Allow authenticated users to create reservations
+                .requestMatchers(HttpMethod.GET, "/api/reservations/user/{userId}").hasRole("USER") // Allow users to view their own reservations
+                .requestMatchers("/api/reservations/**").hasAnyRole("ADMIN", "SUPER_ADMIN") // Admin endpoints for all reservations
 
                 // Everything else requires authentication
                 .anyRequest().authenticated()

@@ -188,6 +188,20 @@ public class ReservationController {
     public ResponseEntity<?> getAllReservations() {
         try {
             List<Reservation> reservations = reservationRepository.findAll();
+
+            // Populate user details for reservations that don't have them
+            for (Reservation res : reservations) {
+                if (res.getFirstName() == null || res.getFirstName().isEmpty()) {
+                    Optional<User> userOpt = userRepository.findById(res.getUserId());
+                    if (userOpt.isPresent()) {
+                        User user = userOpt.get();
+                        res.setTitle(user.getTitle());
+                        res.setFirstName(user.getFirstName());
+                        res.setLastName(user.getLastName());
+                    }
+                }
+            }
+
             return ResponseEntity.ok(reservations);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

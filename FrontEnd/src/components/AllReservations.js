@@ -73,9 +73,6 @@ const AllReservations = ({ reservations, setReservations, currentUser, setCurren
     }
   };
 
-  // Filter vehicles that are rented
-  const rentedVehicles = cars.filter(vehicle => vehicle.status?.toLowerCase() === 'rented');
-
   const filteredReservations = reservations.filter(reservation => {
     const matchesSearch = searchTerm === '' ||
       reservation.vehicle?.make?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -163,8 +160,8 @@ const AllReservations = ({ reservations, setReservations, currentUser, setCurren
       <div className="main-content">
         <div className="all-reservations">
           <div className="reservations-header">
-            <h2>Rented Vehicles</h2>
-            <p>View all currently rented vehicles</p>
+            <h2>All Reservations</h2>
+            <p>View and manage all vehicle reservations</p>
           </div>
 
       {/* Filters */}
@@ -191,12 +188,12 @@ const AllReservations = ({ reservations, setReservations, currentUser, setCurren
         </div>
       </div>
 
-      {/* Rented Vehicles Table */}
-      {rentedVehicles.length === 0 ? (
+      {/* All Reservations Table */}
+      {filteredReservations.length === 0 ? (
         <div className="no-reservations">
-          <Car size={48} style={{ color: '#bdc3c7', marginBottom: '1rem' }} />
-          <h3>No Rented Vehicles Found</h3>
-          <p>No vehicles are currently rented.</p>
+          <Calendar size={48} style={{ color: '#bdc3c7', marginBottom: '1rem' }} />
+          <h3>No Reservations Found</h3>
+          <p>No reservations match your current filters.</p>
         </div>
       ) : (
         <div className="reservations-table-container">
@@ -209,86 +206,83 @@ const AllReservations = ({ reservations, setReservations, currentUser, setCurren
                 <th>Booking Dates</th>
                 <th>Status</th>
                 <th>Location</th>
-                <th>Price/Day</th>
+                <th>Total Price</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {rentedVehicles.map(vehicle => {
-                // Find the reservation for this vehicle
-                const reservation = reservations.find(r => r.vehicle?.id === vehicle.id);
-                return (
-                  <tr key={vehicle.id}>
-                    <td>#{vehicle.id}</td>
-                    <td>
-                      {vehicle.make} {vehicle.model}
-                      <div style={{ fontSize: '0.8rem', color: '#666', marginTop: '2px' }}>
-                        {vehicle.year} • {vehicle.vehicleType}
+              {filteredReservations.map(reservation => (
+                <tr key={reservation.id}>
+                  <td>#{reservation.id}</td>
+                  <td>
+                    {reservation.vehicle?.make} {reservation.vehicle?.model}
+                    <div style={{ fontSize: '0.8rem', color: '#666', marginTop: '2px' }}>
+                      {reservation.vehicle?.year} • {reservation.vehicle?.vehicleType}
+                    </div>
+                  </td>
+                  <td>
+                    {reservation.firstName || reservation.lastName
+                      ? `${reservation.title || ''} ${reservation.firstName || ''} ${reservation.lastName || ''}`.trim()
+                      : 'N/A'}
+                  </td>
+                  <td>
+                    <div>
+                      <div>
+                        {reservation.pickupDate
+                          ? new Date(reservation.pickupDate).toLocaleDateString()
+                          : new Date(reservation.rentalDate).toLocaleDateString()
+                        }
                       </div>
-                    </td>
-                    <td>
-                      {reservation ? (
-                        reservation.firstName || reservation.lastName
-                          ? `${reservation.title || ''} ${reservation.firstName || ''} ${reservation.lastName || ''}`.trim()
-                          : 'N/A'
-                      ) : 'N/A'}
-                    </td>
-                    <td>
-                      {reservation ? (
-                        <div>
-                          <div>
-                            {reservation.pickupDate
-                              ? new Date(reservation.pickupDate).toLocaleDateString()
-                              : new Date(reservation.rentalDate).toLocaleDateString()
-                            }
-                          </div>
-                          <div style={{ fontSize: '0.8rem', color: '#666' }}>
-                            to {reservation.dropoffDate
-                              ? new Date(reservation.dropoffDate).toLocaleDateString()
-                              : new Date(reservation.returnDate).toLocaleDateString()
-                            }
-                          </div>
-                        </div>
-                      ) : 'N/A'}
-                    </td>
-                    <td>
-                      <span
-                        className="status-badge"
-                        style={{
-                          backgroundColor: '#f39c12' + '20',
-                          color: '#f39c12'
-                        }}
+                      <div style={{ fontSize: '0.8rem', color: '#666' }}>
+                        to {reservation.dropoffDate
+                          ? new Date(reservation.dropoffDate).toLocaleDateString()
+                          : new Date(reservation.returnDate).toLocaleDateString()
+                        }
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <span
+                      className="status-badge"
+                      style={{
+                        backgroundColor: getStatusColor(reservation.status) + '20',
+                        color: getStatusColor(reservation.status)
+                      }}
+                    >
+                      {reservation.status}
+                    </span>
+                  </td>
+                  <td>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                      <MapPin size={12} style={{ marginRight: '4px' }} />
+                      {reservation.vehicle?.location}
+                    </div>
+                  </td>
+                  <td>
+                    ${reservation.totalPrice?.toFixed(2)} FJD
+                  </td>
+                  <td>
+                    <div className="action-buttons">
+                      <button
+                        onClick={() => setSelectedReservation(reservation)}
+                        className="action-btn view-btn"
+                        title="View Reservation Details"
                       >
-                        Rented
-                      </span>
-                    </td>
-                    <td>
-                      <div style={{ display: 'flex', alignItems: 'center' }}>
-                        <MapPin size={12} style={{ marginRight: '4px' }} />
-                        {vehicle.location}
-                      </div>
-                    </td>
-                    <td>
-                      ${vehicle.pricePerDay?.toFixed(2)} FJD
-                    </td>
-                    <td>
-                      <div className="action-buttons">
+                        <Eye size={16} />
+                      </button>
+                      {reservation.status.toLowerCase() === 'confirmed' && (
                         <button
-                          onClick={() => {
-                            if (reservation) {
-                              setSelectedReservation(reservation);
-                            }
-                          }}
-                          className="action-btn view-btn"
-                          title="View Reservation Details"
+                          onClick={() => cancelReservation(reservation.id)}
+                          className="action-btn cancel-btn"
+                          title="Cancel Reservation"
                         >
-                          <Eye size={16} />
+                          <X size={16} />
                         </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>

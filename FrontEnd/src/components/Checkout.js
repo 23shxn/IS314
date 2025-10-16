@@ -125,10 +125,10 @@ const Checkout = ({ reservations, setReservations, currentUser }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
-
+  
     setLoading(true);
     setError('');
-
+  
     try {
       const data = {
         vehicle: { id: reservation.vehicle.id },
@@ -136,46 +136,49 @@ const Checkout = ({ reservations, setReservations, currentUser }) => {
         rentalDate: formatDateForBackend(reservation.rentalDate),
         returnDate: formatDateForBackend(reservation.returnDate),
         status: 'Confirmed',
-        amenities: amenities,
+        amenities,
         totalPrice: parseFloat(totalPrice.toFixed(2)),
         fullName: formData.fullName,
         email: formData.email,
         phone: formData.phone,
         altPhone: formData.altPhone || null,
-        // Payment info (in real app, this would be processed by payment gateway)
         paymentMethod: 'Credit Card',
         lastFourDigits: formData.cardNumber.slice(-4),
         billingAddress: formData.billingAddress,
         billingCity: formData.billingCity,
         billingZip: formData.billingZip
       };
-
+  
       console.log('Checkout - Booking request data:', data);
-
-      const response = await axios.post('http://localhost:8080/api/reservations', data, {
+  
+      const API_BASE = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8080';
+  
+      const response = await fetch(`${API_BASE}/api/reservations`, {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        withCredentials: true
+        credentials: 'include',
+        body: JSON.stringify(data)
       });
-
-      console.log('Checkout - Booking response:', response.data);
-      setReservations(prev => [...prev, { ...response.data, vehicle: reservation.vehicle }]);
+  
+      if (!response.ok) {
+        const errText = await response.text();
+        throw new Error(errText || `Request failed: ${response.status}`);
+      }
+  
+      const result = await response.json();
+      console.log('Checkout - Booking response:', result);
+  
+      setReservations(prev => [...prev, { ...result, vehicle: reservation.vehicle }]);
       alert(`Successfully booked ${reservation.vehicle.make} ${reservation.vehicle.model}!`);
       navigate('/reservations');
     } catch (err) {
       console.error('Checkout - Booking error:', err);
-      let errorMessage = 'Booking failed. Please try again.';
-      if (err.response?.data?.error) {
-        errorMessage = err.response.data.error;
-      } else if (err.response?.data?.message) {
-        errorMessage = err.response.data.message;
-      } else if (err.response?.data) {
-        errorMessage = typeof err.response.data === 'string' ? err.response.data : JSON.stringify(err.response.data);
-      }
-      setError(errorMessage);
+      setError(err.message || 'Booking failed. Please try again.');
     } finally {
       setLoading(false);
     }
   };
+  
 
   const vehicle = reservation?.vehicle;
   const days = reservation ?
