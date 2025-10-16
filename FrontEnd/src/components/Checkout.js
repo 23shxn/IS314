@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { CalendarDays, MapPin, CheckCircle, CreditCard, Lock } from 'lucide-react';
-import axios from 'axios';
+
 import '../styles/Checkout.css';
 
 const Checkout = ({ reservations, setReservations, currentUser }) => {
@@ -151,9 +151,9 @@ const Checkout = ({ reservations, setReservations, currentUser }) => {
   
       console.log('Checkout - Booking request data:', data);
   
-      const API_BASE = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8080';
+      
   
-      const response = await fetch(`${API_BASE}/api/reservations`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/reservations`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

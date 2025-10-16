@@ -97,23 +97,38 @@ export default function CancelReservation({ reservations, setReservations, curre
 
   const handleCancel = async () => {
     if (feePreview?.cancellationFee > 0 && !validatePayment()) return;
-
+  
     setPaymentLoading(true);
     try {
-      await axios.put(`http://localhost:8080/api/reservations/${id}/cancel`, {}, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/reservations/${id}/cancel`, {
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        withCredentials: true
+        credentials: 'include', // same as axios withCredentials
       });
-      setReservations(prev => prev.map(r => r.id == id ? {...r, status: 'Cancelled'} : r));
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+  
+      setReservations(prev =>
+        prev.map(r => (r.id == id ? { ...r, status: 'Cancelled' } : r))
+      );
+  
       setPaymentLoading(false);
       setShowPayment(false);
-      navigate("/reservations", { state: { successMessage: "Your reservation has been successfully cancelled. A confirmation email has been sent to you." } });
+      navigate('/reservations', {
+        state: {
+          successMessage:
+            'Your reservation has been successfully cancelled. A confirmation email has been sent to you.',
+        },
+      });
     } catch (error) {
       console.error('Error cancelling reservation:', error);
       alert('Failed to cancel reservation. Please try again.');
       setPaymentLoading(false);
     }
   };
+  
 
   // --- Auto formatting + navigation ---
   const handleCardChange = (e) => {

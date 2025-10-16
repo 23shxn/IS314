@@ -511,7 +511,7 @@ const VehicleManagementManager = ({ setCurrentUser }) => {
                     <ChevronLeft size={24} />
                   </button>
                   <img
-                    src={`http://localhost:8080/api/vehicles/images/${vehicle.images[currentImageIndex]}`}
+                    src={`${process.env.REACT_APP_API_URL}/api/vehicles/images/${vehicle.images[currentImageIndex]}`}
                     alt={`${vehicle.make} ${vehicle.model}`}
                     className="vehicle-image-large"
                   />
