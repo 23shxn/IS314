@@ -32,6 +32,7 @@ import VehicleManagement from './components/VehicleManagement';
 import VehicleMaintenance from './components/VehicleMaintenance';
 import VehicleMaintenanceManager from './components/VehicleMaintenanceManager';
 import PendingRequests from './components/PendingRequests';
+import PendingRequestsAdmin from './components/PendingRequestsAdmin';
 import UserManagement from './components/UserManagement';
 import LandingPage from './components/LandingPage';
 import AboutUs from './components/AboutUs';
@@ -410,13 +411,13 @@ const App = () => {
               </AdminRoute>
             } 
           />
-          <Route 
-            path="/admin/pending-requests" 
+          <Route
+            path="/admin/pending-requests"
             element={
               <AdminRoute setCurrentUser={setCurrentUser}>
-                <PendingRequests />
+                <PendingRequestsAdmin />
               </AdminRoute>
-            } 
+            }
           />
           <Route
             path="/admin/reservations"

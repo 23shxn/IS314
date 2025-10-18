@@ -27,34 +27,35 @@ const AdminDashboard = ({ currentUser, cars, reservations, users, pendingRequest
           <h2>Ronaldo's Rentals Admin Dashboard</h2>
         </div>
         <div className="sidebar-menu">
-          <button 
-            onClick={() => handleNavigation('dashboard')} 
+          <button
+            onClick={() => handleNavigation('dashboard')}
             className={`sidebar-btn ${location.pathname === '/admin/dashboard' ? 'active' : ''}`}
           >
             <Layout className="btn-icon" />
             <span>Dashboard</span>
           </button>
-          <button 
-            onClick={() => handleNavigation('vehicles')} 
+          <button
+            onClick={() => handleNavigation('vehicles')}
             className={`sidebar-btn ${location.pathname === '/admin/vehicles' ? 'active' : ''}`}
           >
             <Car className="btn-icon" />
             <span>Vehicle Management</span>
           </button>
-          <button 
-            onClick={() => handleNavigation('pending-requests')} 
+          <button
+            onClick={() => handleNavigation('pending-requests')}
             className={`sidebar-btn ${location.pathname === '/admin/pending-requests' ? 'active' : ''}`}
           >
             <ClipboardList className="btn-icon" />
-            <span>Pending Requests</span>
+            <span>Pending User Requests</span>
           </button>
-          <button 
-            onClick={() => handleNavigation('users')} 
+          <button
+            onClick={() => handleNavigation('users')}
             className={`sidebar-btn ${location.pathname === '/admin/users' ? 'active' : ''}`}
           >
             <Users className="btn-icon" />
-            <span>Customer Infofrmation</span>
+            <span>Customer Information</span>
           </button>
+          
           <button
             onClick={() => handleNavigation('maintenance')}
             className={`sidebar-btn ${location.pathname === '/admin/maintenance' ? 'active' : ''}`}
@@ -81,7 +82,7 @@ const AdminDashboard = ({ currentUser, cars, reservations, users, pendingRequest
         {currentView === 'dashboard' && (
           <div>
             <h2>Dashboard Overview</h2>
-            <p>Welcome to the admin dashboard. Use the sidebar to manage vehicles, review pending registration requests, manage users, or manage maintenance.</p>
+            <p>Welcome to the admin dashboard. Use the sidebar to manage vehicles, review pending user registration requests, manage customers, view reservations, or manage maintenance.</p>
             <div className="dashboard-stats">
               <div className="stat-card">
                 <h3>Total Vehicles</h3>
@@ -96,7 +97,7 @@ const AdminDashboard = ({ currentUser, cars, reservations, users, pendingRequest
                 <p>{users.length}</p>
               </div>
               <div className="stat-card">
-                <h3>Pending Requests</h3>
+                <h3>Pending User Requests</h3>
                 <p>{pendingRequests.length}</p>
               </div>
             </div>

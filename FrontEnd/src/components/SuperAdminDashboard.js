@@ -151,7 +151,6 @@ const SuperAdminDashboard = ({ setCurrentUser, currentUser }) => {
             <Car className="btn-icon" />
             <span>Vehicle Management</span>
           </button>
-
           <button
             onClick={() => handleNavigation('users')}
             className={`sidebar-btn ${location.pathname === '/manager/users' ? 'active' : ''}`}

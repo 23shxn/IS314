@@ -8,7 +8,7 @@ const Navigation = ({ currentUser, setCurrentUser }) => {
   const navigate = useNavigate();
 
   // Don't render navigation for admin users or admin pages
-  if (currentUser?.role === 'admin' || currentUser?.role === 'SUPER_ADMIN' ||
+  if (currentUser?.role === 'ADMIN' || currentUser?.role === 'SUPER_ADMIN' ||
       location.pathname.startsWith('/admin') || location.pathname.startsWith('/manager')) {
     return null;
   }
@@ -20,7 +20,7 @@ const Navigation = ({ currentUser, setCurrentUser }) => {
   };
 
   const isActive = (path) => {
-    return location.pathname === path;
+    return location.pathname === path || (path === '/home' && location.pathname === '/');
   };
 
   return (

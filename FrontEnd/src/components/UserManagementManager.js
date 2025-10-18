@@ -143,34 +143,69 @@ const UserManagementManager = ({ setCurrentUser, currentUser }) => {
             <Car className="btn-icon" />
             <span>Vehicle Management</span>
           </button>
-          <button
-            onClick={() => handleNavigation('users')}
-            className={`sidebar-btn ${location.pathname === `/${isSuperAdmin ? 'manager' : 'admin'}/users` ? 'active' : ''}`}
-          >
-            <Users className="btn-icon" />
-            <span>User Management</span>
-          </button>
-          <button
-            onClick={() => handleNavigation('pending-requests')}
-            className={`sidebar-btn ${location.pathname === '/manager/pending-requests' ? 'active' : ''}`}
-          >
-            <ClipboardList className="btn-icon" />
-            <span>Pending Requests</span>
-          </button>
-          <button
-            onClick={() => handleNavigation('maintenance')}
-            className={`sidebar-btn ${location.pathname === `/${isSuperAdmin ? 'manager' : 'admin'}/maintenance` ? 'active' : ''}`}
-          >
-            <ToolCase className="btn-icon" />
-            <span>Maintenance</span>
-          </button>
-          <button
-            onClick={() => handleNavigation('reservations')}
-            className={`sidebar-btn ${location.pathname === '/manager/reservations' ? 'active' : ''}`}
-          >
-            <Calendar className="btn-icon" />
-            <span>Reservations</span>
-          </button>
+          {isSuperAdmin ? (
+            <>
+              <button
+                onClick={() => handleNavigation('users')}
+                className={`sidebar-btn ${location.pathname === '/manager/users' ? 'active' : ''}`}
+              >
+                <Users className="btn-icon" />
+                <span>User Management</span>
+              </button>
+              <button
+                onClick={() => handleNavigation('pending-requests')}
+                className={`sidebar-btn ${location.pathname === '/manager/pending-requests' ? 'active' : ''}`}
+              >
+                <ClipboardList className="btn-icon" />
+                <span>Pending Requests</span>
+              </button>
+              <button
+                onClick={() => handleNavigation('reservations')}
+                className={`sidebar-btn ${location.pathname === '/manager/reservations' ? 'active' : ''}`}
+              >
+                <Calendar className="btn-icon" />
+                <span>Reservations</span>
+              </button>
+              <button
+                onClick={() => handleNavigation('maintenance')}
+                className={`sidebar-btn ${location.pathname === `/${isSuperAdmin ? 'manager' : 'admin'}/maintenance` ? 'active' : ''}`}
+              >
+                <ToolCase className="btn-icon" />
+                <span>Maintenance</span>
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={() => handleNavigation('pending-requests')}
+                className={`sidebar-btn ${location.pathname === '/admin/pending-requests' ? 'active' : ''}`}
+              >
+                <ClipboardList className="btn-icon" />
+                <span>Pending User Requests</span>
+              </button>
+              <button
+                onClick={() => handleNavigation('users')}
+                className={`sidebar-btn ${location.pathname === '/admin/users' ? 'active' : ''}`}
+              >
+                <Users className="btn-icon" />
+                <span>Customer Information</span>
+              </button>
+              <button
+                onClick={() => handleNavigation('reservations')}
+                className={`sidebar-btn ${location.pathname === '/admin/reservations' ? 'active' : ''}`}
+              >
+                <Calendar className="btn-icon" />
+                <span>Reservations</span>
+              </button>
+              <button
+                onClick={() => handleNavigation('maintenance')}
+                className={`sidebar-btn ${location.pathname === `/${isSuperAdmin ? 'manager' : 'admin'}/maintenance` ? 'active' : ''}`}
+              >
+                <ToolCase className="btn-icon" />
+                <span>Maintenance</span>
+              </button>
+            </>
+          )}
         </div>
         <div className="sidebar-footer">
           <button onClick={handleLogout} className="sidebar-btn logout">

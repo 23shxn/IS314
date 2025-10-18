@@ -122,15 +122,13 @@ const AllReservations = ({ reservations, setReservations, currentUser, setCurren
             <Users className="btn-icon" />
             <span>User Management</span>
           </button>
-          {role === 'SUPER_ADMIN' && (
-            <button
-              onClick={() => navigate('/manager/pending-requests')}
-              className="sidebar-btn"
-            >
-              <ClipboardList className="btn-icon" />
-              <span>Pending Requests</span>
-            </button>
-          )}
+          <button
+            onClick={() => navigate(role === 'SUPER_ADMIN' ? '/manager/pending-requests' : '/admin/pending-requests')}
+            className="sidebar-btn"
+          >
+            <ClipboardList className="btn-icon" />
+            <span>Pending Requests</span>
+          </button>
           <button
             onClick={() => navigate(role === 'SUPER_ADMIN' ? '/manager/maintenance' : '/admin/maintenance')}
             className="sidebar-btn"

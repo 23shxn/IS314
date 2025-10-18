@@ -151,7 +151,6 @@ const SuperAdminDashboardModified = ({ setCurrentUser, currentUser }) => {
             <Car className="btn-icon" />
             <span>Vehicle Management</span>
           </button>
-
           <button
             onClick={() => handleNavigation('users')}
             className={`sidebar-btn ${location.pathname === '/manager/users' ? 'active' : ''}`}
@@ -167,18 +166,18 @@ const SuperAdminDashboardModified = ({ setCurrentUser, currentUser }) => {
             <span>Pending Requests</span>
           </button>
           <button
-            onClick={() => handleNavigation('maintenance')}
-            className={`sidebar-btn ${location.pathname === '/manager/maintenance' ? 'active' : ''}`}
-          >
-            <ToolCase className="btn-icon" />
-            <span>Maintenance</span>
-          </button>
-          <button
             onClick={() => handleNavigation('reservations')}
             className={`sidebar-btn ${location.pathname === '/manager/reservations' ? 'active' : ''}`}
           >
             <Calendar className="btn-icon" />
             <span>Reservations</span>
+          </button>
+          <button
+            onClick={() => handleNavigation('maintenance')}
+            className={`sidebar-btn ${location.pathname === '/manager/maintenance' ? 'active' : ''}`}
+          >
+            <ToolCase className="btn-icon" />
+            <span>Maintenance</span>
           </button>
         </div>
         <div className="sidebar-footer">

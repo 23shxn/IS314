@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { LogOut, Layout, Users, Car, ClipboardList, ToolCase, Check, X, Calendar } from 'lucide-react';
 import '../styles/SuperAdminDashboard.css';
 
-const PendingRequests = ({ setCurrentUser }) => {
+const PendingRequestsAdmin = ({ setCurrentUser }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [requests, setRequests] = useState([]);
@@ -24,13 +24,13 @@ const PendingRequests = ({ setCurrentUser }) => {
     } catch (error) {
       console.error('Logout error:', error);
     }
-    
+
     setCurrentUser(null);
     navigate('/login');
   };
 
   const handleNavigation = (path) => {
-    navigate(`/manager/${path}`);
+    navigate(`/admin/${path}`);
   };
 
   const fetchPendingRequests = async () => {
@@ -63,7 +63,7 @@ const PendingRequests = ({ setCurrentUser }) => {
       setLoading(true);
       const response = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/approve/${requestId}`, {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
@@ -98,7 +98,7 @@ const PendingRequests = ({ setCurrentUser }) => {
       setLoading(true);
       const response = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/reject/${requestId}`, {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
@@ -145,47 +145,47 @@ const PendingRequests = ({ setCurrentUser }) => {
         <div className="sidebar-menu">
           <button
             onClick={() => handleNavigation('dashboard')}
-            className={`sidebar-btn ${location.pathname === '/manager/dashboard' ? 'active' : ''}`}
+            className={`sidebar-btn ${location.pathname === '/admin/dashboard' ? 'active' : ''}`}
           >
             <Layout className="btn-icon" />
             <span>Dashboard</span>
           </button>
           <button
             onClick={() => handleNavigation('vehicles')}
-            className={`sidebar-btn ${location.pathname === '/manager/vehicles' ? 'active' : ''}`}
+            className={`sidebar-btn ${location.pathname === '/admin/vehicles' ? 'active' : ''}`}
           >
             <Car className="btn-icon" />
             <span>Vehicle Management</span>
           </button>
           <button
             onClick={() => handleNavigation('pending-requests')}
-            className={`sidebar-btn ${location.pathname === '/manager/pending-requests' ? 'active' : ''}`}
+            className={`sidebar-btn ${location.pathname === '/admin/pending-requests' ? 'active' : ''}`}
           >
             <ClipboardList className="btn-icon" />
             <span>Pending User Requests</span>
           </button>
           <button
             onClick={() => handleNavigation('users')}
-            className={`sidebar-btn ${location.pathname === '/manager/users' ? 'active' : ''}`}
+            className={`sidebar-btn ${location.pathname === '/admin/users' ? 'active' : ''}`}
           >
             <Users className="btn-icon" />
             <span>Customer Information</span>
           </button>
-          
           <button
             onClick={() => handleNavigation('maintenance')}
-            className={`sidebar-btn ${location.pathname === '/manager/maintenance' ? 'active' : ''}`}
+            className={`sidebar-btn ${location.pathname === '/admin/maintenance' ? 'active' : ''}`}
           >
             <ToolCase className="btn-icon" />
             <span>Maintenance</span>
           </button>
           <button
             onClick={() => handleNavigation('reservations')}
-            className={`sidebar-btn ${location.pathname === '/manager/reservations' ? 'active' : ''}`}
+            className={`sidebar-btn ${location.pathname === '/admin/reservations' ? 'active' : ''}`}
           >
             <Calendar className="btn-icon" />
             <span>Reservations</span>
           </button>
+          
         </div>
         <div className="sidebar-footer">
           <button onClick={handleLogout} className="sidebar-btn logout">
@@ -194,7 +194,7 @@ const PendingRequests = ({ setCurrentUser }) => {
           </button>
         </div>
       </nav>
-      
+
       <div className="main-content">
         <div className="pending-requests">
           <div className="card">
@@ -242,8 +242,8 @@ const PendingRequests = ({ setCurrentUser }) => {
                                   <html>
                                     <head><title>Driver's License - ${request.firstName} ${request.lastName}</title></head>
                                     <body style="margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #f0f0f0;">
-                                      <img src="data:image/jpeg;base64,${request.driversLicenseImage}" 
-                                           alt="Driver's License" 
+                                      <img src="data:image/jpeg;base64,${request.driversLicenseImage}"
+                                           alt="Driver's License"
                                            style="max-width: 100%; max-height: 100%; object-fit: contain;" />
                                     </body>
                                   </html>
@@ -335,4 +335,4 @@ const PendingRequests = ({ setCurrentUser }) => {
   );
 };
 
-export default PendingRequests;
+export default PendingRequestsAdmin;
