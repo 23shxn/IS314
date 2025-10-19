@@ -157,7 +157,7 @@ const UserManagement = ({ setCurrentUser, currentUser }) => {
                 className={`sidebar-btn ${location.pathname === '/manager/pending-requests' ? 'active' : ''}`}
               >
                 <ClipboardList className="btn-icon" />
-                <span>Pending Requests</span>
+                <span>Pending User Requests</span>
               </button>
               <button
                 onClick={() => handleNavigation('maintenance')}
@@ -252,7 +252,6 @@ const UserManagement = ({ setCurrentUser, currentUser }) => {
                                 src={`data:image/jpeg;base64,${user.driversLicenseImage}`}
                                 alt={`${user.firstName}'s license`}
                                 className="license-image"
-                                style={{ maxWidth: '100px', maxHeight: '100px', objectFit: 'cover' }}
                                 onError={(e) => {
                                   e.target.style.display = 'none';
                                   e.target.nextElementSibling.style.display = 'inline';

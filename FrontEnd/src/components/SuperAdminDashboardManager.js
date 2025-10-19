@@ -152,18 +152,26 @@ const SuperAdminDashboardModified = ({ setCurrentUser, currentUser }) => {
             <span>Vehicle Management</span>
           </button>
           <button
+            onClick={() => handleNavigation('pending-requests')}
+            className={`sidebar-btn ${location.pathname === '/manager/pending-requests' ? 'active' : ''}`}
+          >
+            <ClipboardList className="btn-icon" />
+            <span>Pending User Requests</span>
+          </button>
+          <button
             onClick={() => handleNavigation('users')}
             className={`sidebar-btn ${location.pathname === '/manager/users' ? 'active' : ''}`}
           >
             <Users className="btn-icon" />
             <span>User Management</span>
           </button>
+          
           <button
-            onClick={() => handleNavigation('pending-requests')}
-            className={`sidebar-btn ${location.pathname === '/manager/pending-requests' ? 'active' : ''}`}
+            onClick={() => handleNavigation('maintenance')}
+            className={`sidebar-btn ${location.pathname === '/manager/maintenance' ? 'active' : ''}`}
           >
-            <ClipboardList className="btn-icon" />
-            <span>Pending Requests</span>
+            <ToolCase className="btn-icon" />
+            <span>Maintenance</span>
           </button>
           <button
             onClick={() => handleNavigation('reservations')}
@@ -172,13 +180,7 @@ const SuperAdminDashboardModified = ({ setCurrentUser, currentUser }) => {
             <Calendar className="btn-icon" />
             <span>Reservations</span>
           </button>
-          <button
-            onClick={() => handleNavigation('maintenance')}
-            className={`sidebar-btn ${location.pathname === '/manager/maintenance' ? 'active' : ''}`}
-          >
-            <ToolCase className="btn-icon" />
-            <span>Maintenance</span>
-          </button>
+          
         </div>
         <div className="sidebar-footer">
           <button onClick={handleLogout} className="sidebar-btn logout">

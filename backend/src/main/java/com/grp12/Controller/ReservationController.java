@@ -185,29 +185,32 @@ public class ReservationController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<?> getAllReservations() {
-        try {
-            List<Reservation> reservations = reservationRepository.findAll();
+public ResponseEntity<?> getAllReservations() {
+    try {
+        // Use the new query to eagerly fetch vehicles
+        List<Reservation> reservations = reservationRepository.findAllWithVehicle();
 
-            // Populate user details for reservations that don't have them
-            for (Reservation res : reservations) {
-                if (res.getFirstName() == null || res.getFirstName().isEmpty()) {
-                    Optional<User> userOpt = userRepository.findById(res.getUserId());
-                    if (userOpt.isPresent()) {
-                        User user = userOpt.get();
-                        res.setTitle(user.getTitle());
-                        res.setFirstName(user.getFirstName());
-                        res.setLastName(user.getLastName());
-                    }
+        // Populate user details for reservations that don't have them
+        for (Reservation res : reservations) {
+            if (res.getFirstName() == null || res.getFirstName().isEmpty()) {
+                Optional<User> userOpt = userRepository.findById(res.getUserId());
+                if (userOpt.isPresent()) {
+                    User user = userOpt.get();
+                    res.setTitle(user.getTitle());
+                    res.setFirstName(user.getFirstName());
+                    res.setLastName(user.getLastName());
                 }
             }
-
-            return ResponseEntity.ok(reservations);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(Map.of("error", "Failed to get all reservations: " + e.getMessage()));
         }
+
+        return ResponseEntity.ok(reservations);
+    } catch (Exception e) {
+        // Log the full stack trace for debugging
+        e.printStackTrace();
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body(Map.of("error", "Failed to get all reservations: " + e.getMessage()));
     }
+}
 }
 
 class ErrorResponse {

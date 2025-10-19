@@ -152,19 +152,20 @@ const SuperAdminDashboard = ({ setCurrentUser, currentUser }) => {
             <span>Vehicle Management</span>
           </button>
           <button
+            onClick={() => handleNavigation('pending-requests')}
+            className={`sidebar-btn ${location.pathname === '/manager/pending-requests' ? 'active' : ''}`}
+          >
+            <ClipboardList className="btn-icon" />
+            <span>Pending User Requests</span>
+          </button>
+          <button
             onClick={() => handleNavigation('users')}
             className={`sidebar-btn ${location.pathname === '/manager/users' ? 'active' : ''}`}
           >
             <Users className="btn-icon" />
             <span>User Management</span>
           </button>
-          <button
-            onClick={() => handleNavigation('pending-requests')}
-            className={`sidebar-btn ${location.pathname === '/manager/pending-requests' ? 'active' : ''}`}
-          >
-            <ClipboardList className="btn-icon" />
-            <span>Pending Requests</span>
-          </button>
+          
           <button
             onClick={() => handleNavigation('maintenance')}
             className={`sidebar-btn ${location.pathname === '/manager/maintenance' ? 'active' : ''}`}

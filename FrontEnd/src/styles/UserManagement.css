@@ -33,7 +33,7 @@
   
   .users-table th,
   .users-table td {
-    padding: 8px 12px;
+    padding: 4px 12px;
     text-align: left;
     border-bottom: 1px solid #ddd;
   }
@@ -49,6 +49,7 @@
   
   .license-image {
     max-width: 100px;
-    height: auto;
+    height: 50px;
+    object-fit: cover;
     border-radius: 4px;
   }

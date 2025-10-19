@@ -146,19 +146,20 @@ const UserManagementManager = ({ setCurrentUser, currentUser }) => {
           {isSuperAdmin ? (
             <>
               <button
+                onClick={() => handleNavigation('pending-requests')}
+                className={`sidebar-btn ${location.pathname === '/manager/pending-requests' ? 'active' : ''}`}
+              >
+                <ClipboardList className="btn-icon" />
+                <span>Pending User Requests</span>
+              </button>
+              <button
                 onClick={() => handleNavigation('users')}
                 className={`sidebar-btn ${location.pathname === '/manager/users' ? 'active' : ''}`}
               >
                 <Users className="btn-icon" />
                 <span>User Management</span>
               </button>
-              <button
-                onClick={() => handleNavigation('pending-requests')}
-                className={`sidebar-btn ${location.pathname === '/manager/pending-requests' ? 'active' : ''}`}
-              >
-                <ClipboardList className="btn-icon" />
-                <span>Pending Requests</span>
-              </button>
+              
               <button
                 onClick={() => handleNavigation('reservations')}
                 className={`sidebar-btn ${location.pathname === '/manager/reservations' ? 'active' : ''}`}
@@ -251,7 +252,6 @@ const UserManagementManager = ({ setCurrentUser, currentUser }) => {
                                 src={`data:image/jpeg;base64,${user.driversLicenseImage}`}
                                 alt={`${user.firstName}'s license`}
                                 className="license-image"
-                                style={{ maxWidth: '100px', maxHeight: '100px', objectFit: 'cover' }}
                                 onError={(e) => {
                                   e.target.style.display = 'none';
                                   e.target.nextElementSibling.style.display = 'inline';

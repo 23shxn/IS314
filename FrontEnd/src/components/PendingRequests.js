@@ -140,7 +140,7 @@ const PendingRequests = ({ setCurrentUser }) => {
     <div className="admin-dashboard">
       <nav className="sidebar">
         <div className="sidebar-header">
-          <h2>Ronaldo's Rentals Admin Dashboard</h2>
+          <h2>Ronaldo's Rentals Super Admin Dashboard</h2>
         </div>
         <div className="sidebar-menu">
           <button
@@ -169,7 +169,7 @@ const PendingRequests = ({ setCurrentUser }) => {
             className={`sidebar-btn ${location.pathname === '/manager/users' ? 'active' : ''}`}
           >
             <Users className="btn-icon" />
-            <span>Customer Information</span>
+            <span>User Management</span>
           </button>
           
           <button
