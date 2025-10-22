@@ -36,6 +36,7 @@ const Breadcrumbs = () => {
     '/manager/dashboard': 'Manager Dashboard',
     '/manager/vehicles': 'Vehicle Management',
     '/manager/vehicles/add': 'Add Vehicle',
+    '/manager/vehicles/edit': 'Edit Vehicle',
     '/manager/maintenance': 'Vehicle Maintenance',
     '/manager/pending-requests': 'Pending Requests',
     '/manager/users': 'User Management',

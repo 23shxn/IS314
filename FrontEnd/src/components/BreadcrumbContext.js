@@ -37,6 +37,8 @@ export const BreadcrumbProvider = ({ children }) => {
           trail.push('/manager/vehicles');
         } else if (location.pathname === '/manager/vehicles/add') {
           trail.push('/manager/vehicles', '/manager/vehicles/add');
+        } else if (location.pathname.startsWith('/manager/vehicles/edit/')) {
+          trail.push('/manager/vehicles', location.pathname);
         } else if (location.pathname === '/manager/maintenance') {
           trail.push('/manager/maintenance');
         } else if (location.pathname === '/manager/pending-requests') {

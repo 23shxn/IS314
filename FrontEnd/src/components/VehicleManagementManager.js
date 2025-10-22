@@ -150,8 +150,7 @@ const VehicleManagementManager = ({ setCurrentUser }) => {
   const [error, setError] = useState('');
   const [viewingVehicle, setViewingVehicle] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [editingVehicle, setEditingVehicle] = useState(null);
-  const [showEditForm, setShowEditForm] = useState(false);
+
   const [currentAdmin, setCurrentAdmin] = useState(null);
   const [pendingRequests, setPendingRequests] = useState([]);
   const [vehicleDetails, setVehicleDetails] = useState({});
@@ -396,73 +395,7 @@ const VehicleManagementManager = ({ setCurrentUser }) => {
 
 
 
-  const handleEditVehicle = async (e) => {
-    e.preventDefault();
-    setFormError('');
 
-    const errors = validateForm(editingVehicle);
-    if (Object.keys(errors).length > 0) {
-      setFormError(Object.values(errors).join('; '));
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const formData = new FormData();
-      formData.append('id', editingVehicle.id);
-      formData.append('licensePlate', editingVehicle.licensePlate);
-      formData.append('make', editingVehicle.make);
-      formData.append('model', editingVehicle.model);
-      formData.append('year', editingVehicle.year);
-      formData.append('vehicleType', editingVehicle.vehicleType);
-      formData.append('color', editingVehicle.color);
-      formData.append('vin', editingVehicle.vin || '');
-      formData.append('fuelType', editingVehicle.fuelType);
-      formData.append('transmission', editingVehicle.transmission);
-      formData.append('seatingCapacity', editingVehicle.seatingCapacity);
-      formData.append('mileage', editingVehicle.mileage || '');
-      formData.append('pricePerDay', editingVehicle.pricePerDay);
-      formData.append('location', editingVehicle.location);
-      formData.append('description', editingVehicle.description || '');
-      formData.append('features', editingVehicle.features || '');
-      if (editingVehicle.vehicleImage1) formData.append('vehicleImage1', editingVehicle.vehicleImage1);
-      if (editingVehicle.vehicleImage2) formData.append('vehicleImage2', editingVehicle.vehicleImage2);
-      if (editingVehicle.vehicleImage3) formData.append('vehicleImage3', editingVehicle.vehicleImage3);
-
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/vehicles`, {
-        method: 'PUT',
-        body: formData,
-        credentials: 'include'
-      });
-
-      if (response.ok) {
-        alert('Vehicle updated successfully');
-        setShowEditForm(false);
-        setEditingVehicle(null);
-        fetchVehicles();
-      } else {
-        const errorData = await response.json();
-        setFormError(errorData.error || 'Failed to update vehicle');
-      }
-    } catch (error) {
-      console.error('Error updating vehicle:', error);
-      setFormError('Failed to connect to server');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleEditInputChange = (field, value) => {
-    setEditingVehicle(prev => ({ ...prev, [field]: value }));
-  };
-
-  const handleEditImageChange = (field, file) => {
-    if (file && file.size > 5 * 1024 * 1024) {
-      alert('Image size must be less than 5MB');
-      return;
-    }
-    setEditingVehicle(prev => ({ ...prev, [field]: file }));
-  };
 
   const handleStatusUpdate = async (vehicleId, status) => {
     if (!window.confirm(`Are you sure you want to change status to ${status}?`)) return;
@@ -635,42 +568,7 @@ const VehicleManagementManager = ({ setCurrentUser }) => {
 
 
 
-        {showEditForm && editingVehicle && (
-          <div className="modal-overlay" onClick={() => setShowEditForm(false)}>
-            <div className="modal-content form-modal" onClick={(e) => e.stopPropagation()}>
-              <div className="modal-header">
-                <h2>Edit Vehicle</h2>
-                <button onClick={() => setShowEditForm(false)} className="close-btn"><X size={24} /></button>
-              </div>
-              <form onSubmit={handleEditVehicle} className="vehicle-form">
-                {/* Similar form fields as add, but populated with editingVehicle values */}
-                <div className="form-grid">
-                  <div className="form-group">
-                    <label>License Plate *</label>
-                    <input
-                      type="text"
-                      value={editingVehicle.licensePlate}
-                      onChange={(e) => handleEditInputChange('licensePlate', e.target.value.toUpperCase())}
-                      placeholder="AB 123"
-                      required
-                    />
-                  </div>
-                  {/* ... Repeat other inputs similar to add form, using handleEditInputChange ... */}
-                  {/* For brevity, assuming similar structure; expand as needed */}
-                </div>
-                {/* Images section similar to add form, using handleEditImageChange */}
-                <div className="form-actions">
-                  <button type="button" onClick={() => setShowEditForm(false)} className="btn-secondary">
-                    Cancel
-                  </button>
-                  <button type="submit" className="btn-primary" disabled={loading}>
-                    {loading ? 'Updating...' : 'Update Vehicle'}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
+
 
         {pendingRequests.length > 0 && isSuperAdmin() && (
           <div className="pending-section">
@@ -876,10 +774,7 @@ const VehicleManagementManager = ({ setCurrentUser }) => {
                       </button>
 
                       <button
-                        onClick={() => {
-                          setEditingVehicle(vehicle);
-                          setShowEditForm(true);
-                        }}
+                        onClick={() => navigate(`/manager/vehicles/edit/${vehicle.id}`)}
                         className="action-btn edit"
                         disabled={loading}
                         title="Edit Vehicle Details"

@@ -49,6 +49,7 @@ import CarDetail from './components/CarDetail';
 import Checkout from './components/Checkout';
 import Cancellation from './components/Cancellation';
 import AllReservations from './components/AllReservations';
+import EditVehicleManager from './components/EditVehicleManager';
 
 const App = () => {
   const [currentUser, setCurrentUser] = useState(null);
@@ -372,6 +373,14 @@ const App = () => {
             element={
               <SuperAdminRoute setCurrentUser={setCurrentUser}>
                 <AddVehicleManager />
+              </SuperAdminRoute>
+            }
+          />
+          <Route
+            path="/manager/vehicles/edit/:id"
+            element={
+              <SuperAdminRoute setCurrentUser={setCurrentUser}>
+                <EditVehicleManager />
               </SuperAdminRoute>
             }
           />
