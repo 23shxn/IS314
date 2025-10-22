@@ -148,35 +148,14 @@ const VehicleManagementManager = ({ setCurrentUser }) => {
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [showAddForm, setShowAddForm] = useState(false);
   const [viewingVehicle, setViewingVehicle] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [newVehicle, setNewVehicle] = useState({
-    licensePlate: '',
-    make: '',
-    model: '',
-    year: '',
-    vehicleType: '',
-    color: '',
-    vin: '',
-    fuelType: '',
-    transmission: '',
-    seatingCapacity: '',
-    mileage: '',
-    pricePerDay: '',
-    location: '',
-    description: '',
-    features: '',
-    vehicleImage1: null,
-    vehicleImage2: null,
-    vehicleImage3: null
-  });
-  const [formError, setFormError] = useState('');
   const [editingVehicle, setEditingVehicle] = useState(null);
   const [showEditForm, setShowEditForm] = useState(false);
   const [currentAdmin, setCurrentAdmin] = useState(null);
   const [pendingRequests, setPendingRequests] = useState([]);
   const [vehicleDetails, setVehicleDetails] = useState({});
+  const [formError, setFormError] = useState('');
 
   const approveRequest = async (requestId) => {
     if (!window.confirm('Are you sure you want to approve this request?')) return;
@@ -411,158 +390,11 @@ const VehicleManagementManager = ({ setCurrentUser }) => {
     }
   };
 
-  const handleAddVehicle = async (e) => {
-    e.preventDefault();
-    setFormError('');
-
-    const errors = validateForm(newVehicle);
-    if (Object.keys(errors).length > 0) {
-      setFormError(Object.values(errors).join('; '));
-      return;
-    }
-
-    if (!isSuperAdmin()) {
-      // For regular admins, submit pending request
-      setLoading(true);
-      try {
-        const formData = new FormData();
-        formData.append('make', newVehicle.make);
-        formData.append('model', newVehicle.model);
-        formData.append('vehicleType', newVehicle.vehicleType);
-        formData.append('year', newVehicle.year);
-        formData.append('color', newVehicle.color);
-        formData.append('licensePlate', newVehicle.licensePlate);
-        formData.append('vin', newVehicle.vin || '');
-        formData.append('fuelType', newVehicle.fuelType);
-        formData.append('transmission', newVehicle.transmission);
-        formData.append('seatingCapacity', newVehicle.seatingCapacity);
-        formData.append('mileage', newVehicle.mileage || '');
-        formData.append('pricePerDay', newVehicle.pricePerDay);
-        formData.append('location', newVehicle.location);
-        formData.append('description', newVehicle.description || '');
-        formData.append('features', newVehicle.features || '');
-        if (newVehicle.vehicleImage1) formData.append('vehicleImage1', newVehicle.vehicleImage1);
-        if (newVehicle.vehicleImage2) formData.append('vehicleImage2', newVehicle.vehicleImage2);
-        if (newVehicle.vehicleImage3) formData.append('vehicleImage3', newVehicle.vehicleImage3);
-
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/vehicles/pending/add`, {
-          method: 'POST',
-          body: formData,
-          credentials: 'include'
-        });
-
-        if (response.ok) {
-          alert('Vehicle add request submitted for approval');
-          setShowAddForm(false);
-          setNewVehicle({
-            licensePlate: '',
-            make: '',
-            model: '',
-            year: '',
-            vehicleType: '',
-            color: '',
-            vin: '',
-            fuelType: '',
-            transmission: '',
-            seatingCapacity: '',
-            mileage: '',
-            pricePerDay: '',
-            location: '',
-            description: '',
-            features: '',
-            vehicleImage1: null,
-            vehicleImage2: null,
-            vehicleImage3: null
-          });
-        } else {
-          const errorData = await response.json();
-          setFormError(errorData.error || 'Failed to submit add request');
-        }
-      } catch (error) {
-        console.error('Error submitting add request:', error);
-        setFormError('Failed to connect to server');
-      } finally {
-        setLoading(false);
-      }
-      return;
-    }
-
-    // For super admins, direct add
-    setLoading(true);
-    try {
-      const formData = new FormData();
-      formData.append('licensePlate', newVehicle.licensePlate);
-      formData.append('make', newVehicle.make);
-      formData.append('model', newVehicle.model);
-      formData.append('year', newVehicle.year);
-      formData.append('vehicleType', newVehicle.vehicleType);
-      formData.append('color', newVehicle.color);
-      formData.append('vin', newVehicle.vin);
-      formData.append('fuelType', newVehicle.fuelType);
-      formData.append('transmission', newVehicle.transmission);
-      formData.append('seatingCapacity', newVehicle.seatingCapacity);
-      formData.append('mileage', newVehicle.mileage || '');
-      formData.append('pricePerDay', newVehicle.pricePerDay);
-      formData.append('location', newVehicle.location);
-      formData.append('description', newVehicle.description);
-      formData.append('features', newVehicle.features);
-      if (newVehicle.vehicleImage1) formData.append('vehicleImage1', newVehicle.vehicleImage1);
-      if (newVehicle.vehicleImage2) formData.append('vehicleImage2', newVehicle.vehicleImage2);
-      if (newVehicle.vehicleImage3) formData.append('vehicleImage3', newVehicle.vehicleImage3);
-
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/vehicles`, {
-        method: 'POST',
-        body: formData,
-        credentials: 'include'
-      });
-
-      if (response.ok) {
-        alert('Vehicle added successfully');
-        setShowAddForm(false);
-        setNewVehicle({
-          licensePlate: '',
-          make: '',
-          model: '',
-          year: '',
-          vehicleType: '',
-          color: '',
-          vin: '',
-          fuelType: '',
-          transmission: '',
-          seatingCapacity: '',
-          mileage: '',
-          pricePerDay: '',
-          location: '',
-          description: '',
-          features: '',
-          vehicleImage1: null,
-          vehicleImage2: null,
-          vehicleImage3: null
-        });
-        fetchVehicles();
-      } else {
-        const errorData = await response.json();
-        setFormError(errorData.error || 'Failed to add vehicle');
-      }
-    } catch (error) {
-      console.error('Error adding vehicle:', error);
-      setFormError('Failed to connect to server');
-    } finally {
-      setLoading(false);
-    }
+  const handleAddVehicle = () => {
+    navigate('/manager/vehicles/add');
   };
 
-  const handleInputChange = (field, value) => {
-    setNewVehicle(prev => ({ ...prev, [field]: value }));
-  };
 
-  const handleImageChange = (field, file) => {
-    if (file && file.size > 5 * 1024 * 1024) { // 5MB limit
-      alert('Image size must be less than 5MB');
-      return;
-    }
-    setNewVehicle(prev => ({ ...prev, [field]: file }));
-  };
 
   const handleEditVehicle = async (e) => {
     e.preventDefault();
@@ -792,8 +624,8 @@ const VehicleManagementManager = ({ setCurrentUser }) => {
           <h1>Vehicle Management</h1>
           {error && <div className="error-message">{error}</div>}
           {formError && <div className="form-error">{formError}</div>}
-          <button 
-            onClick={() => setShowAddForm(true)} 
+          <button
+            onClick={handleAddVehicle}
             className="btn-primary add-vehicle-btn"
             disabled={loading}
           >
@@ -801,228 +633,7 @@ const VehicleManagementManager = ({ setCurrentUser }) => {
           </button>
         </div>
 
-        {showAddForm && (
-          <div className="modal-overlay" onClick={() => setShowAddForm(false)}>
-            <div className="modal-content form-modal" onClick={(e) => e.stopPropagation()}>
-              <div className="modal-header">
-                <h2>Add New Vehicle</h2>
-                <button onClick={() => setShowAddForm(false)} className="close-btn"><X size={24} /></button>
-              </div>
-              <form onSubmit={handleAddVehicle} className="vehicle-form">
-                <div className="form-grid">
-                  <div className="form-group">
-                    <label>License Plate *</label>
-                    <input
-                      type="text"
-                      value={newVehicle.licensePlate}
-                      onChange={(e) => handleInputChange('licensePlate', e.target.value.toUpperCase())}
-                      placeholder="AB 123"
-                      required
-                      maxLength={10}
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>Make *</label>
-                    <input
-                      type="text"
-                      value={newVehicle.make}
-                      onChange={(e) => handleInputChange('make', e.target.value)}
-                      placeholder="Toyota"
-                      required
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>Model *</label>
-                    <input
-                      type="text"
-                      value={newVehicle.model}
-                      onChange={(e) => handleInputChange('model', e.target.value)}
-                      placeholder="Camry"
-                      required
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>Year *</label>
-                    <input
-                      type="number"
-                      value={newVehicle.year}
-                      onChange={(e) => handleInputChange('year', e.target.value)}
-                      min="1900"
-                      max={new Date().getFullYear()}
-                      required
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>Vehicle Type *</label>
-                    <select
-                      value={newVehicle.vehicleType}
-                      onChange={(e) => handleInputChange('vehicleType', e.target.value)}
-                      required
-                    >
-                      <option value="">Select Type</option>
-                      <option value="Sedan">Sedan</option>
-                      <option value="SUV">SUV</option>
-                      <option value="Truck">Truck</option>
-                      <option value="Van">Van</option>
-                    </select>
-                  </div>
-                  <div className="form-group">
-                    <label>Color</label>
-                    <input
-                      type="text"
-                      value={newVehicle.color}
-                      onChange={(e) => handleInputChange('color', e.target.value)}
-                      placeholder="Blue"
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>VIN</label>
-                    <input
-                      type="text"
-                      value={newVehicle.vin}
-                      onChange={(e) => handleInputChange('vin', e.target.value.toUpperCase())}
-                      placeholder="1HGCM82633A004352"
-                      maxLength={17}
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>Fuel Type *</label>
-                    <select
-                      value={newVehicle.fuelType}
-                      onChange={(e) => handleInputChange('fuelType', e.target.value)}
-                      required
-                    >
-                      <option value="">Select Fuel</option>
-                      <option value="Petrol">Petrol</option>
-                      <option value="Diesel">Diesel</option>
-                      <option value="Electric">Electric</option>
-                      <option value="Hybrid">Hybrid</option>
-                    </select>
-                  </div>
-                  <div className="form-group">
-                    <label>Transmission *</label>
-                    <select
-                      value={newVehicle.transmission}
-                      onChange={(e) => handleInputChange('transmission', e.target.value)}
-                      required
-                    >
-                      <option value="">Select Transmission</option>
-                      <option value="Automatic">Automatic</option>
-                      <option value="Manual">Manual</option>
-                    </select>
-                  </div>
-                  <div className="form-group">
-                    <label>Seating Capacity *</label>
-                    <input
-                      type="number"
-                      value={newVehicle.seatingCapacity}
-                      onChange={(e) => handleInputChange('seatingCapacity', e.target.value)}
-                      min="2"
-                      max="50"
-                      required
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>Mileage (km)</label>
-                    <input
-                      type="number"
-                      value={newVehicle.mileage}
-                      onChange={(e) => handleInputChange('mileage', e.target.value)}
-                      min="0"
-                      max="500000"
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>Price per Day (FJD) *</label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={newVehicle.pricePerDay}
-                      onChange={(e) => handleInputChange('pricePerDay', e.target.value)}
-                      min="0"
-                      required
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>Location *</label>
-                    <select
-                      value={newVehicle.location}
-                      onChange={(e) => handleInputChange('location', e.target.value)}
-                      required
-                    >
-                      <option value="">Select Location</option>
-                      <option value="Suva">Suva</option>
-                      <option value="Nadi">Nadi</option>
-                      <option value="Lautoka">Lautoka</option>
-                    </select>
-                  </div>
-                </div>
-                <div className="form-group full-width">
-                  <label>Description</label>
-                  <textarea
-                    value={newVehicle.description}
-                    onChange={(e) => handleInputChange('description', e.target.value)}
-                    placeholder="Vehicle description..."
-                    rows={3}
-                  />
-                </div>
-                <div className="form-group full-width">
-                  <label>Features</label>
-                  <textarea
-                    value={newVehicle.features}
-                    onChange={(e) => handleInputChange('features', e.target.value)}
-                    placeholder="Key features (comma-separated)..."
-                    rows={3}
-                  />
-                </div>
-                <div className="images-section">
-                  <h4>Vehicle Images (Optional)</h4>
-                  <div className="image-upload-group">
-                    <label>Image 1</label>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => handleImageChange('vehicleImage1', e.target.files[0])}
-                    />
-                    {newVehicle.vehicleImage1 && newVehicle.vehicleImage1.name && (
-                      <p>Selected: {newVehicle.vehicleImage1.name}</p>
-                    )}
-                  </div>
-                  <div className="image-upload-group">
-                    <label>Image 2</label>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => handleImageChange('vehicleImage2', e.target.files[0])}
-                    />
-                    {newVehicle.vehicleImage2 && newVehicle.vehicleImage2.name && (
-                      <p>Selected: {newVehicle.vehicleImage2.name}</p>
-                    )}
-                  </div>
-                  <div className="image-upload-group">
-                    <label>Image 3</label>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => handleImageChange('vehicleImage3', e.target.files[0])}
-                    />
-                    {newVehicle.vehicleImage3 && newVehicle.vehicleImage3.name && (
-                      <p>Selected: {newVehicle.vehicleImage3.name}</p>
-                    )}
-                  </div>
-                </div>
-                <div className="form-actions">
-                  <button type="button" onClick={() => setShowAddForm(false)} className="btn-secondary">
-                    Cancel
-                  </button>
-                  <button type="submit" className="btn-primary" disabled={loading}>
-                    {loading ? 'Adding...' : 'Add Vehicle'}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
+
 
         {showEditForm && editingVehicle && (
           <div className="modal-overlay" onClick={() => setShowEditForm(false)}>

@@ -24,6 +24,8 @@ import AdminLogin from './components/AdminLogin';
 import Navigation from './components/Navigation';
 import Breadcrumbs from './components/Breadcrumbs';
 import Footer from './components/Footer';
+import AdminPageWrapper from './components/AdminPageWrapper';
+import ManagerPageWrapper from './components/ManagerPageWrapper';
 import CustomerDashboard from './components/CustomerDashboard';
 import VehicleSearch from './components/VehicleSearch';
 import ReservationManagement from './components/ReservationManagement';
@@ -31,6 +33,7 @@ import AdminDashboard from './components/AdminDashboard';
 import SuperAdminDashboardManager from './components/SuperAdminDashboardManager';
 import UserManagementManager from './components/UserManagementManager';
 import VehicleManagementManager from './components/VehicleManagementManager';
+import AddVehicleManager from './components/AddVehicleManager';
 import VehicleManagement from './components/VehicleManagement';
 import VehicleMaintenance from './components/VehicleMaintenance';
 import VehicleMaintenanceManager from './components/VehicleMaintenanceManager';
@@ -140,7 +143,11 @@ const App = () => {
     if (currentUser.role !== 'ADMIN') {
       return <Navigate to="/admin/login" replace />;
     }
-    return React.cloneElement(children, { currentUser, setCurrentUser, cars, users, pendingRequests });
+    return (
+      <AdminPageWrapper>
+        {React.cloneElement(children, { currentUser, setCurrentUser, cars, users, pendingRequests })}
+      </AdminPageWrapper>
+    );
   };
 
   // Component to protect super admin routes
@@ -151,7 +158,11 @@ const App = () => {
     if (currentUser.role !== 'SUPER_ADMIN') {
       return <Navigate to="/admin/login" replace />;
     }
-    return React.cloneElement(children, { currentUser, setCurrentUser, cars, users, pendingRequests });
+    return (
+      <ManagerPageWrapper>
+        {React.cloneElement(children, { currentUser, setCurrentUser, cars, users, pendingRequests })}
+      </ManagerPageWrapper>
+    );
   };
 
   // Component to protect customer routes
@@ -353,6 +364,14 @@ const App = () => {
             element={
               <SuperAdminRoute setCurrentUser={setCurrentUser}>
                 <VehicleManagementManager />
+              </SuperAdminRoute>
+            }
+          />
+          <Route
+            path="/manager/vehicles/add"
+            element={
+              <SuperAdminRoute setCurrentUser={setCurrentUser}>
+                <AddVehicleManager />
               </SuperAdminRoute>
             }
           />

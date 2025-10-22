@@ -320,6 +320,7 @@
   justify-content: center;
   z-index: 1000;
   padding: 20px;
+  overflow: hidden;
 }
 
 .modal-content {
@@ -330,6 +331,14 @@
   max-height: 90vh;
   overflow-y: auto;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.modal-content select {
+  overflow: visible;
+}
+
+.modal-content .form-modal {
+  overflow-y: visible;
 }
 
 .modal-header {

@@ -73,18 +73,25 @@ const AllReservations = ({ reservations, setReservations, currentUser, setCurren
     }
   };
 
-  const filteredReservations = reservations.filter(reservation => {
-    const matchesSearch = searchTerm === '' ||
-      reservation.vehicle?.make?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      reservation.vehicle?.model?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      reservation.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      reservation.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      reservation.id.toString().includes(searchTerm);
+  const filteredReservations = reservations
+    .filter(reservation => {
+      const matchesSearch = searchTerm === '' ||
+        reservation.vehicle?.make?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        reservation.vehicle?.model?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        reservation.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        reservation.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        reservation.id.toString().includes(searchTerm);
 
-    const matchesStatus = statusFilter === 'all' || reservation.status.toLowerCase() === statusFilter.toLowerCase();
+      const matchesStatus = statusFilter === 'all' || reservation.status.toLowerCase() === statusFilter.toLowerCase();
 
-    return matchesSearch && matchesStatus;
-  });
+      return matchesSearch && matchesStatus;
+    })
+    .sort((a, b) => {
+      // Sort by newest first (createdAt or id as fallback)
+      const dateA = new Date(a.createdAt || a.id);
+      const dateB = new Date(b.createdAt || b.id);
+      return dateB - dateA;
+    });
 
   if (loading) {
     return (

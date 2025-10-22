@@ -3,6 +3,7 @@
   padding: 10px 20px;
   border-bottom: 1px solid #e9ecef;
   font-size: 14px;
+  margin-top: 80px; /* Push below navigation bar */
 }
 
 .breadcrumb-list {
@@ -11,6 +12,7 @@
   margin: 0;
   display: flex;
   align-items: center;
+  justify-content: center;
   flex-wrap: wrap;
 }
 
