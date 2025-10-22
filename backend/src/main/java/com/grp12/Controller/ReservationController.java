@@ -13,15 +13,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.GrantedAuthority;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.math.BigDecimal;
 
 @RestController
 @RequestMapping("/api/reservations")
-
 public class ReservationController {
 
     @Autowired
@@ -33,7 +37,6 @@ public class ReservationController {
     @Autowired
     private EmailService emailService;
 
-   
     @Autowired
     private ReservationRepository reservationRepository;
 
@@ -63,7 +66,7 @@ public class ReservationController {
                 return ResponseEntity.status(400).body(new ErrorResponse("Total price is required"));
             }
             if (reservation.getCreatedAt() == null) {
-                reservation.setCreatedAt(java.time.LocalDateTime.now());
+                reservation.setCreatedAt(LocalDateTime.now());
             }
 
             // Fetch vehicle from database
@@ -91,7 +94,7 @@ public class ReservationController {
             Reservation savedReservation = reservationService.createReservation(reservation);
 
             // Mark vehicle as rented after successful reservation
-            vehicle.setStatus("Rented"); 
+            vehicle.setStatus("Rented");
             vehicleRepository.save(vehicle);
 
             // Send reservation confirmation email
@@ -135,12 +138,31 @@ public class ReservationController {
     @PutMapping("/{id}/cancel")
     public ResponseEntity<?> cancelReservation(@PathVariable Long id) {
         try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN") || auth.getAuthority().equals("ROLE_SUPER_ADMIN"));
+
             Optional<Reservation> reservationOpt = reservationRepository.findById(id);
             if (!reservationOpt.isPresent()) {
                 return ResponseEntity.notFound().build();
             }
 
             Reservation reservation = reservationOpt.get();
+
+            if (!isAdmin) {
+                // Must be a regular user, check ownership
+                String currentUserEmail = authentication.getName();
+                Optional<User> currentUserOpt = userRepository.findByEmailForAuth(currentUserEmail);
+                if (!currentUserOpt.isPresent()) {
+                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "User not authenticated"));
+                }
+                User currentUser = currentUserOpt.get();
+                boolean isOwner = reservation.getUserId().equals(currentUser.getId());
+                if (!isOwner) {
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", "You can only cancel your own reservations"));
+                }
+            }
+            // If admin or owner, proceed
 
             // Update reservation status
             reservation.setStatus("Cancelled");
@@ -149,7 +171,7 @@ public class ReservationController {
             // Update vehicle status - make it available again
             Vehicle vehicle = reservation.getVehicle();
             if (vehicle != null) {
-                vehicle.setStatus("Available"); 
+                vehicle.setStatus("Available");
                 vehicleRepository.save(vehicle);
             }
 
@@ -172,10 +194,27 @@ public class ReservationController {
         }
     }
 
-  
     @GetMapping("/user/{userId}")
-    public ResponseEntity<?> getUserReservations(@PathVariable Long userId) {
+    public ResponseEntity<?> getUserReservations(@PathVariable Long userId, Authentication authentication) {
         try {
+            boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN") || auth.getAuthority().equals("ROLE_SUPER_ADMIN"));
+
+            if (!isAdmin) {
+                // Must be a regular user, check ownership
+                String currentUserEmail = authentication.getName();
+                Optional<User> currentUserOpt = userRepository.findByEmailForAuth(currentUserEmail);
+                if (!currentUserOpt.isPresent()) {
+                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "User not authenticated"));
+                }
+                User currentUser = currentUserOpt.get();
+                boolean isOwner = userId.equals(currentUser.getId());
+                if (!isOwner) {
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", "You can only view your own reservations"));
+                }
+            }
+            // If admin or owner, proceed
+
             List<Reservation> reservations = reservationRepository.findByUserId(userId);
             return ResponseEntity.ok(reservations);
         } catch (Exception e) {
@@ -185,32 +224,32 @@ public class ReservationController {
     }
 
     @GetMapping("/all")
-public ResponseEntity<?> getAllReservations() {
-    try {
-        // Use the new query to eagerly fetch vehicles
-        List<Reservation> reservations = reservationRepository.findAllWithVehicle();
+    public ResponseEntity<?> getAllReservations() {
+        try {
+            // Use the new query to eagerly fetch vehicles
+            List<Reservation> reservations = reservationRepository.findAllWithVehicle();
 
-        // Populate user details for reservations that don't have them
-        for (Reservation res : reservations) {
-            if (res.getFirstName() == null || res.getFirstName().isEmpty()) {
-                Optional<User> userOpt = userRepository.findById(res.getUserId());
-                if (userOpt.isPresent()) {
-                    User user = userOpt.get();
-                    res.setTitle(user.getTitle());
-                    res.setFirstName(user.getFirstName());
-                    res.setLastName(user.getLastName());
+            // Populate user details for reservations that don't have them
+            for (Reservation res : reservations) {
+                if (res.getFirstName() == null || res.getFirstName().isEmpty()) {
+                    Optional<User> userOpt = userRepository.findById(res.getUserId());
+                    if (userOpt.isPresent()) {
+                        User user = userOpt.get();
+                        res.setTitle(user.getTitle());
+                        res.setFirstName(user.getFirstName());
+                        res.setLastName(user.getLastName());
+                    }
                 }
             }
-        }
 
-        return ResponseEntity.ok(reservations);
-    } catch (Exception e) {
-        // Log the full stack trace for debugging
-        e.printStackTrace();
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-            .body(Map.of("error", "Failed to get all reservations: " + e.getMessage()));
+            return ResponseEntity.ok(reservations);
+        } catch (Exception e) {
+            // Log the full stack trace for debugging
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("error", "Failed to get all reservations: " + e.getMessage()));
+        }
     }
-}
 }
 
 class ErrorResponse {
@@ -237,9 +276,9 @@ class ReservationResponse {
     private LocalDate returnDate;
     private String status;
     private List<String> amenities;
-    private java.math.BigDecimal totalPrice;
-    private java.time.LocalDateTime createdAt;
-    private java.time.LocalDateTime updatedAt;
+    private BigDecimal totalPrice;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     // Getters and setters
     public Long getId() { return id; }
@@ -256,10 +295,10 @@ class ReservationResponse {
     public void setStatus(String status) { this.status = status; }
     public List<String> getAmenities() { return amenities; }
     public void setAmenities(List<String> amenities) { this.amenities = amenities; }
-    public java.math.BigDecimal getTotalPrice() { return totalPrice; }
-    public void setTotalPrice(java.math.BigDecimal totalPrice) { this.totalPrice = totalPrice; }
-    public java.time.LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(java.time.LocalDateTime createdAt) { this.createdAt = createdAt; }
-    public java.time.LocalDateTime getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(java.time.LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+    public BigDecimal getTotalPrice() { return totalPrice; }
+    public void setTotalPrice(BigDecimal totalPrice) { this.totalPrice = totalPrice; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 }

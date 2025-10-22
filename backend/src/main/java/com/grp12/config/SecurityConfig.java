@@ -123,7 +123,8 @@ public class SecurityConfig {
 
                 // Reservation endpoints
                 .requestMatchers(HttpMethod.POST, "/api/reservations").authenticated() // Allow authenticated users to create reservations
-                .requestMatchers(HttpMethod.GET, "/api/reservations/user/{userId}").hasRole("USER") // Allow users to view their own reservations
+                .requestMatchers(HttpMethod.GET, "/api/reservations/user/{userId}").authenticated() // Allow authenticated users; controller checks ownership/admin
+                .requestMatchers(HttpMethod.PUT, "/api/reservations/{id}/cancel").authenticated() // Allow authenticated users; controller checks ownership/admin
                 .requestMatchers("/api/reservations/**").hasAnyRole("ADMIN", "SUPER_ADMIN") // Admin endpoints for all reservations
 
                 // Everything else requires authentication
