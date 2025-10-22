@@ -176,6 +176,7 @@ const VehicleManagementManager = ({ setCurrentUser }) => {
   const [showEditForm, setShowEditForm] = useState(false);
   const [currentAdmin, setCurrentAdmin] = useState(null);
   const [pendingRequests, setPendingRequests] = useState([]);
+  const [vehicleDetails, setVehicleDetails] = useState({});
 
   const approveRequest = async (requestId) => {
     if (!window.confirm('Are you sure you want to approve this request?')) return;
@@ -384,6 +385,26 @@ const VehicleManagementManager = ({ setCurrentUser }) => {
       if (response.ok) {
         const data = await response.json();
         setPendingRequests(Array.isArray(data) ? data : []);
+
+        // Fetch vehicle details for REMOVE requests
+        const details = {};
+        for (const request of data) {
+          if (request.changeType === 'REMOVE' && request.vehicleId) {
+            try {
+              const vehicleResponse = await fetch(`${process.env.REACT_APP_API_URL}/api/vehicles/${request.vehicleId}`, {
+                method: 'GET',
+                credentials: 'include'
+              });
+              if (vehicleResponse.ok) {
+                const vehicle = await vehicleResponse.json();
+                details[request.id] = vehicle;
+              }
+            } catch (err) {
+              console.error('Error fetching vehicle details:', err);
+            }
+          }
+        }
+        setVehicleDetails(details);
       }
     } catch (error) {
       console.error('Error fetching pending requests:', error);
@@ -1044,15 +1065,158 @@ const VehicleManagementManager = ({ setCurrentUser }) => {
           <div className="pending-section">
             <h3>Pending Vehicle Requests ({pendingRequests.length})</h3>
             <div className="pending-list">
-              {pendingRequests.map(request => (
-                <div key={request.id} className="pending-item">
-                  <p>Admin requests to {request.changeType.toLowerCase()} vehicle {request.vehicleId ? `ID: ${request.vehicleId}` : 'new vehicle'}</p>
-                  <div className="pending-actions">
-                    <button onClick={() => approveRequest(request.id)} className="btn-small approve">Approve</button>
-                    <button onClick={() => rejectRequest(request.id)} className="btn-small reject">Reject</button>
+              {pendingRequests.map(request => {
+                let vehicleInfo = null;
+                let images = [];
+                if (request.changeType === 'ADD') {
+                  try {
+                    const data = JSON.parse(request.vehicleData);
+                    vehicleInfo = {
+                      make: data.make,
+                      model: data.model,
+                      year: data.year,
+                      licensePlate: data.licensePlate,
+                      location: data.location,
+                      pricePerDay: data.pricePerDay,
+                      color: data.color,
+                      vin: data.vin,
+                      fuelType: data.fuelType,
+                      transmission: data.transmission,
+                      seatingCapacity: data.seatingCapacity,
+                      mileage: data.mileage,
+                      description: data.description,
+                      features: data.features
+                    };
+                    images = [data.vehicleImage1, data.vehicleImage2, data.vehicleImage3].filter(img => img);
+                  } catch (e) {
+                    console.error('Error parsing vehicle data:', e);
+                  }
+                } else if (request.changeType === 'REMOVE') {
+                  const vehicle = vehicleDetails[request.id];
+                  if (vehicle) {
+                    vehicleInfo = {
+                      make: vehicle.make,
+                      model: vehicle.model,
+                      year: vehicle.year,
+                      licensePlate: vehicle.licensePlate,
+                      location: vehicle.location,
+                      pricePerDay: vehicle.pricePerDay,
+                      color: vehicle.color,
+                      vin: vehicle.vin,
+                      fuelType: vehicle.fuelType,
+                      transmission: vehicle.transmission,
+                      seatingCapacity: vehicle.seatingCapacity,
+                      mileage: vehicle.mileage,
+                      description: vehicle.description,
+                      features: vehicle.features
+                    };
+                    images = [vehicle.vehicleImage1, vehicle.vehicleImage2, vehicle.vehicleImage3].filter(img => img);
+                  }
+                }
+
+                return (
+                  <div key={request.id} className="pending-item">
+                    <div className="pending-header">
+                      <h4>Request to {request.changeType.toLowerCase()} vehicle</h4>
+                      <span className="request-type">{request.changeType}</span>
+                    </div>
+                    {vehicleInfo && (
+                      <div className="vehicle-details-full">
+                        <div className="vehicle-basic-info">
+                          <p><strong>Vehicle:</strong> {vehicleInfo.year} {vehicleInfo.make} {vehicleInfo.model}</p>
+                          <p><strong>License Plate:</strong> {vehicleInfo.licensePlate}</p>
+                          <p><strong>Color:</strong> {vehicleInfo.color || 'N/A'}</p>
+                          <p><strong>VIN:</strong> {vehicleInfo.vin || 'N/A'}</p>
+                          <p><strong>Fuel Type:</strong> {vehicleInfo.fuelType}</p>
+                          <p><strong>Transmission:</strong> {vehicleInfo.transmission}</p>
+                          <p><strong>Seating Capacity:</strong> {vehicleInfo.seatingCapacity}</p>
+                          <p><strong>Mileage:</strong> {vehicleInfo.mileage ? `${vehicleInfo.mileage} km` : 'N/A'}</p>
+                          <p><strong>Location:</strong> {vehicleInfo.location}</p>
+                          <p><strong>Price/Day:</strong> ${vehicleInfo.pricePerDay} FJD</p>
+                          {vehicleInfo.description && <p><strong>Description:</strong> {vehicleInfo.description}</p>}
+                          {vehicleInfo.features && <p><strong>Features:</strong> {vehicleInfo.features}</p>}
+                        </div>
+                        {images.length > 0 && (
+                          <div className="vehicle-images">
+                            <h5>Vehicle Images:</h5>
+                            <div className="image-carousel-container">
+                              <div className="image-container">
+                                <img
+                                  src={`data:image/jpeg;base64,${images[0]}`}
+                                  alt="Vehicle"
+                                  className="pending-vehicle-image"
+                                  onError={(e) => {
+                                    e.target.style.display = 'none';
+                                  }}
+                                />
+                              </div>
+                              {images.length > 1 && (
+                                <div className="carousel-controls">
+                                  <button
+                                    className="carousel-btn prev"
+                                    onClick={(e) => {
+                                      const container = e.target.closest('.pending-item');
+                                      const img = container.querySelector('.pending-vehicle-image');
+                                      const currentSrc = img.src;
+                                      const currentIndex = images.findIndex(imgData => `data:image/jpeg;base64,${imgData}` === currentSrc);
+                                      const newIndex = currentIndex > 0 ? currentIndex - 1 : images.length - 1;
+                                      img.src = `data:image/jpeg;base64,${images[newIndex]}`;
+                                      const indicators = container.querySelectorAll('.indicator');
+                                      indicators.forEach((ind, idx) => {
+                                        ind.classList.toggle('active', idx === newIndex);
+                                      });
+                                    }}
+                                  >
+                                    ‹
+                                  </button>
+                                  <div className="carousel-indicators">
+                                    {images.map((_, i) => (
+                                      <button
+                                        key={i}
+                                        className={`indicator ${i === 0 ? 'active' : ''}`}
+                                        onClick={(e) => {
+                                          const container = e.target.closest('.pending-item');
+                                          const img = container.querySelector('.pending-vehicle-image');
+                                          img.src = `data:image/jpeg;base64,${images[i]}`;
+                                          const indicators = container.querySelectorAll('.indicator');
+                                          indicators.forEach((ind, idx) => {
+                                            ind.classList.toggle('active', idx === i);
+                                          });
+                                        }}
+                                      />
+                                    ))}
+                                  </div>
+                                  <button
+                                    className="carousel-btn next"
+                                    onClick={(e) => {
+                                      const container = e.target.closest('.pending-item');
+                                      const img = container.querySelector('.pending-vehicle-image');
+                                      const currentSrc = img.src;
+                                      const currentIndex = images.findIndex(imgData => `data:image/jpeg;base64,${imgData}` === currentSrc);
+                                      const newIndex = currentIndex < images.length - 1 ? currentIndex + 1 : 0;
+                                      img.src = `data:image/jpeg;base64,${images[newIndex]}`;
+                                      const indicators = container.querySelectorAll('.indicator');
+                                      indicators.forEach((ind, idx) => {
+                                        ind.classList.toggle('active', idx === newIndex);
+                                      });
+                                    }}
+                                  >
+                                    ›
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    <div className="pending-actions">
+                      <button onClick={() => approveRequest(request.id)} className="btn-small approve">Approve</button>
+                      <button onClick={() => rejectRequest(request.id)} className="btn-small reject">Reject</button>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}

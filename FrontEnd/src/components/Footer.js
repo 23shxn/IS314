@@ -1,42 +1,26 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import '../styles/Footer.css';
 
 const Footer = () => {
+  const year = new Date().getFullYear();
+
   return (
     <footer className="footer">
       <div className="footer-container">
-        <div className="footer-content">
-          <div className="footer-section">
-            <h3>Car Rental</h3>
-            <p>Your trusted partner for vehicle rentals. Quality cars, great prices, exceptional service.</p>
-          </div>
-          <div className="footer-section">
-            <h4>Quick Links</h4>
-            <ul>
-              <li><a href="/">Home</a></li>
-              <li><a href="/search">Search Cars</a></li>
-              <li><a href="/about">About Us</a></li>
-              <li><a href="/contact">Contact</a></li>
-            </ul>
-          </div>
-          <div className="footer-section">
-            <h4>Support</h4>
-            <ul>
-              <li><a href="/faqs">FAQs</a></li>
-              <li><a href="/contact">Help Center</a></li>
-              <li><a href="/contact">Customer Service</a></li>
-            </ul>
-          </div>
-          <div className="footer-section">
-            <h4>Contact Info</h4>
-            <p>📧 support@carrental.com</p>
-            <p>📞 +1 (555) 123-4567</p>
-            <p>📍 123 Main St, City, State 12345</p>
-          </div>
+        <div className="footer-branding">
+          <span className="logo-icon">🚐</span>
+          <span className="logo-text">Ronaldo's Rentals</span>
         </div>
-        <div className="footer-bottom">
-          <p>&copy; 2024 Car Rental. All rights reserved.</p>
+        <div className="footer-links">
+          <Link to="/about">About Us</Link>
+          <Link to="/faqs">FAQs</Link>
+          <Link to="/contact">Contact</Link>
+          <Link to="/search">Vehicle Search</Link>
         </div>
+      </div>
+      <div className="footer-copy">
+        <p>&copy; {year} Ronaldo's Rentals. All rights reserved.</p>
       </div>
     </footer>
   );
