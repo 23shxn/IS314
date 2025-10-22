@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BreadcrumbProvider } from './components/BreadcrumbContext';
 import { 
   User, 
   Car, 
@@ -21,6 +22,8 @@ import './styles/Global.css';
 import LoginForm from './components/LoginForm';
 import AdminLogin from './components/AdminLogin';
 import Navigation from './components/Navigation';
+import Breadcrumbs from './components/Breadcrumbs';
+import Footer from './components/Footer';
 import CustomerDashboard from './components/CustomerDashboard';
 import VehicleSearch from './components/VehicleSearch';
 import ReservationManagement from './components/ReservationManagement';
@@ -159,7 +162,15 @@ const App = () => {
     if (currentUser.role !== 'customer') {
       return <Navigate to="/login" replace />;
     }
-    return children;
+    return (
+      <div className="customer-page">
+        <Breadcrumbs />
+        <div className="customer-content">
+          {children}
+        </div>
+        <Footer />
+      </div>
+    );
   };
 
   // Component to redirect logged-in users away from login pages
@@ -179,21 +190,33 @@ const App = () => {
     return children;
   };
 
+  // Component to wrap public pages with breadcrumbs and footer
+  const PublicPageWrapper = ({ children }) => (
+    <div className="public-page">
+      <Breadcrumbs />
+      <div className="public-content">
+        {children}
+      </div>
+      <Footer />
+    </div>
+  );
+
   return (
     <BrowserRouter>
-      <div className="app">
-        <Navigation 
-          currentUser={currentUser} 
-          setCurrentUser={setCurrentUser}
-        />
-        
-        <Routes>
+      <BreadcrumbProvider>
+        <div className="app">
+          <Navigation
+            currentUser={currentUser}
+            setCurrentUser={setCurrentUser}
+          />
+
+          <Routes>
           {/* Public Routes - Available to everyone */}
-          <Route path="/" element={<LandingPage currentUser={currentUser} />} />
-          <Route path="/home" element={<LandingPage currentUser={currentUser} />} />
-          <Route path="/about" element={<AboutUs />} />
-          <Route path="/faqs" element={<FAQs />} />
-          <Route path="/contact" element={<Contact />} />
+          <Route path="/" element={<PublicPageWrapper><LandingPage currentUser={currentUser} /></PublicPageWrapper>} />
+          <Route path="/home" element={<PublicPageWrapper><LandingPage currentUser={currentUser} /></PublicPageWrapper>} />
+          <Route path="/about" element={<PublicPageWrapper><AboutUs /></PublicPageWrapper>} />
+          <Route path="/faqs" element={<PublicPageWrapper><FAQs /></PublicPageWrapper>} />
+          <Route path="/contact" element={<PublicPageWrapper><Contact /></PublicPageWrapper>} />
           
           {/* Login Routes - redirect if already logged in */}
           <Route 
@@ -214,18 +237,20 @@ const App = () => {
           />
 
           {/* Vehicle Search - Available to both logged in and non-logged in users */}
-          <Route 
-            path="/search" 
+          <Route
+            path="/search"
             element={
-              <VehicleSearch 
-                cars={cars} 
-                searchParams={searchParams} 
-                setSearchParams={setSearchParams} 
-                reservations={reservations} 
-                setReservations={setReservations} 
-                currentUser={currentUser}
-              />
-            } 
+              <PublicPageWrapper>
+                <VehicleSearch
+                  cars={cars}
+                  searchParams={searchParams}
+                  setSearchParams={setSearchParams}
+                  reservations={reservations}
+                  setReservations={setReservations}
+                  currentUser={currentUser}
+                />
+              </PublicPageWrapper>
+            }
           />
 
           {/* Customer Protected Routes */}
@@ -443,7 +468,7 @@ const App = () => {
             }
           />
 
-          {/* Catch-all route - redirect to appropriate default page */}
+          {/* Catch-allroute - redirect to appropriate default page */}
           <Route
             path="*"
             element={
@@ -456,8 +481,9 @@ const App = () => {
                     <Navigate to="/" replace />
             }
           />
-        </Routes>
-      </div>
+          </Routes>
+        </div>
+      </BreadcrumbProvider>
     </BrowserRouter>
   );
 };

@@ -7,9 +7,10 @@ const Navigation = ({ currentUser, setCurrentUser }) => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Don't render navigation for admin users or admin pages
+  // Don't render navigation for admin users, admin pages, or login pages
   if (currentUser?.role === 'ADMIN' || currentUser?.role === 'SUPER_ADMIN' ||
-      location.pathname.startsWith('/admin') || location.pathname.startsWith('/manager')) {
+      location.pathname.startsWith('/admin') || location.pathname.startsWith('/manager') ||
+      location.pathname === '/login' || location.pathname === '/admin/login') {
     return null;
   }
 
