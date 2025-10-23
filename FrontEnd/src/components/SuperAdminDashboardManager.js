@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { LogOut, Layout, Users, Car, ClipboardList, ToolCase, UserPlus, Check, X, Calendar } from 'lucide-react';
+import { LogOut, Layout, Users, Car, ClipboardList, ToolCase, UserPlus, Check, X, Calendar, Lock } from 'lucide-react';
 import '../styles/SuperAdminDashboard.css';
 
 const SuperAdminDashboardModified = ({ setCurrentUser, currentUser }) => {
@@ -14,14 +14,15 @@ const SuperAdminDashboardModified = ({ setCurrentUser, currentUser }) => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [showCreateAdmin, setShowCreateAdmin] = useState(false);
-  const [newAdmin, setNewAdmin] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phoneNumber: '',
-    password: ''
+  const [showChangePassword, setShowChangePassword] = useState(false);
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
   });
+  const [passwordError, setPasswordError] = useState('');
+  const [passwordSuccess, setPasswordSuccess] = useState('');
+
 
   useEffect(() => {
     fetchStats();
@@ -99,36 +100,64 @@ const SuperAdminDashboardModified = ({ setCurrentUser, currentUser }) => {
     }
   };
 
-  const handleCreateAdmin = async (e) => {
+  const handleChangePassword = async (e) => {
     e.preventDefault();
+    setPasswordError('');
+    setPasswordSuccess('');
+
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      setPasswordError('New passwords do not match');
+      return;
+    }
+
+    if (passwordData.newPassword.length < 6) {
+      setPasswordError('New password must be at least 6 characters long');
+      return;
+    }
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/create-admin`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/admin/change-password`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newAdmin),
-        credentials: 'include'
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          currentPassword: passwordData.currentPassword,
+          newPassword: passwordData.newPassword
+        })
       });
 
+      const data = await response.json();
+
       if (response.ok) {
-        alert('Admin created successfully! Credentials have been emailed.');
-        setShowCreateAdmin(false);
-        setNewAdmin({
-          firstName: '',
-          lastName: '',
-          email: '',
-          phoneNumber: '',
-          password: ''
+        setPasswordSuccess('Password changed successfully!');
+        setPasswordData({
+          currentPassword: '',
+          newPassword: '',
+          confirmPassword: ''
         });
+        setTimeout(() => {
+          setShowChangePassword(false);
+          setPasswordSuccess('');
+        }, 2000);
       } else {
-        const errorData = await response.json();
-        alert(errorData.error || 'Failed to create admin');
+        setPasswordError(data.error || 'Failed to change password');
       }
-    } catch (err) {
-      console.error('Create admin error:', err);
-      alert('Failed to create admin');
+    } catch (error) {
+      setPasswordError('Network error. Please try again.');
     }
   };
+
+  const handlePasswordInputChange = (e) => {
+    const { name, value } = e.target;
+    setPasswordData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+
 
   return (
     <div className="admin-dashboard">
@@ -180,7 +209,13 @@ const SuperAdminDashboardModified = ({ setCurrentUser, currentUser }) => {
             <Calendar className="btn-icon" />
             <span>Reservations</span>
           </button>
-          
+          <button
+            onClick={() => setShowChangePassword(!showChangePassword)}
+            className={`sidebar-btn ${showChangePassword ? 'active' : ''}`}
+          >
+            <Lock className="btn-icon" />
+            <span>Change Password</span>
+          </button>
         </div>
         <div className="sidebar-footer">
           <button onClick={handleLogout} className="sidebar-btn logout">
@@ -191,11 +226,59 @@ const SuperAdminDashboardModified = ({ setCurrentUser, currentUser }) => {
       </nav>
 
       <div className="main-content">
+        {showChangePassword && (
+          <div className="change-password-section">
+            <h2>Change Password</h2>
+            <form onSubmit={handleChangePassword} className="change-password-form">
+              <div className="form-group">
+                <label htmlFor="currentPassword">Current Password</label>
+                <input
+                  type="password"
+                  id="currentPassword"
+                  name="currentPassword"
+                  value={passwordData.currentPassword}
+                  onChange={handlePasswordInputChange}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="newPassword">New Password</label>
+                <input
+                  type="password"
+                  id="newPassword"
+                  name="newPassword"
+                  value={passwordData.newPassword}
+                  onChange={handlePasswordInputChange}
+                  required
+                  minLength="6"
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="confirmPassword">Confirm New Password</label>
+                <input
+                  type="password"
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  value={passwordData.confirmPassword}
+                  onChange={handlePasswordInputChange}
+                  required
+                  minLength="6"
+                />
+              </div>
+              {passwordError && <div className="error-message">{passwordError}</div>}
+              {passwordSuccess && <div className="success-message">{passwordSuccess}</div>}
+              <div className="form-actions">
+                <button type="submit" className="btn-primary">Change Password</button>
+                <button type="button" onClick={() => setShowChangePassword(false)} className="btn-secondary">Cancel</button>
+              </div>
+            </form>
+          </div>
+        )}
         <div className="dashboard-content">
           <div className="dashboard-header">
             <h1>Super Admin Dashboard</h1>
             <button
-              onClick={() => setShowCreateAdmin(true)}
+              onClick={() => navigate('/manager/add-admin')}
               className="btn-primary"
             >
               <UserPlus className="btn-icon" />
@@ -246,91 +329,7 @@ const SuperAdminDashboardModified = ({ setCurrentUser, currentUser }) => {
             </div>
           </div>
 
-          {/* Create Admin Modal */}
-          {showCreateAdmin && (
-            <div className="modal-overlay">
-              <div className="modal-content">
-                <h2>Create New Admin</h2>
-                <form onSubmit={handleCreateAdmin} className="admin-form">
-                  <div className="form-grid">
-                    <div className="form-group">
-                      <label htmlFor="firstName">First Name *</label>
-                      <input
-                        type="text"
-                        id="firstName"
-                        value={newAdmin.firstName}
-                        onChange={e => setNewAdmin({...newAdmin, firstName: e.target.value})}
-                        className="form-input"
-                        required
-                      />
-                    </div>
 
-                    <div className="form-group">
-                      <label htmlFor="lastName">Last Name *</label>
-                      <input
-                        type="text"
-                        id="lastName"
-                        value={newAdmin.lastName}
-                        onChange={e => setNewAdmin({...newAdmin, lastName: e.target.value})}
-                        className="form-input"
-                        required
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label htmlFor="email">Email *</label>
-                      <input
-                        type="email"
-                        id="email"
-                        value={newAdmin.email}
-                        onChange={e => setNewAdmin({...newAdmin, email: e.target.value})}
-                        className="form-input"
-                        required
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label htmlFor="phoneNumber">Phone Number</label>
-                      <input
-                        type="tel"
-                        id="phoneNumber"
-                        value={newAdmin.phoneNumber}
-                        onChange={e => setNewAdmin({...newAdmin, phoneNumber: e.target.value})}
-                        className="form-input"
-                      />
-                    </div>
-
-                    <div className="form-group full-width">
-                      <label htmlFor="password">Temporary Password *</label>
-                      <input
-                        type="password"
-                        id="password"
-                        value={newAdmin.password}
-                        onChange={e => setNewAdmin({...newAdmin, password: e.target.value})}
-                        className="form-input"
-                        required
-                        minLength="6"
-                      />
-                      <small className="form-hint">Admin will receive login credentials via email</small>
-                    </div>
-                  </div>
-
-                  <div className="form-actions">
-                    <button type="submit" className="btn-primary">
-                      Create Admin
-                    </button>
-                    <button
-                      type="button"
-                      className="btn-secondary"
-                      onClick={() => setShowCreateAdmin(false)}
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          )}
 
 
 

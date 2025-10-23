@@ -1,11 +1,14 @@
 package com.grp12.Controller;
 
 import com.grp12.Model.User;
+import com.grp12.Model.Admin;
 import com.grp12.Model.RegistrationRequest;
 import com.grp12.Services.UserService;
+import com.grp12.Services.AdminService;
 import com.grp12.Services.EmailService;
 import com.grp12.Services.ImageCompressionService; // Add this
 import com.grp12.Repository.RegistrationRequestRepository;
+import com.grp12.Repository.AdminRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
@@ -25,6 +28,8 @@ import java.util.Base64;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Optional;
+import java.time.LocalDateTime;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -35,7 +40,16 @@ public class UserController {
     private UserService userService;
 
     @Autowired
+    private AdminService adminService;
+
+    @Autowired
+    private AdminRepository adminRepository;
+
+    @Autowired
     private ImageCompressionService imageCompressionService;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody User user) {
@@ -385,7 +399,7 @@ public class UserController {
             String email = request.get("email");
             String resetToken = request.get("resetToken");
 
-           
+
             boolean isValid = userService.verifyResetToken(email, resetToken);
 
             if (isValid) {
@@ -395,6 +409,94 @@ public class UserController {
             }
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", "Failed to verify reset code"));
+        }
+    }
+
+    @PostMapping("/create-admin")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    public ResponseEntity<?> createAdmin(@RequestBody Admin admin, HttpServletRequest request) {
+        try {
+            // Get current admin from security context
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication == null || !authentication.isAuthenticated() ||
+                authentication.getName().equals("anonymousUser")) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Not authenticated"));
+            }
+
+            // Get current admin by email/username
+            String currentUsername = authentication.getName();
+            Admin currentAdmin = adminService.getAdminByEmail(currentUsername);
+            if (currentAdmin == null) {
+                currentAdmin = adminService.getAdminByUsername(currentUsername);
+            }
+
+            if (currentAdmin == null || !"SUPER_ADMIN".equals(currentAdmin.getRole())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("error", "Only super admins can create new admin accounts"));
+            }
+
+            // Validate input
+            if (admin.getUsername() == null || admin.getUsername().trim().isEmpty()) {
+                return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Username is required"));
+            }
+
+            if (admin.getEmail() == null || admin.getEmail().trim().isEmpty()) {
+                return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Email is required"));
+            }
+
+            if (admin.getPassword() == null || admin.getPassword().length() < 6) {
+                return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Password must be at least 6 characters"));
+            }
+
+            // Check if username or email already exists
+            if (adminRepository.findByUsername(admin.getUsername()).isPresent()) {
+                return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Username already exists"));
+            }
+
+            if (adminRepository.findByEmail(admin.getEmail()).isPresent()) {
+                return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Email already exists"));
+            }
+
+            // Store plain password before encoding
+            String plainPassword = admin.getPassword();
+
+            // Set admin properties
+            admin.setPassword(passwordEncoder.encode(admin.getPassword()));
+            admin.setRole("ADMIN"); // New admins get regular admin role
+            admin.setCreatedAt(LocalDateTime.now());
+            admin.setActive(true); // Make sure new admin is active
+
+            Admin savedAdmin = adminRepository.save(admin);
+            savedAdmin.setPassword(null); // Remove password from response
+
+            // Send email with credentials
+            try {
+                emailService.sendAdminCredentialsEmail(
+                    admin.getEmail(),
+                    admin.getFirstName(),
+                    admin.getLastName(),
+                    admin.getUsername(),
+                    plainPassword // Send the plain password
+                );
+            } catch (Exception e) {
+                System.err.println("Failed to send admin credentials email: " + e.getMessage());
+                // Don't fail the admin creation if email fails
+            }
+
+            return ResponseEntity.ok().body(Map.of(
+                "message", "Admin created successfully! Credentials have been emailed.",
+                "admin", savedAdmin
+            ));
+
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                .body(Map.of("error", "Failed to create admin: " + e.getMessage()));
         }
     }
 }

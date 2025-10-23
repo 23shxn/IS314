@@ -262,19 +262,19 @@ public class AdminController {
         try {
             // Get current admin from security context
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            if (authentication == null || !authentication.isAuthenticated() || 
+            if (authentication == null || !authentication.isAuthenticated() ||
                 authentication.getName().equals("anonymousUser")) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of("error", "Not authenticated"));
             }
-            
+
             // Get current admin by email/username
             String currentUsername = authentication.getName();
             Admin currentAdmin = adminService.getAdminByEmail(currentUsername);
             if (currentAdmin == null) {
                 currentAdmin = adminService.getAdminByUsername(currentUsername);
             }
-            
+
             if (currentAdmin == null || !"SUPER_ADMIN".equals(currentAdmin.getRole())) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(Map.of("error", "Only super admins can add new admin accounts"));
@@ -285,12 +285,12 @@ public class AdminController {
                 return ResponseEntity.badRequest()
                     .body(Map.of("error", "Username is required"));
             }
-            
+
             if (admin.getEmail() == null || admin.getEmail().trim().isEmpty()) {
                 return ResponseEntity.badRequest()
                     .body(Map.of("error", "Email is required"));
             }
-            
+
             if (admin.getPassword() == null || admin.getPassword().length() < 6) {
                 return ResponseEntity.badRequest()
                     .body(Map.of("error", "Password must be at least 6 characters"));
@@ -301,7 +301,7 @@ public class AdminController {
                 return ResponseEntity.badRequest()
                     .body(Map.of("error", "Username already exists"));
             }
-            
+
             if (adminRepository.findByEmail(admin.getEmail()).isPresent()) {
                 return ResponseEntity.badRequest()
                     .body(Map.of("error", "Email already exists"));
@@ -312,18 +312,64 @@ public class AdminController {
             admin.setRole("ADMIN"); // New admins get regular admin role
             admin.setCreatedAt(LocalDateTime.now());
             admin.setActive(true); // Make sure new admin is active
-            
+
             Admin savedAdmin = adminRepository.save(admin);
             savedAdmin.setPassword(null); // Remove password from response
-            
+
             return ResponseEntity.ok().body(Map.of(
                 "message", "Admin added successfully",
                 "admin", savedAdmin
             ));
-            
+
         } catch (Exception e) {
             return ResponseEntity.badRequest()
                 .body(Map.of("error", "Failed to add admin: " + e.getMessage()));
+        }
+    }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<?> changePassword(@RequestBody Map<String, String> request) {
+        try {
+            // Get current admin from security context
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication == null || !authentication.isAuthenticated() ||
+                authentication.getName().equals("anonymousUser")) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Not authenticated"));
+            }
+
+            String currentUsername = authentication.getName();
+            String currentPassword = request.get("currentPassword");
+            String newPassword = request.get("newPassword");
+
+            // Validate input
+            if (currentPassword == null || currentPassword.trim().isEmpty()) {
+                return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Current password is required"));
+            }
+
+            if (newPassword == null || newPassword.trim().isEmpty()) {
+                return ResponseEntity.badRequest()
+                    .body(Map.of("error", "New password is required"));
+            }
+
+            if (newPassword.length() < 6) {
+                return ResponseEntity.badRequest()
+                    .body(Map.of("error", "New password must be at least 6 characters long"));
+            }
+
+            // Change password
+            adminService.changePassword(currentUsername, currentPassword.trim(), newPassword.trim());
+
+            return ResponseEntity.ok()
+                .body(Map.of("message", "Password changed successfully"));
+
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest()
+                .body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("error", "Failed to change password: " + e.getMessage()));
         }
     }
 }

@@ -207,12 +207,20 @@ const AdminLogin = ({ setCurrentUser }) => {
         </h3>
         
         {!superAdminMode && (
-          <div className="info-message">
-            <p>Please login with your admin credentials.</p>
-            <div style={{ fontSize: '12px', color: '#666', marginTop: '10px', padding: '10px', backgroundColor: '#f8f9fa', borderRadius: '4px' }}>
-              
-            </div>
+        <div className="info-message">
+          <p>Please login with your admin credentials.</p>
+          <div style={{ fontSize: '12px', color: '#666', marginTop: '10px', padding: '10px', backgroundColor: '#f8f9fa', borderRadius: '4px' }}>
+            <p style={{ margin: '0 0 5px 0' }}>Forgot your password or need to change it?</p>
+            <button
+              type="button"
+              className="link-button"
+              onClick={() => navigate('/admin/change-password')}
+              style={{ fontSize: '12px', padding: '5px 10px' }}
+            >
+              Change Password
+            </button>
           </div>
+        </div>
         )}
         
         {superAdminMode && (

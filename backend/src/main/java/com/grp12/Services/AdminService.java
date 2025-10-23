@@ -174,4 +174,34 @@ public class AdminService {
     public Admin getAdminByUsername(String username) {
         return adminRepository.findByUsername(username).orElse(null);
     }
+
+    public void changePassword(String emailOrUsername, String currentPassword, String newPassword) {
+        try {
+            // Find admin by email or username
+            Admin admin = adminRepository.findByEmailOrUsername(emailOrUsername, emailOrUsername)
+                .orElseThrow(() -> new RuntimeException("Admin not found"));
+
+            // Verify current password
+            if (!passwordEncoder.matches(currentPassword, admin.getPassword())) {
+                throw new RuntimeException("Current password is incorrect");
+            }
+
+            // Validate new password
+            if (newPassword == null || newPassword.length() < 6) {
+                throw new RuntimeException("New password must be at least 6 characters long");
+            }
+
+            // Update password
+            admin.setPassword(passwordEncoder.encode(newPassword));
+            adminRepository.save(admin);
+
+            System.out.println("Password changed successfully for admin: " + admin.getUsername());
+
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            System.err.println("Error in changePassword: " + e.getMessage());
+            throw new RuntimeException("Failed to change password: " + e.getMessage());
+        }
+    }
 }

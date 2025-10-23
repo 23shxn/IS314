@@ -45,7 +45,7 @@ const CustomerDashboard = ({ currentUser, reservations = [], cars = [] }) => (
                     <Bell className="stat-icon red" />
                     <div>
                         <p className="stat-label">Notifications</p>
-                        <p className="stat-value">3</p>
+                        <p className="stat-value">0</p>
                     </div>
                 </div>
             </div>

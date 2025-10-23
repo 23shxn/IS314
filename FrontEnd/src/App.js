@@ -50,6 +50,8 @@ import Checkout from './components/Checkout';
 import Cancellation from './components/Cancellation';
 import AllReservations from './components/AllReservations';
 import EditVehicleManager from './components/EditVehicleManager';
+import AddAdminManager from './components/AddAdminManager';
+import ChangePassword from './components/ChangePassword';
 
 const App = () => {
   const [currentUser, setCurrentUser] = useState(null);
@@ -239,13 +241,21 @@ const App = () => {
               </PublicRoute>
             } 
           />
-          <Route 
-            path="/admin/login" 
+          <Route
+            path="/admin/login"
             element={
               <PublicRoute>
                 <AdminLogin setCurrentUser={setCurrentUser} />
               </PublicRoute>
-            } 
+            }
+          />
+          <Route
+            path="/admin/change-password"
+            element={
+              <PublicRoute>
+                <ChangePassword />
+              </PublicRoute>
+            }
           />
 
           {/* Vehicle Search - Available to both logged in and non-logged in users */}
@@ -424,6 +434,14 @@ const App = () => {
                   role="SUPER_ADMIN"
                   cars={cars}
                 />
+              </SuperAdminRoute>
+            }
+          />
+          <Route
+            path="/manager/add-admin"
+            element={
+              <SuperAdminRoute setCurrentUser={setCurrentUser}>
+                <AddAdminManager />
               </SuperAdminRoute>
             }
           />

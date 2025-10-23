@@ -110,6 +110,20 @@ public class EmailService {
         System.out.println("Cancellation email sent to: " + email);
     }
 
+    // Send admin credentials email
+    public void sendAdminCredentialsEmail(String email, String firstName, String lastName, String username, String password) throws MessagingException {
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true);
+
+        helper.setTo(email);
+        helper.setSubject("Admin Account Created - Ronaldo's Rentals");
+        helper.setText(buildAdminCredentialsEmailHtml(firstName, lastName, username, password), true);
+
+        mailSender.send(message);
+
+        System.out.println("Admin credentials email sent to: " + email);
+    }
+
     // Send reservation confirmation notification
     public void sendReservationConfirmationEmail(String email, String firstName, String lastName, Long reservationId, String vehicleName, String rentalDate, String returnDate, String totalPrice) throws MessagingException {
         MimeMessage message = mailSender.createMimeMessage();
@@ -343,6 +357,64 @@ public class EmailService {
                 "</div>" +
                 "<div class='footer'>" +
                 "<p>© 2025 Ronaldo's Rentals. All rights reserved.</p>" +
+                "<p>This is an automated message, please do not reply to this email.</p>" +
+                "</div>" +
+                "</div>" +
+                "</body>" +
+                "</html>";
+    }
+
+    // Build admin credentials email HTML
+    private String buildAdminCredentialsEmailHtml(String firstName, String lastName, String username, String password) {
+        return "<!DOCTYPE html>" +
+                "<html>" +
+                "<head>" +
+                "<style>" +
+                "body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }" +
+                ".container { max-width: 600px; margin: 0 auto; padding: 20px; }" +
+                ".header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }" +
+                ".content { padding: 30px; background-color: #f9f9f9; }" +
+                ".credentials-box { background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 20px; border-radius: 8px; margin: 20px 0; }" +
+                ".credential-item { margin: 10px 0; padding: 10px; background-color: white; border-radius: 4px; border-left: 4px solid #667eea; }" +
+                ".warning { background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 4px; margin: 15px 0; }" +
+                ".cta-button { display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 30px; " +
+                "text-decoration: none; border-radius: 5px; margin: 20px 0; font-weight: bold; }" +
+                ".footer { background: #333; color: white; padding: 20px; text-align: center; border-radius: 0 0 8px 8px; }" +
+                "</style>" +
+                "</head>" +
+                "<body>" +
+                "<div class='container'>" +
+                "<div class='header'>" +
+                "<h1>🚗 Ronaldo's Rentals</h1>" +
+                "<h2>Admin Account Created!</h2>" +
+                "</div>" +
+                "<div class='content'>" +
+                "<h3>Welcome, " + firstName + " " + lastName + "!</h3>" +
+                "<p><strong>Congratulations!</strong> You have been granted admin access to Ronaldo's Rentals management system.</p>" +
+                "<div class='credentials-box'>" +
+                "<h4 style='margin-top: 0; color: #856404;'>Your Login Credentials</h4>" +
+                "<div class='credential-item'>" +
+                "<strong>Username:</strong> " + username + "</div>" +
+                "<div class='credential-item'>" +
+                "<strong>Password:</strong> " + password + "</div>" +
+                "</div>" +
+                "<div class='warning'>" +
+                "<strong>⚠️ Security Notice:</strong> Please change your password after your first login for security purposes." +
+                "</div>" +
+                "<p><strong>As an admin, you can:</strong></p>" +
+                "<ul>" +
+                "<li>Manage vehicle inventory and maintenance</li>" +
+                "<li>Review and approve customer registrations</li>" +
+                "<li>Handle reservation requests</li>" +
+                "<li>Access administrative reports</li>" +
+                "</ul>" +
+                "<div style='text-align: center;'>" +
+                "<a href='http://localhost:3000/login' class='cta-button'>Login to Admin Panel</a>" +
+                "</div>" +
+                "<p>If you have any questions about your admin privileges or need assistance, please contact the super admin.</p>" +
+                "</div>" +
+                "<div class='footer'>" +
+                "<p>&copy; 2025 Ronaldo's Rentals. All rights reserved.</p>" +
                 "<p>This is an automated message, please do not reply to this email.</p>" +
                 "</div>" +
                 "</div>" +
