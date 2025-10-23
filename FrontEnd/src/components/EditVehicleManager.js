@@ -196,9 +196,10 @@ const EditVehicleManager = () => {
       formData.append('location', vehicle.location);
       formData.append('description', vehicle.description || '');
       formData.append('features', vehicle.features || '');
-      if (vehicle.vehicleImage1) formData.append('vehicleImage1', vehicle.vehicleImage1);
-      if (vehicle.vehicleImage2) formData.append('vehicleImage2', vehicle.vehicleImage2);
-      if (vehicle.vehicleImage3) formData.append('vehicleImage3', vehicle.vehicleImage3);
+      if (vehicle.vehicleImage1 instanceof File) formData.append('vehicleImage1', vehicle.vehicleImage1);
+      if (vehicle.vehicleImage2 instanceof File) formData.append('vehicleImage2', vehicle.vehicleImage2);
+      if (vehicle.vehicleImage3 instanceof File) formData.append('vehicleImage3', vehicle.vehicleImage3);
+
 
       const response = await fetch(`${process.env.REACT_APP_API_URL}/api/vehicles/${vehicle.id}`, {
         method: 'PUT',

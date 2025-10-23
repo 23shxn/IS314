@@ -465,44 +465,6 @@ public ResponseEntity<?> updateVehicle(@PathVariable Long id,
         // Validate input parameters
         validateVehicleParameters(licensePlate, seatingCapacity, vehicleType, fuelType, transmission, location);
 
-        // Validate image types and sizes if provided
-        if (vehicleImage1 != null && !vehicleImage1.isEmpty()) {
-            if (!isValidImageType(vehicleImage1)) {
-                Map<String, String> errorResponse = new HashMap<>();
-                errorResponse.put("error", "Vehicle Image 1 must be a valid image file (JPEG, PNG, GIF, WebP)");
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
-            }
-            if (vehicleImage1.getSize() > 10 * 1024 * 1024) {
-                Map<String, String> errorResponse = new HashMap<>();
-                errorResponse.put("error", "Vehicle Image 1 must be smaller than 10MB");
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
-            }
-        }
-        if (vehicleImage2 != null && !vehicleImage2.isEmpty()) {
-            if (!isValidImageType(vehicleImage2)) {
-                Map<String, String> errorResponse = new HashMap<>();
-                errorResponse.put("error", "Vehicle Image 2 must be a valid image file (JPEG, PNG, GIF, WebP)");
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
-            }
-            if (vehicleImage2.getSize() > 10 * 1024 * 1024) {
-                Map<String, String> errorResponse = new HashMap<>();
-                errorResponse.put("error", "Vehicle Image 2 must be smaller than 10MB");
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
-            }
-        }
-        if (vehicleImage3 != null && !vehicleImage3.isEmpty()) {
-            if (!isValidImageType(vehicleImage3)) {
-                Map<String, String> errorResponse = new HashMap<>();
-                errorResponse.put("error", "Vehicle Image 3 must be a valid image file (JPEG, PNG, GIF, WebP)");
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
-            }
-            if (vehicleImage3.getSize() > 10 * 1024 * 1024) {
-                Map<String, String> errorResponse = new HashMap<>();
-                errorResponse.put("error", "Vehicle Image 3 must be smaller than 10MB");
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
-            }
-        }
-
         // Validate required string fields
         if (make == null || make.trim().isEmpty()) {
             throw new IllegalArgumentException("Make is required");
@@ -545,14 +507,40 @@ public ResponseEntity<?> updateVehicle(@PathVariable Long id,
         existingVehicle.setDescription(description != null ? description.trim() : null);
         existingVehicle.setFeatures(features != null ? features.trim() : null);
 
-        // Handle image updates (only if provided)
+        // Handle optional image updates
         if (vehicleImage1 != null && !vehicleImage1.isEmpty()) {
+            if (!isValidImageType(vehicleImage1)) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", "Vehicle Image 1 must be a valid image file"));
+            }
+            if (vehicleImage1.getSize() > 10 * 1024 * 1024) { // 10MB limit
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", "Vehicle Image 1 must be smaller than 10MB"));
+            }
             existingVehicle.setVehicleImage1(Base64.getEncoder().encodeToString(vehicleImage1.getBytes()));
         }
+
         if (vehicleImage2 != null && !vehicleImage2.isEmpty()) {
+            if (!isValidImageType(vehicleImage2)) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", "Vehicle Image 2 must be a valid image file"));
+            }
+            if (vehicleImage2.getSize() > 10 * 1024 * 1024) { // 10MB limit
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", "Vehicle Image 2 must be smaller than 10MB"));
+            }
             existingVehicle.setVehicleImage2(Base64.getEncoder().encodeToString(vehicleImage2.getBytes()));
         }
+
         if (vehicleImage3 != null && !vehicleImage3.isEmpty()) {
+            if (!isValidImageType(vehicleImage3)) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", "Vehicle Image 3 must be a valid image file"));
+            }
+            if (vehicleImage3.getSize() > 10 * 1024 * 1024) { // 10MB limit
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", "Vehicle Image 3 must be smaller than 10MB"));
+            }
             existingVehicle.setVehicleImage3(Base64.getEncoder().encodeToString(vehicleImage3.getBytes()));
         }
 
@@ -562,10 +550,6 @@ public ResponseEntity<?> updateVehicle(@PathVariable Long id,
     } catch (IllegalArgumentException e) {
         Map<String, String> errorResponse = new HashMap<>();
         errorResponse.put("error", e.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
-    } catch (IOException e) {
-        Map<String, String> errorResponse = new HashMap<>();
-        errorResponse.put("error", "Failed to process image files: " + e.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     } catch (Exception e) {
         Map<String, String> errorResponse = new HashMap<>();
