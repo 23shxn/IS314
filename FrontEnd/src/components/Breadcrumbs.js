@@ -24,7 +24,6 @@ const Breadcrumbs = () => {
     '/complete-booking': 'Complete Booking',
     '/reservations': 'My Reservations',
     '/cancel': 'Cancel Reservation',
-    '/pickup': 'Pickup',
     '/car-detail': 'Car Details',
     '/checkout': 'Checkout',
     '/admin/dashboard': 'Admin Dashboard',

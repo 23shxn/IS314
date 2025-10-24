@@ -61,12 +61,6 @@ const Navigation = ({ currentUser, setCurrentUser }) => {
               >
                 My Reservations
               </Link>
-              <Link
-                to="/pickup"
-                className={`nav-link ${isActive('/pickup') ? 'active' : ''}`}
-              >
-                Pickup
-              </Link>
             </>
           ) : (
             // Show basic navigation for non-logged in users (enhanced from second version)

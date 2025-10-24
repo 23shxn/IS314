@@ -312,25 +312,17 @@ const App = () => {
               </CustomerRoute>
             } 
           />
-          <Route 
-            path="/cancel/:id" 
+          <Route
+            path="/cancel/:id"
             element={
               <CustomerRoute>
-                <Cancellation 
-                  reservations={reservations} 
-                  setReservations={setReservations} 
+                <Cancellation
+                  reservations={reservations}
+                  setReservations={setReservations}
                   currentUser={currentUser}
                 />
               </CustomerRoute>
-            } 
-          />
-          <Route 
-            path="/pickup" 
-            element={
-              <CustomerRoute>
-                <div>Pickup functionality to be implemented</div>
-              </CustomerRoute>
-            } 
+            }
           />
           <Route  
             path="/car-detail" 
