@@ -47,7 +47,7 @@ public class RegistrationRequest {
     @Column(name = "approved_at")
     private LocalDateTime approvedAt;
 
-    // Default constructor
+    
     public RegistrationRequest() {
         this.createdAt = LocalDateTime.now();
         this.status = "PENDING";

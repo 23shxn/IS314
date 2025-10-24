@@ -235,7 +235,7 @@ const PendingRequestsAdmin = ({ setCurrentUser }) => {
                                 display: 'inline-block'
                               }}
                               onClick={(e) => {
-                                // Force open in new tab if default doesn't work
+                          
                                 e.preventDefault();
                                 const newWindow = window.open();
                                 newWindow.document.write(`

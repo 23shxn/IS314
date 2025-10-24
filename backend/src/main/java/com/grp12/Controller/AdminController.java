@@ -44,7 +44,7 @@ public class AdminController {
     public ResponseEntity<?> registerAdmin(@RequestBody Admin admin) {
         try {
             Admin registeredAdmin = adminService.registerAdmin(admin);
-            // Remove password from response for security
+           
             registeredAdmin.setPassword(null);
             
             Map<String, Object> response = new HashMap<>();
@@ -74,7 +74,7 @@ public class AdminController {
             System.out.println("Email/Username: " + email);
             System.out.println("Password length: " + (password != null ? password.length() : 0));
             
-            // Check if admin exists before authentication
+           
             Admin existingAdmin = adminService.getAdminByEmail(email);
             if (existingAdmin == null) {
                 existingAdmin = adminService.getAdminByUsername(email);
@@ -96,11 +96,11 @@ public class AdminController {
             
             SecurityContextHolder.getContext().setAuthentication(authentication);
             
-            // Save to session
+           
             HttpSessionSecurityContextRepository repo = new HttpSessionSecurityContextRepository();
             repo.saveContext(SecurityContextHolder.getContext(), request, null);
             
-            existingAdmin.setPassword(null); // Remove password from response
+            existingAdmin.setPassword(null); 
             return ResponseEntity.ok(existingAdmin);
             
         } catch (Exception e) {
@@ -132,7 +132,7 @@ public class AdminController {
     public ResponseEntity<?> getAllAdmins() {
         try {
             List<Admin> admins = adminService.getAllAdmins();
-            // Remove passwords from response
+        
             admins.forEach(admin -> admin.setPassword(null));
             return ResponseEntity.ok(admins);
         } catch (Exception e) {
@@ -147,7 +147,7 @@ public class AdminController {
         try {
             Admin admin = adminService.getAdminById(id);
             if (admin != null) {
-                admin.setPassword(null); // Remove password from response
+                admin.setPassword(null);
                 return ResponseEntity.ok(admin);
             }
             
@@ -165,7 +165,7 @@ public class AdminController {
     public ResponseEntity<?> updateAdmin(@PathVariable Long id, @RequestBody Admin admin) {
         try {
             Admin updatedAdmin = adminService.updateAdmin(id, admin);
-            updatedAdmin.setPassword(null); // Remove password from response
+            updatedAdmin.setPassword(null);
             return ResponseEntity.ok(updatedAdmin);
         } catch (IllegalArgumentException e) {
             Map<String, String> errorResponse = new HashMap<>();
@@ -309,12 +309,12 @@ public class AdminController {
 
             // Set admin properties
             admin.setPassword(passwordEncoder.encode(admin.getPassword()));
-            admin.setRole("ADMIN"); // New admins get regular admin role
+            admin.setRole("ADMIN"); 
             admin.setCreatedAt(LocalDateTime.now());
-            admin.setActive(true); // Make sure new admin is active
+            admin.setActive(true); 
 
             Admin savedAdmin = adminRepository.save(admin);
-            savedAdmin.setPassword(null); // Remove password from response
+            savedAdmin.setPassword(null); 
 
             return ResponseEntity.ok().body(Map.of(
                 "message", "Admin added successfully",
@@ -330,7 +330,7 @@ public class AdminController {
     @PostMapping("/change-password")
     public ResponseEntity<?> changePassword(@RequestBody Map<String, String> request) {
         try {
-            // Get current admin from security context
+     
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             if (authentication == null || !authentication.isAuthenticated() ||
                 authentication.getName().equals("anonymousUser")) {

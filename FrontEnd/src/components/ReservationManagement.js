@@ -595,7 +595,7 @@ const ReservationManagement = ({ reservations, setReservations, currentUser, set
     );
   }
 
-  // Default layout for customers and other users
+  
   return (
     <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem' }}>
       <div style={{ marginBottom: '2rem' }}>

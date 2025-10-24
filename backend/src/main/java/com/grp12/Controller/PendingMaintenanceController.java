@@ -96,7 +96,7 @@ public class PendingMaintenanceController {
             if (nextDate != null && !nextDate.trim().isEmpty()) {
                 pendingRecord.setNextDate(LocalDate.parse(nextDate).atStartOfDay());
             } else {
-                // Auto-calculate nextDate as current date + 3 months
+                // calculate nextDate as current date + 3 months
                 pendingRecord.setNextDate(pendingRecord.getDate().toLocalDate().plusMonths(3).atStartOfDay());
             }
             if (mechanic != null && !mechanic.trim().isEmpty()) pendingRecord.setMechanic(mechanic.trim());

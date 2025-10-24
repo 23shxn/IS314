@@ -193,7 +193,8 @@ public class UserService {
             System.err.println("Failed to send approval email: " + e.getMessage());
         }
         
-        return savedUser; // Return User, not RegistrationRequest
+        return savedUser; 
+    
     }
 
     public void rejectUser(Long userId) {
@@ -205,7 +206,7 @@ public class UserService {
                 throw new RuntimeException("Request already processed");
             }
             
-            // Send rejection email before marking as rejected
+          
             try {
                 emailService.sendApprovalNotification(
                     request.getEmail(), 
@@ -317,7 +318,7 @@ public class UserService {
             tokenExpiryTimes.remove(email.toLowerCase());
             throw new RuntimeException("Failed to send password reset email: " + e.getMessage());
         } catch (RuntimeException e) {
-            throw e; // Re-throw runtime exceptions as-is
+            throw e; 
         } catch (Exception e) {
             System.err.println("Unexpected error in requestPasswordReset: " + e.getMessage());
             throw new RuntimeException("Failed to process password reset request: " + e.getMessage());
@@ -368,7 +369,7 @@ public class UserService {
             System.out.println("Password reset successful for: " + email);
             
         } catch (RuntimeException e) {
-            throw e; // Re-throw runtime exceptions as-is
+            throw e;
         } catch (Exception e) {
             System.err.println("Unexpected error in resetPassword: " + e.getMessage());
             throw new RuntimeException("Failed to reset password: " + e.getMessage());

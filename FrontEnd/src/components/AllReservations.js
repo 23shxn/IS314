@@ -49,7 +49,7 @@ const AllReservations = ({ reservations, setReservations, currentUser, setCurren
       });
 
       if (response.ok) {
-        // Update local state
+       
         setReservations(prev => prev.map(res =>
           res.id === reservationId ? { ...res, status: 'Cancelled' } : res
         ));
@@ -87,7 +87,7 @@ const AllReservations = ({ reservations, setReservations, currentUser, setCurren
       return matchesSearch && matchesStatus;
     })
     .sort((a, b) => {
-      // Sort by newest first (createdAt or id as fallback)
+  
       const dateA = new Date(a.createdAt || a.id);
       const dateB = new Date(b.createdAt || b.id);
       return dateB - dateA;

@@ -42,7 +42,7 @@ const CompleteBooking = ({ reservations, setReservations, currentUser }) => {
   const totalDays = Math.ceil((new Date(returnDate) - new Date(rentalDate)) / (1000 * 60 * 60 * 24));
   const basePrice = totalDays * vehicle.pricePerDay;
 
-  // SP CODE)
+ 
   const amenityPrices = {
     'baby-sitter': 35,
     'gps': 25,

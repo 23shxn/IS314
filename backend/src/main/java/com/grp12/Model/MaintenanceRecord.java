@@ -42,12 +42,12 @@ public class MaintenanceRecord {
     private Integer mileage;
 
     @Column(name = "receipt", columnDefinition = "TEXT")
-    private String receipt; // Base64 encoded receipt image
+    private String receipt; 
 
     @Column(name = "completed_at", nullable = false)
     private LocalDateTime completedAt;
 
-    // Default constructor
+    
     public MaintenanceRecord() {
         this.completedAt = LocalDateTime.now();
     }

@@ -72,7 +72,7 @@ const VehicleDetailModal = ({ vehicle, onClose }) => {
   const handleImageError = (e, index) => {
     console.error(`Image ${index + 1} failed to load:`, e);
     e.target.style.display = 'none';
-    // Fallback to placeholder if current fails
+   
     e.target.nextElementSibling.style.display = 'flex';
   };
 
@@ -168,7 +168,7 @@ const VehicleManagementManager = ({ setCurrentUser }) => {
       if (response.ok) {
         alert('Request approved successfully');
         fetchPendingRequests();
-        fetchVehicles(); // Refresh vehicle list in case of add/remove
+        fetchVehicles(); 
       } else {
         alert('Failed to approve request');
       }
@@ -180,7 +180,7 @@ const VehicleManagementManager = ({ setCurrentUser }) => {
 
   const rejectRequest = async (requestId) => {
     const reason = prompt('Enter rejection reason (optional):');
-    if (reason === null) return; // User cancelled
+    if (reason === null) return; 
 
     try {
       const response = await fetch(`${process.env.REACT_APP_API_URL}/api/vehicles/pending/${requestId}/reject`, {

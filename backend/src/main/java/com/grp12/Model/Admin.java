@@ -32,10 +32,10 @@ public class Admin {
     private String password;
     
     @Column(name = "role", nullable = false, length = 20)
-    private String role = "ADMIN"; // Default role
+    private String role = "ADMIN";
     
     @Column(name = "status", nullable = false, length = 20)
-    private String status = "ACTIVE"; // ACTIVE, INACTIVE
+    private String status = "ACTIVE"; 
     
     @Column(name = "active", nullable = false)
     private boolean active = true;
@@ -46,7 +46,7 @@ public class Admin {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    // Default constructor
+   
     public Admin() {
         this.createdAt = LocalDateTime.now();
         this.role = "ADMIN"; 
@@ -54,7 +54,6 @@ public class Admin {
         this.active = true;
     }
 
-    // Constructor for easy creation
     public Admin(String firstName, String lastName, String username, String email) {
         this();
         this.firstName = firstName;

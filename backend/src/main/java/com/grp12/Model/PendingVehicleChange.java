@@ -37,7 +37,7 @@ public class PendingVehicleChange {
     @Column(name = "rejection_reason", columnDefinition = "TEXT")
     private String rejectionReason;
 
-    // Default constructor
+
     public PendingVehicleChange() {
         this.requestedAt = LocalDateTime.now();
         this.status = "PENDING";

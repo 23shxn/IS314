@@ -61,12 +61,12 @@ public class User {
         }
     }
 
-    // Default constructor
+    
     public User() {
         this.createdAt = LocalDateTime.now();
     }
 
-    // Constructor for easy creation
+ 
     public User(String firstName, String lastName, String phoneNumber, String email,
                 String driversLicenseNumber, String driversLicenseImage) {
         this.firstName = firstName;
@@ -81,7 +81,7 @@ public class User {
         this.createdAt = LocalDateTime.now();
     }
 
-    // Constructor with title
+  
     public User(String title, String firstName, String lastName, String phoneNumber, String email,
                 String driversLicenseNumber, String driversLicenseImage) {
         this(firstName, lastName, phoneNumber, email, driversLicenseNumber, driversLicenseImage);

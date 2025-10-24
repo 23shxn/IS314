@@ -85,12 +85,12 @@ public class ReservationController {
                 reservation.setLastName(user.getLastName());
             }
 
-            // Ensure status is set
+        
             if (reservation.getStatus() == null || reservation.getStatus().isEmpty()) {
                 reservation.setStatus("Confirmed");
             }
 
-            // Save reservation via service
+     
             Reservation savedReservation = reservationService.createReservation(reservation);
 
             // Mark vehicle as rented after successful reservation
@@ -150,7 +150,8 @@ public class ReservationController {
             Reservation reservation = reservationOpt.get();
 
             if (!isAdmin) {
-                // Must be a regular user, check ownership
+            
+            
                 String currentUserEmail = authentication.getName();
                 Optional<User> currentUserOpt = userRepository.findByEmailForAuth(currentUserEmail);
                 if (!currentUserOpt.isPresent()) {
@@ -162,7 +163,7 @@ public class ReservationController {
                     return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", "You can only cancel your own reservations"));
                 }
             }
-            // If admin or owner, proceed
+           
 
             // Update reservation status
             reservation.setStatus("Cancelled");
@@ -248,7 +249,7 @@ public class ReservationController {
     @GetMapping("/all")
     public ResponseEntity<?> getAllReservations() {
         try {
-            // Use the new query to eagerly fetch vehicles
+         
             List<Reservation> reservations = reservationRepository.findAllWithVehicle();
 
             // Populate user details for reservations that don't have them
@@ -266,7 +267,7 @@ public class ReservationController {
 
             return ResponseEntity.ok(reservations);
         } catch (Exception e) {
-            // Log the full stack trace for debugging
+            
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(Map.of("error", "Failed to get all reservations: " + e.getMessage()));

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Car, User, Shield, Mail, Key } from 'lucide-react';
 import '../styles/LoginForm.css';
 
-// Move NewPasswordPage outside of LoginForm component
+
 const NewPasswordPage = ({ 
   error, 
   success, 
@@ -107,7 +107,7 @@ const LoginForm = ({ setCurrentUser }) => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
-  const [imageLoading, setImageLoading] = useState(false); // Add this new state
+  const [imageLoading, setImageLoading] = useState(false); 
   
   // Email verification state
   const [showEmailVerification, setShowEmailVerification] = useState(false);
@@ -115,7 +115,7 @@ const LoginForm = ({ setCurrentUser }) => {
   const [registrationEmail, setRegistrationEmail] = useState('');
   const [emailVerified, setEmailVerified] = useState(false);
   
-  // Move these to component level instead of inside modal
+  
   const [codes, setCodes] = useState(['', '', '', '', '', '']);
   const inputRefs = useRef([]);
 
@@ -153,7 +153,6 @@ const LoginForm = ({ setCurrentUser }) => {
     return passwordRegex.test(password);
   };
 
-  // New function to send verification code
   const handleSendVerification = async (email) => {
     try {
       const response = await fetch(`${process.env.REACT_APP_API_URL}/api/email/send-verification`, {
@@ -179,7 +178,7 @@ const LoginForm = ({ setCurrentUser }) => {
     }
   };
 
-  // New function to verify email code
+  
   const handleVerifyEmail = async (e) => {
     e.preventDefault();
     setError('');
@@ -218,10 +217,10 @@ const LoginForm = ({ setCurrentUser }) => {
     setLoading(false);
   };
 
-  // New function to proceed with registration after email verification
+  
   const proceedWithRegistration = async () => {
     try {
-      // Send as JSON, not FormData
+      
       const registrationData = {
         firstName: credentials.firstName,
         lastName: credentials.lastName,
@@ -230,7 +229,7 @@ const LoginForm = ({ setCurrentUser }) => {
         password: credentials.password,
         confirmPassword: credentials.confirmPassword,
         driversLicenseNumber: credentials.driversLicenseNumber,
-        driversLicenseImage: credentials.driversLicenseImage // This is already base64 string
+        driversLicenseImage: credentials.driversLicenseImage 
       };
 
       console.log('Sending registration data:', { ...registrationData, driversLicenseImage: 'base64_string', password: '[HIDDEN]' });
@@ -238,9 +237,9 @@ const LoginForm = ({ setCurrentUser }) => {
       const response = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/register`, {
         method: 'POST',
         headers: { 
-          'Content-Type': 'application/json' // Send as JSON
+          'Content-Type': 'application/json' 
         },
-        body: JSON.stringify(registrationData), // Send as JSON string
+        body: JSON.stringify(registrationData), 
         credentials: 'include'
       });
 
@@ -271,7 +270,8 @@ const LoginForm = ({ setCurrentUser }) => {
     }
   };
 
-  // Password reset functions - optimized to prevent re-renders
+
+  
   const handleRequestPasswordReset = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -299,7 +299,7 @@ const LoginForm = ({ setCurrentUser }) => {
       }
 
       setSuccess('Reset code sent to your email!');
-      setError(''); // Clear any previous errors
+      setError(''); 
       setShowPasswordReset(false);
       setShowResetCodeVerification(true);
     } catch (err) {
@@ -352,7 +352,7 @@ const LoginForm = ({ setCurrentUser }) => {
       }
 
       setSuccess('Password reset successful! You can now login with your new password.');
-      // Clear all reset-related state
+
       setShowResetCodeVerification(false);
       setShowPasswordReset(false);
       setResetEmail('');
@@ -368,7 +368,7 @@ const LoginForm = ({ setCurrentUser }) => {
     setLoading(false);
   };
 
-  // New handler to verify code only
+
   const handleCodeVerification = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -380,7 +380,7 @@ const LoginForm = ({ setCurrentUser }) => {
     }
 
     try {
-      // Verify the reset code with the backend
+  
       const response = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/verify-reset-code`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -399,15 +399,14 @@ const LoginForm = ({ setCurrentUser }) => {
         return;
       }
 
-      // Code is valid, proceed to password reset page
+
       setSuccess('Code verified! Redirecting to password reset...');
       setError('');
       
-      // Hide modal and show new password page after a short delay
       setTimeout(() => {
         setShowResetCodeVerification(false);
         setShowNewPasswordPage(true);
-        setSuccess(''); // Clear success message for new page
+        setSuccess(''); 
       }, 1500);
 
     } catch (err) {
@@ -418,7 +417,7 @@ const LoginForm = ({ setCurrentUser }) => {
     setLoading(false);
   };
 
-  // Optimized reset code handlers
+  
   const handleResetCodeChange = useCallback((index, value) => {
     if (value.length > 1) return;
     
@@ -435,7 +434,7 @@ const LoginForm = ({ setCurrentUser }) => {
       
       return newCodes;
     });
-  }, []); // Empty dependency array
+  }, []); 
 
   const handleResetKeyDown = useCallback((index, e) => {
     if (e.key === 'Backspace') {
@@ -448,9 +447,9 @@ const LoginForm = ({ setCurrentUser }) => {
         return prevCodes;
       });
     }
-  }, []); // Empty dependency array
+  }, []); 
 
-  // Modified handleAuth function
+
   const handleAuth = async (e) => {
     e.preventDefault();
     setError('');
@@ -501,7 +500,7 @@ const LoginForm = ({ setCurrentUser }) => {
         return;
       }
 
-      // NEW: Send email verification before proceeding with registration
+      // Send email verification before proceeding with registration
       setRegistrationEmail(credentials.email);
       const verificationSent = await handleSendVerification(credentials.email);
       if (verificationSent) {

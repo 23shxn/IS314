@@ -40,10 +40,10 @@ const CarDetail = ({ reservations, setReservations, currentUser }) => {
   const { state } = useLocation();
   const navigate = useNavigate();
   const [reservation, setReservation] = useState(state?.reservation);
-  const [amenities, setAmenities] = useState(['none']); // Default to 'none'
+  const [amenities, setAmenities] = useState(['none']); 
   const [error, setError] = useState('');
 
-  // Update the availableAmenities to match backend EXACTLY
+ 
   const availableAmenities = [
     { id: 'none', name: 'None', price: 0 },
     { id: 'baby-sitter', name: 'Baby Sitter', price: 20 },
@@ -55,20 +55,20 @@ const CarDetail = ({ reservations, setReservations, currentUser }) => {
     if (!reservation || !currentUser) {
       navigate('/search');
     }
-    // Log API URL for debugging
+   
     console.log('API URL:', process.env.REACT_APP_API_URL);
   }, [reservation, currentUser, navigate]);
 
   const formatDate = (date) => new Date(date).toLocaleDateString('en-FJ', { timeZone: 'Pacific/Fiji' });
 
-  // Fix the days calculation to match backend logic
+
   const days = reservation ? 
     Math.floor((new Date(reservation.returnDate) - new Date(reservation.rentalDate)) / (1000 * 60 * 60 * 24)) + 1 
     : 1;
 
   const basePrice = reservation ? days * reservation.vehicle.pricePerDay : 0;
 
-  // Map amenity prices for calculations (make sure these match backend exactly)
+  
   const amenityPrices = {
     'none': 0,
     'baby-sitter': 20,

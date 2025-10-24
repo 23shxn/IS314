@@ -30,8 +30,8 @@ const UserManagementManager = ({ setCurrentUser, currentUser }) => {
 
     localStorage.clear();
     sessionStorage.clear();
-    setCurrentUser(null); // Clear the user state
-    navigate('/login'); // Redirect to admin login
+    setCurrentUser(null); 
+    navigate('/login'); 
   };
 
   const handleNavigation = (path) => {
@@ -97,7 +97,7 @@ const UserManagementManager = ({ setCurrentUser, currentUser }) => {
 
       if (response.ok) {
         alert('User deleted successfully');
-        fetchUsers(); // Refresh the list
+        fetchUsers();
       } else {
         const errorData = await response.json();
         alert(errorData.error || 'Failed to delete user');
@@ -114,9 +114,9 @@ const UserManagementManager = ({ setCurrentUser, currentUser }) => {
         return false;
       }
 
-      // Check if it's a valid base64 string
+      
       const base64Regex = /^[A-Za-z0-9+/]*={0,2}$/;
-      return base64Regex.test(str) && str.length > 100; // Minimum length check
+      return base64Regex.test(str) && str.length > 100; 
     } catch {
       return false;
     }

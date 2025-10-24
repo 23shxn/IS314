@@ -84,7 +84,7 @@ public class VehicleService {
             validateSeatingCapacity(vehicle.getSeatingCapacity());
             
             // Validate that all 3 images are provided for new vehicles
-            if (vehicle.getId() == null) { // New vehicle
+            if (vehicle.getId() == null) { 
                 if (vehicle.getVehicleImage1() == null || vehicle.getVehicleImage1().trim().isEmpty()) {
                     throw new IllegalArgumentException("Vehicle Image 1 is required");
                 }

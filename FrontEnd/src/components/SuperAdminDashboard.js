@@ -50,14 +50,14 @@ const SuperAdminDashboard = ({ setCurrentUser, currentUser }) => {
   const fetchStats = async () => {
     setLoading(true);
     try {
-      // Fetch pending requests count
+
       const pendingResponse = await fetch(`${process.env.REACT_APP_API_URL}/api/vehicles/pending/all`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include'
       });
 
-      // Fetch pending maintenance count
+
       const maintenanceResponse = await fetch(`${process.env.REACT_APP_API_URL}/api/maintenance/pending/all`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },

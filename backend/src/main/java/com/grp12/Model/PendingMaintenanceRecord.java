@@ -42,7 +42,7 @@ public class PendingMaintenanceRecord {
     private Integer mileage;
 
     @Column(name = "receipt", columnDefinition = "TEXT")
-    private String receipt; // Base64 encoded receipt image
+    private String receipt; 
 
     @Column(name = "requested_by", nullable = false)
     private Long requestedBy; // Admin ID who submitted
@@ -62,7 +62,7 @@ public class PendingMaintenanceRecord {
     @Column(name = "rejection_reason", columnDefinition = "TEXT")
     private String rejectionReason;
 
-    // Default constructor
+   
     public PendingMaintenanceRecord() {
         this.requestedAt = LocalDateTime.now();
         this.approvalStatus = "PENDING";

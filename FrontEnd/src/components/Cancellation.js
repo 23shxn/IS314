@@ -3,7 +3,7 @@ import { useParams, useNavigate, useLocation } from "react-router-dom";
 import axios from 'axios';
 import "../styles/Cancellation.css";
 
-// --- Input formatters ---
+
 const formatCardNumber = (value) => {
   return value
     .replace(/\D/g, "")        // digits only
@@ -103,7 +103,7 @@ export default function CancelReservation({ reservations, setReservations, curre
       const response = await fetch(`${process.env.REACT_APP_API_URL}/api/reservations/${id}/cancel`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include', // same as axios withCredentials
+        credentials: 'include',
       });
   
       if (!response.ok) {

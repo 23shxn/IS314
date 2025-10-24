@@ -102,7 +102,7 @@ public class DataInitializer implements CommandLineRunner {
         vehicle1.setFeatures("{\"AC\": true, \"GPS\": true, \"Bluetooth\": true}");
         vehicle1.setCreatedAt(LocalDateTime.now());
 
-        // Read three images for vehicle 1 from DB Images folder
+        
         String[] toyotaImages = {"xtrail1.jpg", "xtrail2.jpg", "xtrail3.jpg"};
         for (int i = 0; i < toyotaImages.length; i++) {
             Path imagePath = Paths.get("DB Images", toyotaImages[i]);
@@ -145,7 +145,7 @@ public class DataInitializer implements CommandLineRunner {
         vehicle2.setFeatures("{\"AC\": true, \"GPS\": true, \"Sunroof\": true}");
         vehicle2.setCreatedAt(LocalDateTime.now());
 
-        // Read three images for vehicle 2 from DB Images folder
+      
         String[] hondaImages = {"lc1.jpg", "lc2.jpg", "lc3.jpg"};
         for (int i = 0; i < hondaImages.length; i++) {
             Path imagePath = Paths.get("DB Images", hondaImages[i]);

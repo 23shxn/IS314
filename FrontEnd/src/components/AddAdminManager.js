@@ -49,7 +49,7 @@ const AddAdminManager = () => {
           phoneNumber: '',
           password: ''
         });
-        // Redirect back to dashboard after 2 seconds
+       
         setTimeout(() => {
           navigate('/manager/dashboard');
         }, 2000);

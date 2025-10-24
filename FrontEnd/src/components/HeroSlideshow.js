@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import "../styles/LandingPage.css"; // keep your existing stylesheet
+import "../styles/LandingPage.css"; 
 
 const SLIDE_INTERVAL_MS = 5000; // auto-advance every 5s
 const TRANSITION_MS = 800;      // fade duration

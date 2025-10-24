@@ -14,7 +14,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> findByVehicleId(Long vehicleId);
     List<Reservation> findByStatus(String status);
 
-    // NEW: Eager fetch with JOIN to avoid LazyInitializationException
+   
     @Query("SELECT r FROM Reservation r LEFT JOIN FETCH r.vehicle")
     List<Reservation> findAllWithVehicle();
 }

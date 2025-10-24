@@ -129,7 +129,7 @@ const VehicleSearch = ({ reservations, setReservations, currentUser }) => {
   const [viewingVehicle, setViewingVehicle] = useState(null);
   const navigate = useNavigate();
 
-  // Updated search params with separate pickup and dropoff locations
+
   const [searchParams, setSearchParams] = useState({
     pickupLocation: '',
     dropoffLocation: '',
@@ -139,7 +139,7 @@ const VehicleSearch = ({ reservations, setReservations, currentUser }) => {
     endDate: ''
   });
 
-  // Predefined price ranges for dropdown
+
   const priceRanges = [
     { value: '', label: 'Any Price' },
     { value: '0-50', label: 'Under $50' },
@@ -288,14 +288,14 @@ const VehicleSearch = ({ reservations, setReservations, currentUser }) => {
       dropoffLocation: '',
       vehicleType: '',
       minPrice: '',
-      startDate: searchParams.startDate, // Keep dates
+      startDate: searchParams.startDate, 
       endDate: searchParams.endDate
     });
     setError('');
   };
 
   const refreshVehicles = async () => {
-    // Re-fetch vehicles to get updated availability
+
     setLoading(true);
     try {
       const apiUrl = process.env.REACT_APP_API_URL;
@@ -320,7 +320,7 @@ const VehicleSearch = ({ reservations, setReservations, currentUser }) => {
   };
 
   useEffect(() => {
-    // Listen for reservation changes and refresh
+
     if (reservations) {
       refreshVehicles();
     }

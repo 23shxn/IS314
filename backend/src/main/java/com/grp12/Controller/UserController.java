@@ -6,7 +6,7 @@ import com.grp12.Model.RegistrationRequest;
 import com.grp12.Services.UserService;
 import com.grp12.Services.AdminService;
 import com.grp12.Services.EmailService;
-import com.grp12.Services.ImageCompressionService; // Add this
+import com.grp12.Services.ImageCompressionService; 
 import com.grp12.Repository.RegistrationRequestRepository;
 import com.grp12.Repository.AdminRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -186,7 +186,7 @@ public class UserController {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
             }
 
-            // Create response with role information
+           
             Map<String, Object> response = new HashMap<>();
             response.put("id", user.getId());
             response.put("email", user.getEmail());
@@ -238,10 +238,10 @@ public class UserController {
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     public ResponseEntity<?> approveRegistration(@PathVariable Long requestId) {
         try {
-            // Use approveUser instead of approveRegistration
+ 
             User user = userService.approveUser(requestId);
 
-            // Email notification is already handled in approveUser method
+         
             return ResponseEntity.ok(Map.of(
                 "message", "User approved successfully! Notification email sent.",
                 "user", user
@@ -468,12 +468,12 @@ public class UserController {
 
             // Set admin properties
             admin.setPassword(passwordEncoder.encode(admin.getPassword()));
-            admin.setRole("ADMIN"); // New admins get regular admin role
+            admin.setRole("ADMIN"); 
             admin.setCreatedAt(LocalDateTime.now());
-            admin.setActive(true); // Make sure new admin is active
+            admin.setActive(true); 
 
             Admin savedAdmin = adminRepository.save(admin);
-            savedAdmin.setPassword(null); // Remove password from response
+            savedAdmin.setPassword(null); 
 
             // Send email with credentials
             try {
@@ -486,7 +486,8 @@ public class UserController {
                 );
             } catch (Exception e) {
                 System.err.println("Failed to send admin credentials email: " + e.getMessage());
-                // Don't fail the admin creation if email fails
+            
+            
             }
 
             return ResponseEntity.ok().body(Map.of(

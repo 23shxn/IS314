@@ -22,13 +22,13 @@ const AdminLogin = ({ setCurrentUser }) => {
   const [keySequence, setKeySequence] = useState([]);
 
   useEffect(() => {
-    // Secret key combination listener for super admin registration
+   
     const handleKeyDown = (event) => {
       if (!superAdminMode) {
         const newSequence = [...keySequence, event.key.toLowerCase()];
         setKeySequence(newSequence);
         
-        // Check for secret combination: "superadmin"
+     
         const secretCode = ['s', 'u', 'p', 'e', 'r', 'a', 'd', 'm', 'i', 'n'];
         const lastTenKeys = newSequence.slice(-10);
         
@@ -38,7 +38,7 @@ const AdminLogin = ({ setCurrentUser }) => {
           setKeySequence([]);
         }
         
-        // Reset sequence if it gets too long
+    
         if (newSequence.length > 15) {
           setKeySequence([]);
         }
@@ -140,7 +140,7 @@ const AdminLogin = ({ setCurrentUser }) => {
           confirmPassword: ''
         });
         
-        // Reset modes after successful registration
+     
         setTimeout(() => {
           setSuccess('');
           setSuperAdminMode(false);
@@ -174,7 +174,7 @@ const AdminLogin = ({ setCurrentUser }) => {
 
         const admin = await response.json();
 
-        // Use the actual role from backend response
+     
         const adminWithRole = {
           ...admin,
           role: admin.role || 'ADMIN', // Default to ADMIN if not set

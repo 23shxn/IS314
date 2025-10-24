@@ -76,7 +76,7 @@ public class PendingVehicleController {
                     .body(Map.of("error", "Admin not found"));
             }
 
-            // Check if super admin - allow direct add
+           
             if ("SUPER_ADMIN".equals(currentAdmin.getRole())) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(Map.of("error", "Super admins should use direct add endpoint"));
@@ -104,7 +104,7 @@ public class PendingVehicleController {
                     .body(Map.of("error", "All three vehicle images are required"));
             }
 
-            // Create vehicle data JSON
+       
             Map<String, Object> vehicleData = new HashMap<>();
             vehicleData.put("make", make.trim());
             vehicleData.put("model", model.trim());
@@ -123,7 +123,7 @@ public class PendingVehicleController {
             if (description != null && !description.trim().isEmpty()) vehicleData.put("description", description.trim());
             if (features != null && !features.trim().isEmpty()) vehicleData.put("features", features.trim());
 
-            // Convert images to base64
+         
             vehicleData.put("vehicleImage1", java.util.Base64.getEncoder().encodeToString(vehicleImage1.getBytes()));
             vehicleData.put("vehicleImage2", java.util.Base64.getEncoder().encodeToString(vehicleImage2.getBytes()));
             vehicleData.put("vehicleImage3", java.util.Base64.getEncoder().encodeToString(vehicleImage3.getBytes()));
@@ -165,7 +165,7 @@ public class PendingVehicleController {
                     .body(Map.of("error", "Admin not found"));
             }
 
-            // Check if super admin - allow direct remove
+         
             if ("SUPER_ADMIN".equals(currentAdmin.getRole())) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(Map.of("error", "Super admins should use direct remove endpoint"));

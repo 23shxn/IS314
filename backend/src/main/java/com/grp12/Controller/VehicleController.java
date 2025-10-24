@@ -125,7 +125,7 @@ public class VehicleController {
         }
     }
     
-    // Helper method to get current admin
+    
     private Admin getCurrentAdmin() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
@@ -665,9 +665,9 @@ public ResponseEntity<?> updateVehicle(@PathVariable Long id,
         }
     }
     
-    // ... rest of the existing methods remain the same ...
     
-    // Helper method to validate input parameters
+    
+
     private void validateVehicleParameters(String licensePlate, Integer seatingCapacity, String vehicleType, 
                                          String fuelType, String transmission, String location) {
         // Validate license plate format

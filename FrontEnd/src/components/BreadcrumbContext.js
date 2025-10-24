@@ -14,14 +14,14 @@ export const BreadcrumbProvider = ({ children }) => {
       const last = prev[prev.length - 1];
       if (location.pathname === last) return prev;
 
-      // For admin and manager pages, start from their respective dashboards
+      
       if (location.pathname.startsWith('/admin/')) {
         if (location.pathname === '/admin/dashboard') return ['/admin/dashboard'];
         const index = prev.indexOf(location.pathname);
         if (index !== -1) {
           return prev.slice(0, index + 1);
         }
-        // If not in history, start from dashboard
+   
         return ['/admin/dashboard', location.pathname];
       }
 
@@ -31,7 +31,7 @@ export const BreadcrumbProvider = ({ children }) => {
         if (index !== -1) {
           return prev.slice(0, index + 1);
         }
-        // If not in history, build breadcrumb trail based on navigation path
+
         let trail = ['/manager/dashboard'];
         if (location.pathname === '/manager/vehicles') {
           trail.push('/manager/vehicles');
@@ -54,12 +54,11 @@ export const BreadcrumbProvider = ({ children }) => {
       }
 
       if (location.pathname === '/') return ['/'];
-      // If navigating to a previous page, truncate history
+     
       const index = prev.indexOf(location.pathname);
       if (index !== -1) {
         return prev.slice(0, index + 1);
       }
-      // Otherwise, add new page to history
       return [...prev, location.pathname];
     });
   }, [location.pathname]);

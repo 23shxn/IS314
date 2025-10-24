@@ -7,7 +7,7 @@ const Breadcrumbs = () => {
   const location = useLocation();
   const { breadcrumbHistory } = useBreadcrumbs();
 
-  // Don't render breadcrumbs on login pages
+
   if (location.pathname === '/login' || location.pathname === '/admin/login') {
     return null;
   }

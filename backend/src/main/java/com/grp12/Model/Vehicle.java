@@ -62,7 +62,7 @@ public class Vehicle {
     @Column(name = "image_url", length = 500)
     private String imageUrl;
     
-    // Three vehicle images (Base64 encoded)
+    // Three vehicle images 
     @Column(name = "vehicle_image_1", columnDefinition = "TEXT")
     private String vehicleImage1;
     
@@ -76,7 +76,7 @@ public class Vehicle {
     private String description;
     
     @Column(name = "features", columnDefinition = "TEXT")
-    private String features; // JSON string of features like AC, GPS, etc.
+    private String features;
     
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
@@ -84,13 +84,13 @@ public class Vehicle {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
     
-    // Default constructor
+   
     public Vehicle() {
         this.createdAt = LocalDateTime.now();
         this.status = "Available";
     }
     
-    // Constructor for easy creation
+    
     public Vehicle(String make, String model, String vehicleType, Integer year, String location, BigDecimal pricePerDay) {
         this();
         this.make = make;

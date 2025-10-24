@@ -100,7 +100,7 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(authz -> authz
                 // Public endpoints - no authentication required
-                .requestMatchers("/", "/favicon.ico").permitAll() // ✅ FIXED HERE
+                .requestMatchers("/", "/favicon.ico").permitAll()  
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/email/**").permitAll()
                 .requestMatchers("/api/vehicles/available").permitAll()
@@ -122,10 +122,10 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/reject-user/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
 
                 // Reservation endpoints
-                .requestMatchers(HttpMethod.POST, "/api/reservations").authenticated() // Allow authenticated users to create reservations
-                .requestMatchers(HttpMethod.GET, "/api/reservations/user/{userId}").authenticated() // Allow authenticated users; controller checks ownership/admin
-                .requestMatchers(HttpMethod.PUT, "/api/reservations/{id}/cancel").authenticated() // Allow authenticated users; controller checks ownership/admin
-                .requestMatchers("/api/reservations/**").hasAnyRole("ADMIN", "SUPER_ADMIN") // Admin endpoints for all reservations
+                .requestMatchers(HttpMethod.POST, "/api/reservations").authenticated()
+                .requestMatchers(HttpMethod.GET, "/api/reservations/user/{userId}").authenticated() 
+                .requestMatchers(HttpMethod.PUT, "/api/reservations/{id}/cancel").authenticated() 
+                .requestMatchers("/api/reservations/**").hasAnyRole("ADMIN", "SUPER_ADMIN") 
 
                 // Everything else requires authentication
                 .anyRequest().authenticated()

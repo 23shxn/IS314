@@ -7,7 +7,7 @@ const Navigation = ({ currentUser, setCurrentUser }) => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Don't render navigation for admin users, admin pages, or login pages
+  
   if (currentUser?.role === 'ADMIN' || currentUser?.role === 'SUPER_ADMIN' ||
       location.pathname.startsWith('/admin') || location.pathname.startsWith('/manager') ||
       location.pathname === '/login' || location.pathname === '/admin/login') {
@@ -16,8 +16,8 @@ const Navigation = ({ currentUser, setCurrentUser }) => {
 
   const handleLogout = () => {
     console.log('Logging out, setting currentUser to null');
-    setCurrentUser(null); // This should update App.js state
-    navigate('/login'); // Navigate to login (from original)
+    setCurrentUser(null); 
+    navigate('/login');
   };
 
   const isActive = (path) => {
@@ -63,7 +63,7 @@ const Navigation = ({ currentUser, setCurrentUser }) => {
               </Link>
             </>
           ) : (
-            // Show basic navigation for non-logged in users (enhanced from second version)
+         
             <>
               <Link
                 to="/home"
