@@ -88,7 +88,7 @@ const ReservationManagement = ({ reservations, setReservations, currentUser, set
             <Users className="btn-icon" />
             <span>Customer Information</span>
           </button>
-          
+
           <button
             onClick={() => handleNavigation('maintenance')}
             className={`sidebar-btn ${location.pathname === '/manager/maintenance' ? 'active' : ''}`}
@@ -132,9 +132,9 @@ const ReservationManagement = ({ reservations, setReservations, currentUser, set
             </div>
 
       {userReservations.length === 0 ? (
-        <div style={{ 
-          textAlign: 'center', 
-          padding: '3rem', 
+        <div style={{
+          textAlign: 'center',
+          padding: '3rem',
           backgroundColor: 'white',
           borderRadius: '12px',
           boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
@@ -144,7 +144,7 @@ const ReservationManagement = ({ reservations, setReservations, currentUser, set
           <p style={{ color: '#95a5a6', marginBottom: '1.5rem' }}>
             You haven't made any reservations yet.
           </p>
-          <button 
+          <button
             onClick={() => navigate('/search')}
             className="btn-primary"
           >
@@ -154,7 +154,7 @@ const ReservationManagement = ({ reservations, setReservations, currentUser, set
       ) : (
         <div style={{ display: 'grid', gap: '1.5rem' }}>
           {userReservations.map(reservation => (
-            <div 
+            <div
               key={reservation.id}
               style={{
                 backgroundColor: 'white',
@@ -164,41 +164,28 @@ const ReservationManagement = ({ reservations, setReservations, currentUser, set
                 border: `2px solid ${getStatusColor(reservation.status)}20`
               }}
             >
-              <div style={{ 
-                display: 'grid', 
+              <div style={{
+                display: 'grid',
                 gridTemplateColumns: 'auto 1fr auto',
                 gap: '1.5rem',
                 alignItems: 'center'
               }}>
                 {/* Vehicle Info */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                  <div style={{
-                    width: '60px',
-                    height: '60px',
-                    backgroundColor: '#f8f9fa',
-                    borderRadius: '8px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}>
-                    <Car size={24} color="#666" />
-                  </div>
-                  <div>
-                    <h4 style={{ margin: '0 0 0.25rem 0', color: '#2c3e50' }}>
-                      {reservation.vehicle?.make} {reservation.vehicle?.model}
-                    </h4>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#666', fontSize: '0.9rem' }}>
-                      <MapPin size={14} />
-                      <span>{reservation.vehicle?.location}</span>
-                    </div>
+                <div>
+                  <h4 style={{ margin: '0 0 0.25rem 0', color: '#2c3e50' }}>
+                    {reservation.vehicle?.make} {reservation.vehicle?.model}
+                  </h4>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#666', fontSize: '0.9rem' }}>
+                    <MapPin size={14} />
+                    <span>{reservation.vehicle?.location}</span>
                   </div>
                 </div>
 
                 {/* Reservation Details */}
                 <div>
                   <div style={{ marginBottom: '0.5rem' }}>
-                    <span style={{ 
-                      padding: '0.25rem 0.75rem', 
+                    <span style={{
+                      padding: '0.25rem 0.75rem',
                       borderRadius: '12px',
                       fontSize: '0.8rem',
                       fontWeight: '500',
@@ -212,7 +199,7 @@ const ReservationManagement = ({ reservations, setReservations, currentUser, set
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
                       <Calendar size={14} />
                       <span>
-                        {reservation.pickupDate 
+                        {reservation.pickupDate
                           ? new Date(reservation.pickupDate).toLocaleDateString()
                           : new Date(reservation.rentalDate).toLocaleDateString()
                         }
@@ -253,7 +240,7 @@ const ReservationManagement = ({ reservations, setReservations, currentUser, set
                   >
                     <Eye size={16} />
                   </button>
-                  
+
                   {reservation.status.toLowerCase() === 'confirmed' && (
                     <button
                       onClick={() => cancelReservation(reservation.id)}
@@ -347,8 +334,8 @@ const ReservationManagement = ({ reservations, setReservations, currentUser, set
                   <label style={{ fontWeight: '500', color: '#555', display: 'block', marginBottom: '0.25rem' }}>
                     Status
                   </label>
-                  <span style={{ 
-                    padding: '0.25rem 0.75rem', 
+                  <span style={{
+                    padding: '0.25rem 0.75rem',
                     borderRadius: '12px',
                     fontSize: '0.9rem',
                     fontWeight: '500',
@@ -356,6 +343,15 @@ const ReservationManagement = ({ reservations, setReservations, currentUser, set
                     color: getStatusColor(selectedReservation.status)
                   }}>
                     {selectedReservation.status}
+                  </span>
+                </div>
+
+                <div>
+                  <label style={{ fontWeight: '500', color: '#555', display: 'block', marginBottom: '0.25rem' }}>
+                    Customer
+                  </label>
+                  <span style={{ color: '#666' }}>
+                    {selectedReservation.user?.firstName} {selectedReservation.user?.lastName}
                   </span>
                 </div>
 
@@ -387,6 +383,56 @@ const ReservationManagement = ({ reservations, setReservations, currentUser, set
                         month: 'long',
                         day: 'numeric'
                       })} at {selectedReservation.dropoffTime || '10:00'}
+                    </span>
+                  </div>
+                )}
+
+                {selectedReservation.dropoffLocation && (
+                  <div>
+                    <label style={{ fontWeight: '500', color: '#555', display: 'block', marginBottom: '0.25rem' }}>
+                      Drop-off Location
+                    </label>
+                    <span style={{ color: '#666' }}>
+                      {selectedReservation.dropoffLocation}
+                    </span>
+                  </div>
+                )}
+
+                {((selectedReservation.pickupDate && selectedReservation.dropoffDate) || (selectedReservation.rentalDate && selectedReservation.returnDate)) && (
+                  <div>
+                    <label style={{ fontWeight: '500', color: '#555', display: 'block', marginBottom: '0.25rem' }}>
+                      Rental Duration
+                    </label>
+                    <span style={{ color: '#666' }}>
+                      {(() => {
+                        let startDate, endDate;
+                        if (selectedReservation.pickupDate && selectedReservation.dropoffDate) {
+                          startDate = new Date(selectedReservation.pickupDate);
+                          endDate = new Date(selectedReservation.dropoffDate);
+                        } else if (selectedReservation.rentalDate && selectedReservation.returnDate) {
+                          startDate = new Date(selectedReservation.rentalDate);
+                          endDate = new Date(selectedReservation.returnDate);
+                        }
+                        const diffTime = Math.abs(endDate - startDate);
+                        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                        return `${diffDays} day${diffDays !== 1 ? 's' : ''}`;
+                      })()}
+                    </span>
+                  </div>
+                )}
+
+                {selectedReservation.returnDate && (
+                  <div>
+                    <label style={{ fontWeight: '500', color: '#555', display: 'block', marginBottom: '0.25rem' }}>
+                      Return Date
+                    </label>
+                    <span style={{ color: '#666' }}>
+                      {new Date(selectedReservation.returnDate).toLocaleDateString('en-US', {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })}
                     </span>
                   </div>
                 )}
@@ -609,26 +655,13 @@ const ReservationManagement = ({ reservations, setReservations, currentUser, set
                 alignItems: 'center'
               }}>
                 {/* Vehicle Info */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                  <div style={{
-                    width: '60px',
-                    height: '60px',
-                    backgroundColor: '#f8f9fa',
-                    borderRadius: '8px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}>
-                    <Car size={24} color="#666" />
-                  </div>
-                  <div>
-                    <h4 style={{ margin: '0 0 0.25rem 0', color: '#2c3e50' }}>
-                      {reservation.vehicle?.make} {reservation.vehicle?.model}
-                    </h4>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#666', fontSize: '0.9rem' }}>
-                      <MapPin size={14} />
-                      <span>{reservation.vehicle?.location}</span>
-                    </div>
+                <div>
+                  <h4 style={{ margin: '0 0 0.25rem 0', color: '#2c3e50' }}>
+                    {reservation.vehicle?.make} {reservation.vehicle?.model}
+                  </h4>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#666', fontSize: '0.9rem' }}>
+                    <MapPin size={14} />
+                    <span>{reservation.vehicle?.location}</span>
                   </div>
                 </div>
 
@@ -797,6 +830,8 @@ const ReservationManagement = ({ reservations, setReservations, currentUser, set
                   </span>
                 </div>
 
+                
+
                 {selectedReservation.pickupDate && (
                   <div>
                     <label style={{ fontWeight: '500', color: '#555', display: 'block', marginBottom: '0.25rem' }}>
@@ -825,6 +860,56 @@ const ReservationManagement = ({ reservations, setReservations, currentUser, set
                         month: 'long',
                         day: 'numeric'
                       })} at {selectedReservation.dropoffTime || '10:00'}
+                    </span>
+                  </div>
+                )}
+
+                {selectedReservation.dropoffLocation && (
+                  <div>
+                    <label style={{ fontWeight: '500', color: '#555', display: 'block', marginBottom: '0.25rem' }}>
+                      Drop-off Location
+                    </label>
+                    <span style={{ color: '#666' }}>
+                      {selectedReservation.dropoffLocation}
+                    </span>
+                  </div>
+                )}
+
+                {((selectedReservation.pickupDate && selectedReservation.dropoffDate) || (selectedReservation.rentalDate && selectedReservation.returnDate)) && (
+                  <div>
+                    <label style={{ fontWeight: '500', color: '#555', display: 'block', marginBottom: '0.25rem' }}>
+                      Rental Duration
+                    </label>
+                    <span style={{ color: '#666' }}>
+                      {(() => {
+                        let startDate, endDate;
+                        if (selectedReservation.pickupDate && selectedReservation.dropoffDate) {
+                          startDate = new Date(selectedReservation.pickupDate);
+                          endDate = new Date(selectedReservation.dropoffDate);
+                        } else if (selectedReservation.rentalDate && selectedReservation.returnDate) {
+                          startDate = new Date(selectedReservation.rentalDate);
+                          endDate = new Date(selectedReservation.returnDate);
+                        }
+                        const diffTime = Math.abs(endDate - startDate);
+                        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                        return `${diffDays} day${diffDays !== 1 ? 's' : ''}`;
+                      })()}
+                    </span>
+                  </div>
+                )}
+
+                {selectedReservation.returnDate && (
+                  <div>
+                    <label style={{ fontWeight: '500', color: '#555', display: 'block', marginBottom: '0.25rem' }}>
+                      Return Date
+                    </label>
+                    <span style={{ color: '#666' }}>
+                      {new Date(selectedReservation.returnDate).toLocaleDateString('en-US', {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })}
                     </span>
                   </div>
                 )}
@@ -872,16 +957,7 @@ const ReservationManagement = ({ reservations, setReservations, currentUser, set
                   </div>
                 )}
 
-                {(selectedReservation.firstName || selectedReservation.lastName) && (
-                  <div>
-                    <label style={{ fontWeight: '500', color: '#555', display: 'block', marginBottom: '0.25rem' }}>
-                      Driver
-                    </label>
-                    <span style={{ color: '#666' }}>
-                      {selectedReservation.title} {selectedReservation.firstName} {selectedReservation.lastName}
-                    </span>
-                  </div>
-                )}
+                
 
                 {selectedReservation.additionalRequests && (
                   <div>

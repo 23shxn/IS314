@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Car, Bell, User, LogOut } from 'lucide-react';
+import { Car, User, LogOut } from 'lucide-react';
 import '../styles/Navigation.css';
 
 const Navigation = ({ currentUser, setCurrentUser }) => {
@@ -100,7 +100,6 @@ const Navigation = ({ currentUser, setCurrentUser }) => {
 
           {currentUser && (
             <div className="nav-user">
-              <Bell className="nav-icon-small" />
               <User className="nav-icon-small" />
               <span>{currentUser?.name}</span>
               <button

@@ -316,6 +316,29 @@ const AllReservations = ({ reservations, setReservations, currentUser, setCurren
                     <div>
                       <h5>{selectedReservation.vehicle?.make} {selectedReservation.vehicle?.model}</h5>
                       <p><MapPin size={16} /> {selectedReservation.vehicle?.location}</p>
+                      <div className="vehicle-images">
+                        {selectedReservation.vehicle?.vehicleImage1 && (
+                          <img
+                            src={`data:image/jpeg;base64,${selectedReservation.vehicle.vehicleImage1}`}
+                            alt="Vehicle Image 1"
+                            className="vehicle-image"
+                          />
+                        )}
+                        {selectedReservation.vehicle?.vehicleImage2 && (
+                          <img
+                            src={`data:image/jpeg;base64,${selectedReservation.vehicle.vehicleImage2}`}
+                            alt="Vehicle Image 2"
+                            className="vehicle-image"
+                          />
+                        )}
+                        {selectedReservation.vehicle?.vehicleImage3 && (
+                          <img
+                            src={`data:image/jpeg;base64,${selectedReservation.vehicle.vehicleImage3}`}
+                            alt="Vehicle Image 3"
+                            className="vehicle-image"
+                          />
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
