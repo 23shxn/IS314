@@ -38,6 +38,19 @@ const Checkout = ({ reservations, setReservations, currentUser }) => {
     }
   }, [reservation, currentUser, navigate]);
 
+  useEffect(() => {
+    if (currentUser) {
+      const fullName = `${currentUser.firstName || ''} ${currentUser.lastName || ''}`.trim();
+      setFormData(prev => ({
+        ...prev,
+        fullName: fullName,
+        email: currentUser.email || '',
+        phone: currentUser.phone || '',
+        cardHolderName: fullName
+      }));
+    }
+  }, [currentUser]);
+
   const formatDate = (date) => new Date(date).toLocaleDateString('en-FJ', { timeZone: 'Pacific/Fiji' });
   const formatDateForBackend = (date) => new Date(date).toISOString().split('T')[0];
 
@@ -50,12 +63,12 @@ const Checkout = ({ reservations, setReservations, currentUser }) => {
 
   const validateForm = () => {
     const newErrors = {};
-    
+
     // Personal Information
     if (!formData.fullName.trim()) newErrors.fullName = 'Full name is required';
     if (!formData.email || !/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Valid email is required';
-    if (!formData.phone || !/^\d{7,15}$/.test(formData.phone.replace(/\D/g, ''))) newErrors.phone = 'Valid phone number is required';
-    
+    if (!formData.phone || !/^\d{7}$/.test(formData.phone.replace(/\D/g, ''))) newErrors.phone = 'Phone number must be exactly 7 digits';
+
     // Credit Card Information
     if (!formData.cardNumber || formData.cardNumber.replace(/\D/g, '').length < 13) {
       newErrors.cardNumber = 'Valid card number is required (13-19 digits)';
@@ -68,7 +81,7 @@ const Checkout = ({ reservations, setReservations, currentUser }) => {
       const currentMonth = currentDate.getMonth() + 1;
       const inputYear = parseInt(formData.expiryYear);
       const inputMonth = parseInt(formData.expiryMonth);
-      
+
       if (inputYear < currentYear || (inputYear === currentYear && inputMonth < currentMonth)) {
         newErrors.expiry = 'Card has expired';
       }
@@ -77,10 +90,24 @@ const Checkout = ({ reservations, setReservations, currentUser }) => {
       newErrors.cvv = 'Valid CVV is required (3-4 digits)';
     }
     if (!formData.cardHolderName.trim()) newErrors.cardHolderName = 'Cardholder name is required';
-    if (!formData.billingAddress.trim()) newErrors.billingAddress = 'Billing address is required';
-    if (!formData.billingCity.trim()) newErrors.billingCity = 'Billing city is required';
-    if (!formData.billingZip.trim()) newErrors.billingZip = 'Billing ZIP code is required';
-    
+
+    // Billing Information
+    if (!formData.billingAddress.trim()) {
+      newErrors.billingAddress = 'Billing address is required';
+    } else if (!/^[a-zA-Z0-9\s]+$/.test(formData.billingAddress)) {
+      newErrors.billingAddress = 'Billing address can only contain letters, numbers, and spaces';
+    }
+    if (!formData.billingCity.trim()) {
+      newErrors.billingCity = 'Billing city is required';
+    } else if (!/^[a-zA-Z\s]+$/.test(formData.billingCity)) {
+      newErrors.billingCity = 'Billing city can only contain letters and spaces';
+    }
+    if (!formData.billingZip.trim()) {
+      newErrors.billingZip = 'Billing ZIP code is required';
+    } else if (!/^\d+$/.test(formData.billingZip)) {
+      newErrors.billingZip = 'Billing ZIP code can only contain numbers';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -251,7 +278,7 @@ const Checkout = ({ reservations, setReservations, currentUser }) => {
                     name="phone"
                     value={formData.phone}
                     onChange={handleChange}
-                    placeholder="679XXXXXXX"
+                    placeholder="Enter your phone number"
                     className={errors.phone ? 'input-error' : ''}
                   />
                   {errors.phone && <span className="error-text">{errors.phone}</span>}
@@ -263,7 +290,7 @@ const Checkout = ({ reservations, setReservations, currentUser }) => {
                     name="altPhone"
                     value={formData.altPhone}
                     onChange={handleChange}
-                    placeholder="679XXXXXXX (Optional)"
+                    placeholder="Alternative phone (Optional)"
                   />
                 </div>
               </div>
