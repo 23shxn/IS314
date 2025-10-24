@@ -97,13 +97,13 @@ public class EmailService {
     }
 
     // Send cancellation notification
-    public void sendCancellationEmail(String email, String firstName, String lastName, Long reservationId, String vehicleName) throws MessagingException {
+    public void sendCancellationEmail(String email, String firstName, String lastName, Long reservationId, String vehicleName, String cancellationFee, String totalAmount) throws MessagingException {
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
         helper.setTo(email);
         helper.setSubject("Reservation Cancelled - Ronaldo's Rentals");
-        helper.setText(buildCancellationEmailHtml(firstName, lastName, reservationId, vehicleName), true);
+        helper.setText(buildCancellationEmailHtml(firstName, lastName, reservationId, vehicleName, cancellationFee, totalAmount), true);
 
         mailSender.send(message);
 
@@ -155,7 +155,7 @@ public class EmailService {
                 "<div class='container'>" +
                 "<div class='header'>" +
                 "<h1>🚗 Ronaldo's Rentals</h1>" +
-                "<h2>Reservation Confirmed!</h2>" +
+                "<h2>Your Payment Receipt</h2>" +
                 "</div>" +
                 "<div class='content'>" +
                 "<h3>Dear " + firstName + " " + lastName + ",</h3>" +
@@ -422,7 +422,7 @@ public class EmailService {
                 "</html>";
     }
 
-    private String buildCancellationEmailHtml(String firstName, String lastName, Long reservationId, String vehicleName) {
+    private String buildCancellationEmailHtml(String firstName, String lastName, Long reservationId, String vehicleName, String cancellationFee, String totalAmount) {
         return "<!DOCTYPE html>" +
                 "<html>" +
                 "<head>" +
@@ -433,13 +433,14 @@ public class EmailService {
                 ".content { padding: 30px; background-color: #f9f9f9; }" +
                 ".footer { text-align: center; margin-top: 20px; color: #666; font-size: 14px; }" +
                 ".info-box { background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 4px; margin: 15px 0; }" +
+                ".fee-box { background-color: #f8d7da; border: 1px solid #f5c6cb; padding: 15px; border-radius: 4px; margin: 15px 0; }" +
                 "</style>" +
                 "</head>" +
                 "<body>" +
                 "<div class='container'>" +
                 "<div class='header'>" +
                 "<h1>🚗 Ronaldo's Rentals</h1>" +
-                "<h2>Reservation Cancelled</h2>" +
+                "<h2>Your Payment Receipt</h2>" +
                 "</div>" +
                 "<div class='content'>" +
                 "<h3>Dear " + firstName + " " + lastName + ",</h3>" +
@@ -450,7 +451,12 @@ public class EmailService {
                 "<ul>" +
                 "<li><strong>Reservation ID:</strong> " + reservationId + "</li>" +
                 "<li><strong>Vehicle:</strong> " + vehicleName + "</li>" +
+                "<li><strong>Original Total Amount:</strong> $" + totalAmount + " FJD</li>" +
                 "</ul>" +
+                "<div class='fee-box'>" +
+                "<p><strong>Cancellation Fee Applied:</strong> $" + cancellationFee + " FJD</p>" +
+                "<p><em>Note: All bookings are non-refundable. The cancellation fee covers processing costs.</em></p>" +
+                "</div>" +
                 "<p>If this cancellation was made in error or if you have any questions, please contact our support team immediately.</p>" +
                 "<p>You can make a new reservation anytime through our website.</p>" +
                 "</div>" +

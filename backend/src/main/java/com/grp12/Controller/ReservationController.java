@@ -175,12 +175,34 @@ public class ReservationController {
                 vehicleRepository.save(vehicle);
             }
 
+            // Calculate cancellation fee based on hours to pickup
+            BigDecimal cancellationFee = BigDecimal.ZERO;
+            if (reservation.getRentalDate() != null) {
+                long hoursToPickup = java.time.Duration.between(java.time.LocalDateTime.now(), reservation.getRentalDate().atStartOfDay()).toHours();
+                BigDecimal totalAmount = reservation.getTotalPrice();
+
+                if (hoursToPickup < 24) {
+                    cancellationFee = totalAmount.multiply(BigDecimal.valueOf(0.3)); // 30%
+                } else if (hoursToPickup < 72) {
+                    cancellationFee = totalAmount.multiply(BigDecimal.valueOf(0.1)); // 10%
+                }
+                // No fee if more than 72 hours
+            }
+
             // Send cancellation email to user
             Optional<User> userOpt = userRepository.findById(reservation.getUserId());
             if (userOpt.isPresent()) {
                 User user = userOpt.get();
                 String vehicleName = vehicle != null ? vehicle.getMake() + " " + vehicle.getModel() : "Unknown Vehicle";
-                emailService.sendCancellationEmail(user.getEmail(), user.getFirstName(), user.getLastName(), reservation.getId(), vehicleName);
+                emailService.sendCancellationEmail(
+                    user.getEmail(),
+                    user.getFirstName(),
+                    user.getLastName(),
+                    reservation.getId(),
+                    vehicleName,
+                    cancellationFee.setScale(2, java.math.RoundingMode.HALF_UP).toString(),
+                    reservation.getTotalPrice().toString()
+                );
             }
 
             return ResponseEntity.ok().body(Map.of(
