@@ -165,6 +165,7 @@ const CarDetail = ({ reservations, setReservations, currentUser }) => {
         </div>
         <div className="detail-sidebar">
           {error && <div className="error"><p>{error}</p><button onClick={() => setError('')}>Clear</button></div>}
+          <h3>Booking Summary</h3>
           <div className="pickup-dropoff">
             <div className="pickup">
               <h4>Pick-up</h4>
@@ -174,6 +175,7 @@ const CarDetail = ({ reservations, setReservations, currentUser }) => {
             <div className="dropoff">
               <h4>Drop-off</h4>
               <p><CalendarDays size={16} /> {formatDate(reservation.returnDate)}</p>
+              <p><MapPin size={16} /> {reservation.dropoffLocation || vehicle.location}</p>
             </div>
           </div>
           <div className="pricing">
