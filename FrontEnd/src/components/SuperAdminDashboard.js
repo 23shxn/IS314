@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { LogOut, Layout, Users, Car, ClipboardList, ToolCase, UserPlus, Check, X, Calendar, Lock } from 'lucide-react';
+import { LogOut, Layout, Users, Car, ClipboardList, ToolCase, UserPlus, Check, X, Calendar } from 'lucide-react';
 import '../styles/SuperAdminDashboard.css';
 
 const SuperAdminDashboard = ({ setCurrentUser, currentUser }) => {
@@ -15,7 +15,6 @@ const SuperAdminDashboard = ({ setCurrentUser, currentUser }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showCreateAdmin, setShowCreateAdmin] = useState(false);
-  const [showChangePassword, setShowChangePassword] = useState(false);
   const [newAdmin, setNewAdmin] = useState({
     firstName: '',
     lastName: '',
@@ -23,13 +22,6 @@ const SuperAdminDashboard = ({ setCurrentUser, currentUser }) => {
     phoneNumber: '',
     password: ''
   });
-  const [passwordData, setPasswordData] = useState({
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: ''
-  });
-  const [passwordError, setPasswordError] = useState('');
-  const [passwordSuccess, setPasswordSuccess] = useState('');
 
   useEffect(() => {
     fetchStats();
@@ -138,62 +130,7 @@ const SuperAdminDashboard = ({ setCurrentUser, currentUser }) => {
     }
   };
 
-  const handleChangePassword = async (e) => {
-    e.preventDefault();
-    setPasswordError('');
-    setPasswordSuccess('');
 
-    if (passwordData.newPassword !== passwordData.confirmPassword) {
-      setPasswordError('New passwords do not match');
-      return;
-    }
-
-    if (passwordData.newPassword.length < 6) {
-      setPasswordError('New password must be at least 6 characters long');
-      return;
-    }
-
-    try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/admin/change-password`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          currentPassword: passwordData.currentPassword,
-          newPassword: passwordData.newPassword
-        })
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setPasswordSuccess('Password changed successfully!');
-        setPasswordData({
-          currentPassword: '',
-          newPassword: '',
-          confirmPassword: ''
-        });
-        setTimeout(() => {
-          setShowChangePassword(false);
-          setPasswordSuccess('');
-        }, 2000);
-      } else {
-        setPasswordError(data.error || 'Failed to change password');
-      }
-    } catch (error) {
-      setPasswordError('Network error. Please try again.');
-    }
-  };
-
-  const handlePasswordInputChange = (e) => {
-    const { name, value } = e.target;
-    setPasswordData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
 
   return (
     <div className="admin-dashboard">
@@ -245,13 +182,6 @@ const SuperAdminDashboard = ({ setCurrentUser, currentUser }) => {
             <Calendar className="btn-icon" />
             <span>Reservations</span>
           </button>
-          <button
-            onClick={() => setShowChangePassword(!showChangePassword)}
-            className={`sidebar-btn ${showChangePassword ? 'active' : ''}`}
-          >
-            <Lock className="btn-icon" />
-            <span>Change Password</span>
-          </button>
         </div>
         <div className="sidebar-footer">
           <button onClick={handleLogout} className="sidebar-btn logout">
@@ -262,54 +192,6 @@ const SuperAdminDashboard = ({ setCurrentUser, currentUser }) => {
       </nav>
 
       <div className="main-content">
-        {showChangePassword && (
-          <div className="change-password-section">
-            <h2>Change Password</h2>
-            <form onSubmit={handleChangePassword} className="change-password-form">
-              <div className="form-group">
-                <label htmlFor="currentPassword">Current Password</label>
-                <input
-                  type="password"
-                  id="currentPassword"
-                  name="currentPassword"
-                  value={passwordData.currentPassword}
-                  onChange={handlePasswordInputChange}
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="newPassword">New Password</label>
-                <input
-                  type="password"
-                  id="newPassword"
-                  name="newPassword"
-                  value={passwordData.newPassword}
-                  onChange={handlePasswordInputChange}
-                  required
-                  minLength="6"
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="confirmPassword">Confirm New Password</label>
-                <input
-                  type="password"
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  value={passwordData.confirmPassword}
-                  onChange={handlePasswordInputChange}
-                  required
-                  minLength="6"
-                />
-              </div>
-              {passwordError && <div className="error-message">{passwordError}</div>}
-              {passwordSuccess && <div className="success-message">{passwordSuccess}</div>}
-              <div className="form-actions">
-                <button type="submit" className="btn-primary">Change Password</button>
-                <button type="button" onClick={() => setShowChangePassword(false)} className="btn-secondary">Cancel</button>
-              </div>
-            </form>
-          </div>
-        )}
         <div className="dashboard-content">
           <div className="dashboard-header">
             <h1>Super Admin Dashboard</h1>
