@@ -171,11 +171,10 @@ export default function CancelReservation({ reservations, setReservations, curre
           <p><strong>Vehicle:</strong> {reservation.vehicleName}</p>
           <p><strong>Pickup:</strong> {fmtDateTime(reservation.pickupAt)}</p>
           <p><strong>Total Paid:</strong> {money(reservation.totalAmount, reservation.currency)}</p>
-          {feePreview && (
+          {feePreview && feePreview.cancellationFee > 0 && (
             <>
               <div className="divider" />
               <p><strong>Estimated cancellation fee:</strong> {money(feePreview.cancellationFee, feePreview.currency)}</p>
-              <p><strong>Estimated refund:</strong> {money(0, feePreview.currency)} <span className="muted">(Non-refundable)</span></p>
             </>
           )}
         </div>
