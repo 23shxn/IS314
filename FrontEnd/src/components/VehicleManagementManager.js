@@ -397,30 +397,7 @@ const VehicleManagementManager = ({ setCurrentUser }) => {
 
 
 
-  const handleStatusUpdate = async (vehicleId, status) => {
-    if (!window.confirm(`Are you sure you want to change status to ${status}?`)) return;
 
-    try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/vehicles/${vehicleId}/status`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status }),
-        credentials: 'include'
-      });
-
-      if (response.ok) {
-        setVehicles(prev => prev.map(v => 
-          v.id === vehicleId ? { ...v, status } : v
-        ));
-        alert('Status updated successfully');
-      } else {
-        alert('Failed to update status');
-      }
-    } catch (error) {
-      console.error('Error updating status:', error);
-      alert('Error updating status');
-    }
-  };
 
   const handleDeleteVehicle = async (vehicleId) => {
     if (!window.confirm('Are you sure you want to delete this vehicle?')) return;
@@ -782,18 +759,7 @@ const VehicleManagementManager = ({ setCurrentUser }) => {
                         <Edit size={16} />
                       </button>
 
-                      <select
-                        value={vehicle.status}
-                        onChange={(e) => handleStatusUpdate(vehicle.id, e.target.value)}
-                        className="status-select"
-                        disabled={loading}
-                        title="Change Status"
-                      >
-                        <option value="Available">Available</option>
-                        <option value="Rented">Rented</option>
-                        <option value="Maintenance">Maintenance</option>
-                        <option value="Out_of_Service">Out of Service</option>
-                      </select>
+
 
                       <button
                         onClick={() => handleDeleteVehicle(vehicle.id)}
