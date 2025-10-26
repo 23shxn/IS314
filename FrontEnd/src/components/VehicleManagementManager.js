@@ -403,27 +403,6 @@ const VehicleManagementManager = ({ setCurrentUser }) => {
   const handleDeleteVehicle = async (vehicleId) => {
     if (!window.confirm('Are you sure you want to delete this vehicle?')) return;
 
-    if (!isSuperAdmin()) {
-      // For regular admins, submit pending request
-      try {
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/vehicles/pending/remove/${vehicleId}`, {
-          method: 'POST',
-          credentials: 'include'
-        });
-
-        if (response.ok) {
-          alert('Vehicle delete request submitted for approval');
-        } else {
-          alert('Failed to submit delete request');
-        }
-      } catch (error) {
-        console.error('Error submitting delete request:', error);
-        alert('Error submitting delete request');
-      }
-      return;
-    }
-
-    // For super admins, direct delete
     try {
       const response = await fetch(`${process.env.REACT_APP_API_URL}/api/vehicles/${vehicleId}`, {
         method: 'DELETE',
@@ -431,10 +410,13 @@ const VehicleManagementManager = ({ setCurrentUser }) => {
       });
 
       if (response.ok) {
-        setVehicles(prev => prev.filter(v => v.id !== vehicleId));
         alert('Vehicle deleted successfully');
+        // Refresh the vehicles list from server to ensure UI is up to date
+        await fetchVehicles();
       } else {
-        alert('Failed to delete vehicle');
+        const errorData = await response.text();
+        console.error('Delete failed:', response.status, errorData);
+        alert(`Failed to delete vehicle: ${errorData || 'Unknown error'}`);
       }
     } catch (error) {
       console.error('Error deleting vehicle:', error);

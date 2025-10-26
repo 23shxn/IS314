@@ -173,4 +173,16 @@ public class ReservationService {
     public List<Reservation> getReservationsByVehicle(Long vehicleId) {
         return reservationRepository.findByVehicleId(vehicleId);
     }
+
+    public void deleteReservation(Long reservationId) {
+        try {
+            Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new RuntimeException("Reservation not found"));
+            reservationRepository.delete(reservation);
+            System.out.println("Reservation deleted with ID: " + reservationId);
+        } catch (Exception e) {
+            System.err.println("Error deleting reservation: " + e.getMessage());
+            throw new RuntimeException("Failed to delete reservation: " + e.getMessage());
+        }
+    }
 }

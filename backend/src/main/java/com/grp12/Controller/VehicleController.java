@@ -636,24 +636,13 @@ public ResponseEntity<?> updateVehicle(@PathVariable Long id,
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of("error", "Admin not authenticated"));
             }
-            
-            // If super admin, delete directly
-            if ("SUPER_ADMIN".equals(currentAdmin.getRole())) {
-                vehicleService.deleteVehicle(id);
-                Map<String, String> response = new HashMap<>();
-                response.put("message", "Vehicle deleted successfully");
-                return ResponseEntity.ok(response);
-            }
-            
-            // For regular admins, create pending delete request
-            PendingVehicleChange pendingRequest = new PendingVehicleChange(id, currentAdmin.getId());
-            PendingVehicleChange savedRequest = pendingVehicleChangeRepository.save(pendingRequest);
-            
-            return ResponseEntity.ok().body(Map.of(
-                "message", "Vehicle delete request submitted for approval",
-                "requestId", savedRequest.getId()
-            ));
-            
+
+            // Allow both admin and super admin to delete directly
+            vehicleService.deleteVehicle(id);
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Vehicle deleted successfully");
+            return ResponseEntity.ok(response);
+
         } catch (IllegalArgumentException e) {
             Map<String, String> errorResponse = new HashMap<>();
             errorResponse.put("error", e.getMessage());

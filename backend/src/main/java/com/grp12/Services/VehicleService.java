@@ -360,6 +360,13 @@ public class VehicleService {
                 throw new IllegalArgumentException("Cannot delete vehicle with active reservations. Vehicle ID: " + vehicleId);
             }
 
+            // Delete associated reservations first to avoid foreign key constraint issues
+            if (reservations != null && !reservations.isEmpty()) {
+                for (Reservation reservation : reservations) {
+                    reservationService.deleteReservation(reservation.getId());
+                }
+            }
+
             // Delete the vehicle entity
             vehicleRepository.delete(vehicle);
             System.out.println("Vehicle deleted with ID: " + vehicleId);
