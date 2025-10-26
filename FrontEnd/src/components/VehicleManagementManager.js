@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { LogOut, Layout, Users, Car, ClipboardList, ToolCase, Check, X, Plus, Trash2, Eye, ChevronLeft, ChevronRight, Edit, Calendar } from 'lucide-react';
+import '../styles/AdminDashboard.css';
 import '../styles/VehicleManagement.css';
 
 // VehicleDetailModal Component with Robust Image Handling

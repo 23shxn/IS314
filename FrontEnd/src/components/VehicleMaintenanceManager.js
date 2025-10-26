@@ -212,10 +212,26 @@ const VehicleMaintenanceManager = ({ setCurrentUser, currentUser }) => {
 
 
 
-  const handleDelete = (id) => {
-    if (window.confirm('Delete this maintenance record?')) {
-      setMaintenanceRecords(maintenanceRecords.filter(r => r.id !== id));
-      alert('Record deleted!');
+  const handleDelete = async (id) => {
+    if (!window.confirm('Delete this maintenance record?')) return;
+
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/maintenance/${id}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include'
+      });
+
+      if (response.ok) {
+        setMaintenanceRecords(maintenanceRecords.filter(r => r.id !== id));
+        alert('Record deleted successfully!');
+      } else {
+        const errorData = await response.json();
+        alert(errorData.error || 'Failed to delete maintenance record');
+      }
+    } catch (err) {
+      console.error('Delete maintenance record error:', err);
+      alert('Failed to delete maintenance record');
     }
   };
 

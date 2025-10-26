@@ -1,3 +1,14 @@
+:root {
+  --primary: #007bff;
+  --secondary: #6c757d;
+  --text: #333;
+  --muted: #666;
+  --border: #ddd;
+  --shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  --bg: linear-gradient(to bottom, #f4f7fa, #ffffff);
+  --accent: #f8f9fa;
+}
+
 .vehicle-search-container {
   max-width: 1200px;
   margin: 0 auto;
@@ -211,43 +222,43 @@
 }
 
 .vehicle-image {
-  position: relative;
-  width: 300px;
-  min-width: 300px;
-  height: 220px;
-  cursor: pointer;
-  overflow: hidden;
-  flex-shrink: 0;
+  position: relative !important;
+  width: 300px !important;
+  min-width: 300px !important;
+  height: 300px !important;
+  overflow: hidden !important;
+  flex-shrink: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
 }
 
 .vehicle-image .action-btn.view {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  background: rgba(0,0,0,0.7);
-  color: white;
-  border: none;
-  border-radius: 50%;
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  z-index: 15; /* Higher than carousel nav */
-  padding: 0;
-  min-width: auto;
+  position: absolute !important;
+  top: 12px !important;
+  right: 12px !important;
+  background: rgba(0, 0, 0, 0.8) !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 50% !important;
+  width: 36px !important;
+  height: 36px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  z-index: 15 !important;
+  padding: 0 !important;
 }
 
 .vehicle-image .action-btn.view:hover {
-  background: rgba(0,0,0,0.9);
-  transform: scale(1.1);
+  background: rgba(0, 0, 0, 1) !important;
+  transform: scale(1.1) !important;
 }
 
 .vehicle-image .action-btn.view svg {
-  width: 18px;
-  height: 18px;
+  width: 18px !important;
+  height: 18px !important;
 }
 
 .vehicle-info {
@@ -384,268 +395,150 @@
 /* Responsive design */
 @media (max-width: 1024px) {
   .vehicle-image {
-    width: 250px;
-    min-width: 250px;
-    height: 200px;
+    width: 280px !important;
+    height: 290px !important;
   }
-  
-  .vehicle-info {
-    padding: 20px;
-  }
-  
-  .vehicle-booking {
-    padding: 20px;
-    min-width: 160px;
-  }
-  
-  .price {
-    font-size: 28px;
+
+  .image-container {
+    height: 260px !important;
   }
 }
 
 @media (max-width: 768px) {
   .vehicle-card {
-    flex-direction: column;
-    min-height: auto;
+    flex-direction: column !important;
   }
-  
+
   .vehicle-image {
-    width: 100%;
-    height: 200px;
+    width: 100% !important;
+    min-width: auto !important;
+    height: 280px !important;
   }
-  
+
+  .image-container {
+    height: 240px !important;
+  }
+
   .vehicle-info {
     padding: 20px;
   }
-  
-  .vehicle-details {
-    grid-template-columns: 1fr;
-    gap: 8px;
-  }
-  
+
   .vehicle-booking {
     padding: 20px;
     border-left: none;
     border-top: 1px solid #eee;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    min-width: auto;
-    gap: 16px;
   }
-  
-  .price-info {
-    text-align: left;
+
+  .vehicle-details {
+    grid-template-columns: 1fr;
   }
-  
-  .price {
-    font-size: 26px;
+
+  .carousel-nav {
+    width: 40px !important;
+    height: 40px !important;
   }
-  
-  .btn {
-    min-width: 120px;
-  }
+
+  .carousel-nav.prev { left: 8px !important; }
+  .carousel-nav.next { right: 8px !important; }
 }
 
 @media (max-width: 480px) {
+  .search-form .form-row {
+    grid-template-columns: 1fr;
+  }
+
   .vehicle-header h4 {
     font-size: 18px;
   }
-  
-  .vehicle-booking {
-    flex-direction: column;
-    gap: 16px;
-  }
-  
-  .price-info {
-    text-align: center;
-  }
-  
-  .btn {
-    width: 100%;
-  }
-  
-  .vehicle-info {
-    padding: 16px;
-  }
-  
-  .vehicle-booking {
-    padding: 16px;
-  }
-}
 
-/* Loading and error states */
-.loading-message,
-.error-message,
-.no-results-message {
-  text-align: center;
-  padding: 40px 20px;
-  color: #666;
-  font-size: 16px;
-}
-
-.error-message {
-  color: #dc3545;
-  background: #f8d7da;
-  border: 1px solid #f5c6cb;
-  border-radius: 8px;
-  margin: 20px 0;
-}
-
-.no-results-message {
-  background: #f8f9fa;
-  border: 1px solid #dee2e6;
-  border-radius: 8px;
-  margin: 20px 0;
-}
-
-@media (max-width: 1200px) {
-  .search-form .form-row {
-    grid-template-columns: 1fr 1fr 1fr !important;
-    gap: 16px !important;
-  }
-}
-
-@media (max-width: 900px) {
-  .search-form .form-row {
-    grid-template-columns: 1fr 1fr !important;
-    gap: 15px !important;
-  }
-}
-
-@media (max-width: 768px) {
-  .vehicle-card {
-    flex-direction: column;
-    min-height: auto;
-  }
-  
-  .vehicle-image {
-    width: 100%;
-    height: 180px;
-  }
-  
-  .vehicle-info {
-    padding: 16px;
-  }
-  
-  .vehicle-booking {
-    padding: 16px;
-    border-left: none;
-    border-top: 1px solid #eee;
-    flex-direction: row;
-    justify-content: space-between;
-    min-width: auto;
-  }
-  
-  .price-info {
-    text-align: left;
-  }
-  
   .price {
-    font-size: 24px;
+    font-size: 28px;
   }
-  
-  .btn {
-    min-width: 120px;
+
+  .vehicle-image {
+    height: 260px !important;
+  }
+
+  .image-container {
+    height: 220px !important;
+  }
+
+  .carousel-nav {
+    width: 36px !important;
+    height: 36px !important;
   }
 }
 
-@media (max-width: 600px) {
-  .search-form .form-row {
-    grid-template-columns: 1fr !important;
-    gap: 12px !important;
-  }
-}
-
-@media (max-width: 480px) {
-  .vehicle-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-  }
-  
-  .vehicle-header h4 {
-    font-size: 16px;
-  }
-  
-  .vehicle-booking {
-    flex-direction: column;
-    gap: 12px;
-  }
-  
-  .price-info {
-    text-align: center;
-  }
-  
-  .btn {
-    width: 100%;
-  }
-}
-
-/* Replace the existing carousel and image styles with these: */
-
+/* Carousel styles - FIXED for proper image fitting */
 .vehicle-image-carousel {
   width: 100%;
   height: 100%;
   position: relative;
-  overflow: hidden;
-  background: #f8f9fa;
 }
 
 .image-container {
   width: 100%;
-  height: 100%;
+  height: 280px;
   position: relative;
   overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  border-radius: 12px;
+  background: #f8f9fa;
 }
 
 .carousel-image {
-  max-width: 100%;
-  max-height: 100%;
-  width: auto;
-  height: auto;
-  object-fit: contain; /* Changed from cover to contain */
-  display: block;
-  transition: opacity 0.3s ease;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: center !important;
+  display: block !important;
+  border-radius: 12px !important;
+  transition: transform 0.3s ease !important;
 }
 
-/* Reset all button styles for carousel navigation */
+.carousel-image:hover {
+  transform: scale(1.02);
+}
+
+/* Placeholder image styling - FIXED */
+.placeholder-image {
+  width: 100%;
+  height: 100%;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef) !important;
+  border-radius: 12px !important;
+  border: 2px dashed #dee2e6 !important;
+}
+
+.placeholder-image svg {
+  color: #6c757d !important;
+  opacity: 0.7 !important;
+}
+
+/* Navigation buttons - consistent with CarDetail */
 .carousel-nav {
   position: absolute !important;
   top: 50% !important;
   transform: translateY(-50%) !important;
-  background: rgba(0,0,0,0.7) !important;
+  background: rgba(0, 0, 0, 0.7) !important;
   color: white !important;
   border: none !important;
   border-radius: 50% !important;
-  width: 40px !important;
-  height: 40px !important;
+  width: 44px !important;
+  height: 44px !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   cursor: pointer !important;
-  transition: all 0.2s ease !important;
+  transition: all 0.3s ease !important;
   z-index: 10 !important;
-  font-size: 16px !important;
   padding: 0 !important;
-  min-width: auto !important;
-  font-weight: normal !important;
-  text-decoration: none !important;
-  box-shadow: none !important;
 }
 
 .carousel-nav:hover {
-  background: rgba(0,0,0,0.9) !important;
-  transform: translateY(-50%) scale(1.1) !important;
-  box-shadow: none !important;
-}
-
-.carousel-nav:focus {
-  outline: 2px solid white !important;
-  outline-offset: 2px !important;
+  background: var(--primary) !important;
+  transform: translateY(-50%) scale(1.05) !important;
 }
 
 .carousel-nav.prev {
@@ -661,302 +554,45 @@
   height: 20px !important;
 }
 
+/* Indicators - positioned below image */
 .carousel-indicators {
-  position: absolute;
-  bottom: 12px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 6px;
-  z-index: 10;
-}
-
-/* Reset indicator button styles */
-.indicator {
-  width: 10px !important;
-  height: 10px !important;
-  border-radius: 50% !important;
-  border: 2px solid white !important;
-  background: rgba(255,255,255,0.4) !important;
-  cursor: pointer !important;
-  transition: all 0.2s ease !important;
-  padding: 0 !important;
-  min-width: auto !important;
-  font-size: 0 !important;
-  line-height: 1 !important;
-  font-weight: normal !important;
-  text-decoration: none !important;
-  box-shadow: none !important;
-}
-
-.indicator:hover {
-  background: rgba(255,255,255,0.7) !important;
-  transform: none !important;
-  box-shadow: none !important;
-}
-
-.indicator.active {
-  background: white !important;
-}
-
-.placeholder-image {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #f8f9fa;
-  color: #6c757d;
-  font-size: 14px;
-}
-
-/* Fix for the view details button - make it distinct from other buttons */
-.vehicle-image .action-btn.view {
-  position: absolute !important;
-  top: 12px !important;
-  right: 12px !important;
-  background: rgba(0,0,0,0.7) !important;
-  color: white !important;
-  border: none !important;
-  border-radius: 50% !important;
-  width: 36px !important;
-  height: 36px !important;
   display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  cursor: pointer !important;
-  transition: all 0.2s ease !important;
-  z-index: 15 !important;
-  padding: 0 !important;
-  min-width: auto !important;
-  font-weight: normal !important;
-  text-decoration: none !important;
-  box-shadow: none !important;
-}
-
-.vehicle-image .action-btn.view:hover {
-  background: rgba(0,0,0,0.9) !important;
-  transform: scale(1.1) !important;
-  box-shadow: none !important;
-}
-
-.vehicle-image .action-btn.view svg {
-  width: 18px !important;
-  height: 18px !important;
-}
-
-/* Ensure all vehicle image buttons don't inherit other styles */
-.vehicle-image button {
-  font-family: inherit !important;
-  font-size: inherit !important;
-  line-height: 1 !important;
-  border: none !important;
-  outline: none !important;
-  background: none !important;
-  text-decoration: none !important;
-}
-
-.vehicle-image button:focus {
-  outline: 2px solid white !important;
-  outline-offset: 2px !important;
-}
-
-/* Separate the reserve button styles to avoid conflicts */
-.vehicle-booking .btn {
-  display: inline-flex !important;
-  align-items: center !important;
   justify-content: center !important;
   gap: 8px !important;
-  padding: 12px 20px !important;
-  border: none !important;
-  border-radius: 8px !important;
-  font-size: 14px !important;
-  font-weight: 600 !important;
-  cursor: pointer !important;
-  transition: all 0.2s ease !important;
-  text-decoration: none !important;
-  min-width: 140px !important;
-  height: 44px !important;
-}
-
-.vehicle-booking .btn-primary {
-  background: linear-gradient(135deg, #007bff, #0056b3) !important;
-  color: white !important;
-  box-shadow: 0 2px 4px rgba(0,123,255,0.2) !important;
-}
-
-.vehicle-booking .btn-primary:hover:not(:disabled) {
-  background: linear-gradient(135deg, #0056b3, #004085) !important;
-  transform: translateY(-1px) !important;
-  box-shadow: 0 4px 8px rgba(0,123,255,0.3) !important;
-}
-
-.vehicle-booking .btn-primary:disabled {
-  background: #6c757d !important;
-  cursor: not-allowed !important;
-  transform: none !important;
-  box-shadow: none !important;
-}
-
-/* Mobile adjustments for carousel */
-@media (max-width: 768px) {
-  .carousel-nav {
-    width: 36px !important;
-    height: 36px !important;
-  }
-  
-  .carousel-nav svg {
-    width: 18px !important;
-    height: 18px !important;
-  }
-  
-  .carousel-nav.prev {
-    left: 8px !important;
-  }
-  
-  .carousel-nav.next {
-    right: 8px !important;
-  }
-  
-  .carousel-indicators {
-    bottom: 8px;
-  }
-  
-  .indicator {
-    width: 8px !important;
-    height: 8px !important;
-  }
-  
-  .vehicle-image .action-btn.view {
-    width: 32px !important;
-    height: 32px !important;
-    top: 8px !important;
-    right: 8px !important;
-  }
-  
-  .vehicle-image .action-btn.view svg {
-    width: 16px !important;
-    height: 16px !important;
-  }
-}
-
-@media (max-width: 480px) {
-  .carousel-nav {
-    width: 32px !important;
-    height: 32px !important;
-  }
-  
-  .carousel-nav svg {
-    width: 16px !important;
-    height: 16px !important;
-  }
-}
-
-/* Add this to your VehicleSearch.css to ensure buttons are visible */
-
-.vehicle-image-carousel {
-  position: relative;
-  width: 100%;
-  height: 100%;
-}
-
-.carousel-nav {
-  position: absolute !important;
-  top: 50% !important;
-  transform: translateY(-50%) !important;
-  background: rgba(0,0,0,0.8) !important;
-  color: white !important;
-  border: none !important;
-  border-radius: 50% !important;
-  width: 40px !important;
-  height: 40px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  cursor: pointer !important;
-  transition: all 0.2s ease !important;
-  z-index: 20 !important; /* Increased z-index */
-  font-size: 16px !important;
+  margin-top: 8px !important;
   padding: 0 !important;
-  min-width: auto !important;
-  font-weight: normal !important;
-  text-decoration: none !important;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.3) !important;
-  opacity: 0.8 !important;
-}
-
-.carousel-nav:hover {
-  background: rgba(0,0,0,0.95) !important;
-  transform: translateY(-50%) scale(1.1) !important;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.4) !important;
-  opacity: 1 !important;
-}
-
-.carousel-nav.prev {
-  left: 8px !important;
-}
-
-.carousel-nav.next {
-  right: 8px !important;
-}
-
-.carousel-indicators {
-  position: absolute !important;
-  bottom: 8px !important;
-  left: 50% !important;
-  transform: translateX(-50%) !important;
-  display: flex !important;
-  gap: 6px !important;
-  z-index: 20 !important;
 }
 
 .indicator {
   width: 10px !important;
   height: 10px !important;
   border-radius: 50% !important;
-  border: 2px solid white !important;
-  background: rgba(255,255,255,0.5) !important;
+  background: #dee2e6 !important;
+  border: 2px solid transparent !important;
   cursor: pointer !important;
-  transition: all 0.2s ease !important;
+  transition: all 0.3s ease !important;
   padding: 0 !important;
-  min-width: auto !important;
-  font-size: 0 !important;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.3) !important;
+  flex-shrink: 0 !important;
 }
 
 .indicator:hover {
-  background: rgba(255,255,255,0.8) !important;
-  transform: scale(1.2) !important;
+  background: #adb5bd !important;
 }
 
 .indicator.active {
-  background: white !important;
+  background: var(--primary) !important;
+  border-color: var(--primary) !important;
 }
 
-/* Add this specific CSS to fix carousel button clicks */
-.carousel-nav {
-  pointer-events: auto !important;
-  user-select: none !important;
+/* Ensure images load properly and handle errors */
+.carousel-image {
+  background: #f8f9fa;
 }
 
-.carousel-nav:active {
-  transform: translateY(-50%) scale(0.95) !important;
+.carousel-image[loading="lazy"] {
+  opacity: 0.7;
 }
 
-.indicator {
-  pointer-events: auto !important;
-  user-select: none !important;
-}
-
-.indicator:active {
-  transform: scale(0.9) !important;
-}
-
-/* Ensure carousel container doesn't interfere with clicks */
-.vehicle-image-carousel {
-  pointer-events: none;
-}
-
-.vehicle-image-carousel > * {
-  pointer-events: auto;
+.carousel-image:not([src]) {
+  display: none !important;
 }

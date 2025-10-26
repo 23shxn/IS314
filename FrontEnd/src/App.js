@@ -454,13 +454,21 @@ const App = () => {
               </AdminRoute>
             } 
           />
-          <Route 
-            path="/admin/vehicles" 
+          <Route
+            path="/admin/vehicles"
             element={
               <AdminRoute setCurrentUser={setCurrentUser}>
                 <VehicleManagement />
               </AdminRoute>
-            } 
+            }
+          />
+          <Route
+            path="/admin/vehicles/add"
+            element={
+              <AdminRoute setCurrentUser={setCurrentUser}>
+                <AddVehicleManager />
+              </AdminRoute>
+            }
           />
           <Route 
             path="/admin/maintenance" 

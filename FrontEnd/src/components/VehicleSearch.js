@@ -5,12 +5,15 @@ import '../styles/VehicleSearch.css';
 
 const VehicleImageCarousel = ({ images, vehicleInfo }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const validImages = images.filter(img => img);
+  const validImages = images.filter(img => img && img.trim().length > 0);
 
   if (validImages.length === 0) {
     return (
       <div className="placeholder-image">
         <Car size={40} />
+        <span style={{ marginTop: '8px', fontSize: '12px', color: '#6c757d' }}>
+          No image available
+        </span>
       </div>
     );
   }
@@ -25,13 +28,17 @@ const VehicleImageCarousel = ({ images, vehicleInfo }) => {
           src={`data:image/jpeg;base64,${validImages[currentIndex]}`}
           alt={`${vehicleInfo.make} ${vehicleInfo.model} - Image ${currentIndex + 1}`}
           className="carousel-image"
+          loading="lazy"
+          onError={(e) => {
+            e.target.style.display = 'none';
+          }}
         />
         {validImages.length > 1 && (
           <>
-            <button className="carousel-nav prev" onClick={prevImage}>
+            <button className="carousel-nav prev" onClick={prevImage} aria-label="Previous image">
               <ChevronLeft size={20} />
             </button>
-            <button className="carousel-nav next" onClick={nextImage}>
+            <button className="carousel-nav next" onClick={nextImage} aria-label="Next image">
               <ChevronRight size={20} />
             </button>
           </>
@@ -44,6 +51,7 @@ const VehicleImageCarousel = ({ images, vehicleInfo }) => {
               key={index}
               className={`indicator ${index === currentIndex ? 'active' : ''}`}
               onClick={() => setCurrentIndex(index)}
+              aria-label={`Go to image ${index + 1}`}
             />
           ))}
         </div>
@@ -129,7 +137,6 @@ const VehicleSearch = ({ reservations, setReservations, currentUser }) => {
   const [viewingVehicle, setViewingVehicle] = useState(null);
   const navigate = useNavigate();
 
-
   const [searchParams, setSearchParams] = useState({
     pickupLocation: '',
     dropoffLocation: '',
@@ -138,7 +145,6 @@ const VehicleSearch = ({ reservations, setReservations, currentUser }) => {
     startDate: '',
     endDate: ''
   });
-
 
   const priceRanges = [
     { value: '', label: 'Any Price' },
@@ -190,17 +196,14 @@ const VehicleSearch = ({ reservations, setReservations, currentUser }) => {
   useEffect(() => {
     let results = [...vehicles];
 
-    // Filter by pickup location (where vehicles are available)
     if (searchParams.pickupLocation) {
       results = results.filter(v => v.location.toLowerCase().includes(searchParams.pickupLocation.toLowerCase()));
     }
 
-    // Filter by vehicle type
     if (searchParams.vehicleType) {
       results = results.filter(v => v.vehicleType.toLowerCase().includes(searchParams.vehicleType.toLowerCase()));
     }
 
-    // Filter by price range
     if (searchParams.minPrice) {
       const priceRange = searchParams.minPrice;
       if (priceRange === '0-50') {
@@ -225,61 +228,43 @@ const VehicleSearch = ({ reservations, setReservations, currentUser }) => {
   };
 
   const handleReservation = (vehicle) => {
-    // Validate required fields
     if (!currentUser) {
       setError('Please log in to make a reservation');
       return;
     }
 
-    // Validate dates
     if (!searchParams.startDate || !searchParams.endDate) {
       setError('Please select both start and end dates to reserve a vehicle');
       return;
     }
 
-    // Validate pickup location (required)
     if (!searchParams.pickupLocation) {
       setError('Please select a pickup location');
       return;
     }
-    
+
     const startDate = new Date(searchParams.startDate);
     const endDate = new Date(searchParams.endDate);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
 
-    if (startDate < today) {
-      setError('Start date cannot be in the past');
+    if (startDate > endDate) {
+      setError('Start date must be before end date');
       return;
     }
 
-    if (endDate <= startDate) {
-      setError('End date must be after start date');
-      return;
-    }
-
-    setError('');
-    
-    // Create reservation object that matches CarDetail expectations
     const reservationData = {
-      reservation: {
-        vehicle: vehicle,
-        rentalDate: searchParams.startDate,
-        returnDate: searchParams.endDate,
-        pickupLocation: searchParams.pickupLocation,
-        dropoffLocation: searchParams.dropoffLocation || searchParams.pickupLocation,
-        userId: currentUser.id,
-        customerName: `${currentUser.firstName} ${currentUser.lastName}`,
-        customerEmail: currentUser.email
-      }
+      vehicle: vehicle,
+      rentalDate: startDate.toISOString().split('T')[0],
+      returnDate: endDate.toISOString().split('T')[0],
+      pickupLocation: searchParams.pickupLocation,
+      dropoffLocation: searchParams.dropoffLocation || searchParams.pickupLocation,
+      pricePerDay: vehicle.pricePerDay,
+      totalPrice: vehicle.pricePerDay * (Math.floor((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1),
+      userId: currentUser.id,
+      customerName: `${currentUser.firstName} ${currentUser.lastName}`,
+      customerEmail: currentUser.email
     };
 
-    console.log('Navigating to car-detail with reservation data:', reservationData);
-    
-    // Navigate to car detail page with state
-    navigate('/car-detail', { 
-      state: reservationData
-    });
+    navigate('/car-detail', { state: { reservation: reservationData } });
   };
 
   const clearFilters = () => {
@@ -288,19 +273,18 @@ const VehicleSearch = ({ reservations, setReservations, currentUser }) => {
       dropoffLocation: '',
       vehicleType: '',
       minPrice: '',
-      startDate: searchParams.startDate, 
+      startDate: searchParams.startDate,
       endDate: searchParams.endDate
     });
     setError('');
   };
 
   const refreshVehicles = async () => {
-
     setLoading(true);
     try {
       const apiUrl = process.env.REACT_APP_API_URL;
       const vehiclesRes = await fetch(`${apiUrl}/api/vehicles/available`);
-      
+
       if (vehiclesRes.ok) {
         const data = await vehiclesRes.json();
         setVehicles(Array.isArray(data) ? data : []);
@@ -320,7 +304,6 @@ const VehicleSearch = ({ reservations, setReservations, currentUser }) => {
   };
 
   useEffect(() => {
-
     if (reservations) {
       refreshVehicles();
     }
@@ -381,8 +364,8 @@ const VehicleSearch = ({ reservations, setReservations, currentUser }) => {
           </div>
           <div className="form-group required">
             <label><MapPin size={16} /> Pickup Location (Required)</label>
-            <select 
-              value={searchParams.pickupLocation} 
+            <select
+              value={searchParams.pickupLocation}
               onChange={(e) => handleInputChange('pickupLocation', e.target.value)}
               required
             >
@@ -391,12 +374,12 @@ const VehicleSearch = ({ reservations, setReservations, currentUser }) => {
             </select>
           </div>
         </div>
-        
+
         <div className="form-row">
           <div className="form-group">
             <label><MapPin size={16} /> Drop-off Location (Optional)</label>
-            <select 
-              value={searchParams.dropoffLocation} 
+            <select
+              value={searchParams.dropoffLocation}
               onChange={(e) => handleInputChange('dropoffLocation', e.target.value)}
             >
               <option value="">Same as pickup</option>
@@ -422,7 +405,7 @@ const VehicleSearch = ({ reservations, setReservations, currentUser }) => {
             </select>
           </div>
         </div>
-        
+
         <div className="form-actions">
           <button onClick={clearFilters} className="btn btn-secondary btn-small">
             Clear Filters
@@ -450,16 +433,14 @@ const VehicleSearch = ({ reservations, setReservations, currentUser }) => {
         ) : (
           filteredVehicles.map((vehicle) => {
             const images = [vehicle.vehicleImage1, vehicle.vehicleImage2, vehicle.vehicleImage3];
-            
+
             return (
               <div key={vehicle.id} className="vehicle-card">
                 <div className="vehicle-image">
-                  <VehicleImageCarousel 
-                    images={images} 
-                    vehicleInfo={vehicle} 
+                  <VehicleImageCarousel
+                    images={images}
+                    vehicleInfo={vehicle}
                   />
-                  
-                  {/* View details button */}
                   <button
                     onClick={() => handleViewDetails(vehicle)}
                     className="action-btn view"
@@ -469,13 +450,13 @@ const VehicleSearch = ({ reservations, setReservations, currentUser }) => {
                     <Eye size={18} />
                   </button>
                 </div>
-                
+
                 <div className="vehicle-info">
                   <div className="vehicle-header">
                     <h4>{vehicle.year} {vehicle.make} {vehicle.model}</h4>
                     <span className="status-badge available">{vehicle.status}</span>
                   </div>
-                  
+
                   <div className="vehicle-details">
                     <p><Car size={16} /><strong>Type:</strong> {vehicle.vehicleType}</p>
                     <p><Users size={16} /><strong>Seats:</strong> {vehicle.seatingCapacity}</p>
@@ -483,13 +464,13 @@ const VehicleSearch = ({ reservations, setReservations, currentUser }) => {
                     <p><MapPin size={16} /><strong>Location:</strong> {vehicle.location}</p>
                   </div>
                 </div>
-                
+
                 <div className="vehicle-booking">
                   <div className="price-info">
                     <span className="price">FJD {vehicle.pricePerDay}</span>
                     <span className="price-label">per day</span>
                   </div>
-                  
+
                   <button
                     onClick={() => handleReservation(vehicle)}
                     className="btn btn-primary"
@@ -498,7 +479,7 @@ const VehicleSearch = ({ reservations, setReservations, currentUser }) => {
                     <Calendar size={16} />
                     Reserve
                   </button>
-                  
+
                   {!currentUser && (
                     <small style={{ color: '#dc3545', fontSize: '12px', textAlign: 'center', marginTop: '4px' }}>
                       Please log in to reserve
