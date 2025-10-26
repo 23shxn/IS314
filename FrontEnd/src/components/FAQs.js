@@ -43,7 +43,7 @@ const FAQs = () => {
       <div className="faqs-hero">
         <div className="hero-copy">
           <h1>FAQs</h1>
-          <p>Quick answers to common questions. For more details, please refer to our <a href="/terms">Terms &amp; Conditions</a>.</p>
+          <p>Quick answers to common questions. For more details, please refer to our <a href="https://docs.google.com/document/d/1xfsgmta-rCokIccONsX5WGsLaEuYNySCdJrKrN7kAw0/edit?usp=drivesdk">Terms &amp; Conditions</a>.</p>
         </div>
         <div className="hero-art">
          

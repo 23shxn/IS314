@@ -143,6 +143,11 @@ const LoginForm = ({ setCurrentUser }) => {
     return phoneRegex.test(phoneNumber);
   };
 
+  const validateDriversLicenseNumber = (licenseNumber) => {
+    const licenseRegex = /^\d{7}$/;
+    return licenseRegex.test(licenseNumber);
+  };
+
   const validateName = (name) => {
     const nameRegex = /^[a-zA-Z\s]+$/;
     return nameRegex.test(name);
@@ -490,6 +495,12 @@ const LoginForm = ({ setCurrentUser }) => {
 
       if (credentials.password !== credentials.confirmPassword) {
         setError('Passwords do not match');
+        setLoading(false);
+        return;
+      }
+
+      if (!validateDriversLicenseNumber(credentials.driversLicenseNumber)) {
+        setError('Driver\'s license number must be exactly 7 digits');
         setLoading(false);
         return;
       }
