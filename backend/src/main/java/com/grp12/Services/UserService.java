@@ -33,6 +33,7 @@ public class UserService {
     private static final Pattern PHONE_PATTERN = Pattern.compile("^\\d{7}$");
     private static final Pattern NAME_PATTERN = Pattern.compile("^[a-zA-Z\\s]+$");
     private static final Pattern PASSWORD_PATTERN = Pattern.compile("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$");
+    private static final Pattern DRIVERS_LICENSE_PATTERN = Pattern.compile("^\\d{7}$");
 
     private final Map<String, String> passwordResetTokens = new ConcurrentHashMap<>();
     private final Map<String, LocalDateTime> tokenExpiryTimes = new ConcurrentHashMap<>();
@@ -43,30 +44,38 @@ public class UserService {
             if (user.getEmail() == null || user.getPassword() == null) {
                 throw new IllegalArgumentException("Email and password are required");
             }
-            
+
+            // Validate driver's license number format (7 digits)
+            if (user.getDriversLicenseNumber() == null || user.getDriversLicenseNumber().trim().isEmpty()) {
+                throw new IllegalArgumentException("Driver's license number is required");
+            }
+            if (!DRIVERS_LICENSE_PATTERN.matcher(user.getDriversLicenseNumber().trim()).matches()) {
+                throw new IllegalArgumentException("Driver's license number must be exactly 7 digits");
+            }
+
             // Check if email already exists for APPROVED users only
             Optional<User> existingUser = userRepository.findByEmail(user.getEmail());
             if (existingUser.isPresent() && "APPROVED".equals(existingUser.get().getStatus())) {
                 throw new IllegalArgumentException("Email already registered and approved");
             }
-            
+
             // Check for pending registration requests
             Optional<RegistrationRequest> existingRequest = registrationRequestRepository.findByEmail(user.getEmail());
             if (existingRequest.isPresent() && "PENDING".equals(existingRequest.get().getStatus())) {
                 throw new IllegalArgumentException("Registration request already pending for this email");
             }
-            
+
             // Clean up old rejected/non-approved records
             if (existingUser.isPresent() && !"APPROVED".equals(existingUser.get().getStatus())) {
                 userRepository.delete(existingUser.get());
                 System.out.println("Deleted old non-approved user record for: " + user.getEmail());
             }
-            
+
             if (existingRequest.isPresent() && "REJECTED".equals(existingRequest.get().getStatus())) {
                 registrationRequestRepository.delete(existingRequest.get());
                 System.out.println("Deleted old rejected registration request for: " + user.getEmail());
             }
-            
+
             // Create RegistrationRequest
             RegistrationRequest request = new RegistrationRequest();
             request.setFirstName(user.getFirstName());
@@ -74,16 +83,16 @@ public class UserService {
             request.setPhoneNumber(user.getPhoneNumber());
             request.setEmail(user.getEmail());
             request.setPassword(passwordEncoder.encode(user.getPassword()));
-            request.setDriversLicenseNumber(user.getDriversLicenseNumber());
+            request.setDriversLicenseNumber(user.getDriversLicenseNumber().trim());
             request.setDriversLicenseImage(user.getDriversLicenseImage());
             request.setStatus("PENDING");
             request.setCreatedAt(LocalDateTime.now());
-            
+
             RegistrationRequest savedRequest = registrationRequestRepository.save(request);
             System.out.println("Registration request created with ID: " + savedRequest.getId());
-            
+
             return savedRequest;
-            
+
         } catch (Exception e) {
             System.err.println("Error in registerUser: " + e.getMessage());
             if (e instanceof IllegalArgumentException) {

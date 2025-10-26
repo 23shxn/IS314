@@ -583,7 +583,7 @@ const AddVehicleManager = ({ setCurrentUser }) => {
                 className="btn-primary"
                 disabled={loading}
               >
-                {loading ? 'Adding...' : 'Submit Vehicle Request '}
+                {loading ? 'Adding...' : 'Add Vehicle '}
               </button>
             </div>
             </form>
