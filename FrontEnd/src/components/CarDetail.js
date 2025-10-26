@@ -143,6 +143,7 @@ const CarDetail = ({ reservations, setReservations, currentUser }) => {
           </div>
           <div className="amenities">
             <label className="amenities-label">Add Amenities</label>
+            <p className="amenities-note">Please select at least one amenity option. Choose 'None' if you don't want any additional amenities.</p>
             <div className="amenities-options">
               {availableAmenities.map(amenity => (
                 <label key={amenity.id} className="amenity-checkbox">
