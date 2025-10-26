@@ -64,7 +64,7 @@ export default function CancelReservation({ reservations, setReservations, curre
     else if (hoursToPickup < 72) feePct = 0.1;
 
     const cancellationFee = round2(total * feePct);
-    const refundAmount = 0; // Non-refundable
+    const refundAmount = round2(total - cancellationFee);
 
     return {
       cancellationFee,
@@ -171,10 +171,10 @@ export default function CancelReservation({ reservations, setReservations, curre
           <p><strong>Vehicle:</strong> {reservation.vehicleName}</p>
           <p><strong>Pickup:</strong> {fmtDateTime(reservation.pickupAt)}</p>
           <p><strong>Total Paid:</strong> {money(reservation.totalAmount, reservation.currency)}</p>
-          {feePreview && feePreview.cancellationFee > 0 && (
+          {feePreview && feePreview.refundAmount > 0 && (
             <>
               <div className="divider" />
-              <p><strong>Estimated cancellation fee:</strong> {money(feePreview.cancellationFee, feePreview.currency)}</p>
+              <p><strong>Refund:</strong> {money(feePreview.refundAmount, feePreview.currency)}</p>
             </>
           )}
         </div>
@@ -258,11 +258,11 @@ export default function CancelReservation({ reservations, setReservations, curre
                 </div>
 
                 <div className="divider" />
-                <p><strong>Cancellation Fee:</strong> {money(feePreview.cancellationFee, feePreview.currency)}</p>
+                <p><strong>Refund:</strong> {money(feePreview.refundAmount, feePreview.currency)}</p>
 
                 <div className="actions">
                   <button className="btn-primary" disabled={paymentLoading} onClick={handleCancel}>
-                    {paymentLoading ? "Processing..." : "Pay & Confirm"}
+                    {paymentLoading ? "Processing..." : "Confirm"}
                   </button>
                   <button className="btn-ghost" onClick={() => setShowPayment(false)} disabled={paymentLoading}>
                     Back
@@ -275,7 +275,7 @@ export default function CancelReservation({ reservations, setReservations, curre
                 <div className="divider" />
                 <div className="actions">
                   <button className="btn-primary" disabled={paymentLoading} onClick={handleCancel}>
-                    {paymentLoading ? "Confirming..." : "Confirm Cancellation"}
+                    {paymentLoading ? "Confirming..." : "Confirm"}
                   </button>
                   <button className="btn-ghost" onClick={() => setShowPayment(false)} disabled={paymentLoading}>
                     Back

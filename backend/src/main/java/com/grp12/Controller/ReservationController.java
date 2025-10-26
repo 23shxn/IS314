@@ -195,6 +195,7 @@ public class ReservationController {
             if (userOpt.isPresent()) {
                 User user = userOpt.get();
                 String vehicleName = vehicle != null ? vehicle.getMake() + " " + vehicle.getModel() : "Unknown Vehicle";
+                BigDecimal refundAmount = reservation.getTotalPrice().subtract(cancellationFee);
                 emailService.sendCancellationEmail(
                     user.getEmail(),
                     user.getFirstName(),
@@ -202,7 +203,8 @@ public class ReservationController {
                     reservation.getId(),
                     vehicleName,
                     cancellationFee.setScale(2, java.math.RoundingMode.HALF_UP).toString(),
-                    reservation.getTotalPrice().toString()
+                    reservation.getTotalPrice().toString(),
+                    refundAmount.setScale(2, java.math.RoundingMode.HALF_UP).toString()
                 );
             }
 

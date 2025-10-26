@@ -97,13 +97,13 @@ public class EmailService {
     }
 
     // Send cancellation notification
-    public void sendCancellationEmail(String email, String firstName, String lastName, Long reservationId, String vehicleName, String cancellationFee, String totalAmount) throws MessagingException {
+    public void sendCancellationEmail(String email, String firstName, String lastName, Long reservationId, String vehicleName, String cancellationFee, String totalAmount, String refundAmount) throws MessagingException {
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
         helper.setTo(email);
         helper.setSubject("Reservation Cancelled - Ronaldo's Rentals");
-        helper.setText(buildCancellationEmailHtml(firstName, lastName, reservationId, vehicleName, cancellationFee, totalAmount), true);
+        helper.setText(buildCancellationEmailHtml(firstName, lastName, reservationId, vehicleName, cancellationFee, totalAmount, refundAmount), true);
 
         mailSender.send(message);
 
@@ -422,7 +422,7 @@ public class EmailService {
                 "</html>";
     }
 
-    private String buildCancellationEmailHtml(String firstName, String lastName, Long reservationId, String vehicleName, String cancellationFee, String totalAmount) {
+    private String buildCancellationEmailHtml(String firstName, String lastName, Long reservationId, String vehicleName, String cancellationFee, String totalAmount, String refundAmount) {
         return "<!DOCTYPE html>" +
                 "<html>" +
                 "<head>" +
@@ -454,8 +454,8 @@ public class EmailService {
                 "<li><strong>Original Total Amount:</strong> $" + totalAmount + " FJD</li>" +
                 "</ul>" +
                 "<div class='fee-box'>" +
-                "<p><strong>Cancellation Fee Applied:</strong> $" + cancellationFee + " FJD</p>" +
-                "<p><em>Note: All bookings are non-refundable. The cancellation fee covers processing costs.</em></p>" +
+                "<p><strong>Refund Amount:</strong> $" + refundAmount + " FJD</p>" +
+                "<p><em>Note: All bookings are non-refundable. The refund amount is after deducting any applicable cancellation fees.</em></p>" +
                 "</div>" +
                 "<p>If this cancellation was made in error or if you have any questions, please contact our support team immediately.</p>" +
                 "<p>You can make a new reservation anytime through our website.</p>" +
