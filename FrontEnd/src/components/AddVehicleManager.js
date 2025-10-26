@@ -86,8 +86,8 @@ const AddVehicleManager = ({ setCurrentUser }) => {
   };
 
   const validateVin = (vin) => {
-    const vinRegex = /^[A-HJ-NPR-Z0-9]{17}$/i;
-    return !vin || vinRegex.test(vin);
+    const vinRegex = /^[A-Z0-9]{17}$/i;
+    return !vin || (vin.length === 17 && vinRegex.test(vin));
   };
 
   const validateYear = (year) => {
